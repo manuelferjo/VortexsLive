@@ -134,6 +134,10 @@
   /* Moderación: pulsa un mensaje para borrarlo o expulsar a quien lo escribió */
   body:not(.overlay):not(.nomod) .msg[data-mod] { cursor: pointer; }
   .msg.modsel { background: rgba(192,154,253,.08); }
+  /* Enlaces del chat: se abren en una pestaña nueva (en pantalla, como texto normal). */
+  a.lnk { color: var(--violet); text-decoration: underline; text-decoration-color: rgba(192,154,253,.45); text-underline-offset: 2px; word-break: break-all; }
+  a.lnk:hover { text-decoration-color: var(--violet); }
+  body.overlay a.lnk { color: inherit; text-decoration: none; pointer-events: none; }
   .modbar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 5px 0 3px 22px; cursor: default; }
   .modbar button { font: inherit; font-size: .8em; font-weight: 600; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--border); background: var(--elev); color: var(--text); cursor: pointer; }
   .modbar button:hover { border-color: var(--violet); }
@@ -364,10 +368,31 @@
     return 'hsl(' + Math.round(hh) + ',' + Math.round(s * 100) + '%,' + Math.round((lightBg() ? Math.min(l, .4) : Math.max(l, .62)) * 100) + '%)';
   }
 
+  // Enlaces en el texto: http(s)://…, www.… y dominios como vortexs.es o twitch.tv/algo.
+  // Solo http y https; los correos (algo@dominio) no se tocan.
+  var LINK_RE = /((?:https?:\/\/|www\.)[^\s<>"]+|\b(?:[a-z0-9-]+\.)+(?:com|es|net|org|tv|gg|io|me|co|app|dev|live|link|ly|be|xyz|info|eu|uk|de|fr|it|pt|mx|ar|cl|us|ca|cat|store|shop|club|fm)\b(?:\/[^\s<>"]*)?)/gi;
+  function linkify(text) {
+    var out = '', last = 0, m;
+    text = String(text == null ? '' : text);
+    LINK_RE.lastIndex = 0;
+    while ((m = LINK_RE.exec(text))) {
+      var url = m[0], at = m.index;
+      // Sin la puntuación final ("mira vortexs.es." → vortexs.es).
+      var trail = /[.,!?;:)\]}'»"]+$/.exec(url);
+      if (trail) url = url.slice(0, url.length - trail[0].length);
+      if (!url || (at > 0 && text.charAt(at - 1) === '@')) continue;
+      var href = /^https?:\/\//i.test(url) ? url : 'https://' + url;
+      out += esc(text.slice(last, at)) + '<a class="lnk" href="' + esc(href) + '" target="_blank" rel="noopener noreferrer nofollow" title="' + esc(href) + '">' + esc(url) + '</a>';
+      last = at + url.length;
+      LINK_RE.lastIndex = last;
+    }
+    return out + esc(text.slice(last));
+  }
+
   function partsHtml(parts) {
     if (!parts) return '';
     return parts.map(function (p) {
-      return p.e ? '<img class="emote" src="' + esc(p.e) + '" alt="' + esc(p.n) + '" title="' + esc(p.n) + '" loading="lazy">' : esc(p.x);
+      return p.e ? '<img class="emote" src="' + esc(p.e) + '" alt="' + esc(p.n) + '" title="' + esc(p.n) + '" loading="lazy">' : linkify(p.x);
     }).join('');
   }
 
@@ -651,6 +676,7 @@
   list.addEventListener('click', function (e) {
     if (document.body.classList.contains('overlay') || document.body.classList.contains('nomod')) return;
     if (e.target.closest('.modbar')) return;
+    if (e.target.closest('a.lnk')) return;   // un enlace: se abre, sin la barra de moderar
     var el = e.target.closest('.msg[data-mod]');
     if (!el) return;
     if (String(window.getSelection ? window.getSelection() : '').length) return;   // estaba seleccionando texto
@@ -738,6 +764,7 @@
       { t: 'msg', p: 'tiktok', user: 'Marta 🌸', roles: [], parts: [{ x: 'holaaa desde TikTok' }] },
       { t: 'ev', p: 'twitch', user: 'Ana', kind: 'resub', text: 'Ana lleva 6 meses suscrita', parts: [{ x: '¡a por el directo!' }] },
       { t: 'msg', p: 'twitch', user: 'Pepe', color: '#1E90FF', roles: ['vip'], parts: [{ x: 'GG, qué nivel' }] },
+      { t: 'msg', p: 'twitch', user: 'Laura', color: '#FF4500', roles: ['mod'], parts: [{ x: 'el horario está en vortexs.es/horario y los clips en https://www.twitch.tv/vortexs_mc/clips' }] },
       { t: 'ev', p: 'tiktok', user: 'Racha', kind: 'tiktokgift', text: 'Racha ha enviado 5 × Rosa', amount: '💎 5' },
       { t: 'msg', p: 'kick', user: 'Nocturno', color: '#B388FF', roles: [], parts: [{ x: 'el delay está en 30 s, tranquilos' }] }
     ];
