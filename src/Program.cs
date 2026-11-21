@@ -27,6 +27,9 @@ namespace StreamDelay
 					{
 						try { Process.GetProcessById(pid).WaitForExit(20000); } catch { }
 					}
+					// Las versiones de antes de la 4.12 pasaban sus puertos a la nueva: se sueltan
+					// para que el chat, los overlays y el Mando sigan en el 8935.
+					Sockets.CloseInherited();
 				}
 				else if (a.StartsWith("--actualizado="))
 				{

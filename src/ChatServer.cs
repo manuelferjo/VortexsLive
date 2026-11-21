@@ -175,6 +175,7 @@ namespace StreamDelay
 				}
 			}
 			listener = new TcpListener(Lan ? IPAddress.Any : IPAddress.Loopback, port);
+			Sockets.NoInherit(listener);   // si ffmpeg lo heredara, el 8935 seguiría ocupado al reabrir
 			listener.Start();
 			Port = port;
 			running = true;
@@ -307,6 +308,7 @@ namespace StreamDelay
 				try
 				{
 					c = listener.AcceptTcpClient();
+					Sockets.NoInherit(c);
 				}
 				catch
 				{

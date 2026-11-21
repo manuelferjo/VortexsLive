@@ -1,7 +1,13 @@
-VORTEXS LIVE 4.11 - delay dinámico y multistream para OBS (by Vortexs)
+VORTEXS LIVE 4.12 - delay dinámico y multistream para OBS (by Vortexs)
 =====================================================================
 
 Abre GUIA.html (doble clic) para ver la guía completa.
+
+Novedades de la 4.12
+- Overlays: la URL ya no cambia de 8935 a 8936. Al reiniciarse la app
+  (por ejemplo, al actualizarse) o si quedaba un ffmpeg abierto, el
+  puerto 8935 se quedaba ocupado y había que volver a poner las URL
+  en OBS. Ahora siempre es la misma.
 
 Novedades de la 4.11
 - Chat: los enlaces de los mensajes (https://…, www.… o dominios como
