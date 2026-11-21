@@ -15,6 +15,22 @@ namespace StreamDelay
         protected override string Name { get { return "twitch-follows"; } }
         protected override void State(string s) { hub.SetAlertState("follows", s); }
 
+        // Canjes de puntos del canal por la misma conexión. Si falla, los follows siguen igual.
+        void SubscribeRedemptions(string sid)
+        {
+            try
+            {
+                if (!api.IsOwnChannel(channel)) return;   // solo el dueño del canal ve los canjes
+                if (!api.HasScope("channel:read:redemptions"))
+                {
+                    hub.Log("Canjes de puntos de Twitch: vuelve a conectar Twitch una vez (pestaña Título) para verlos en el chat.");
+                    return;
+                }
+                api.SubscribeRedemptions(sid, channel);
+            }
+            catch (Exception ex) { hub.Log("Canjes de puntos de Twitch: " + ex.Message); }
+        }
+
         protected override string Url()
         {
             string u = reconnectUrl ?? "wss://eventsub.wss.twitch.tv/ws";
@@ -40,6 +56,7 @@ namespace StreamDelay
                         if (!api.CanReadFollows()) { Fatal("falta permiso: vuelve a conectar Twitch"); return; }
                         api.SubscribeFollows(sid, channel);
                         State("activo");
+                        SubscribeRedemptions(sid);
                     }
                     catch (ApiException ex)
                     {
@@ -61,6 +78,24 @@ namespace StreamDelay
                 string u = J.S(o, "payload", "event", "user_name");
                 if (u.Length == 0) u = J.S(o, "payload", "event", "user_login");
                 hub.Emit(new ChatItem { t = "ev", p = "twitch", kind = "follow", user = u, uid = J.S(o, "payload", "event", "user_id"), text = u + " te sigue" });
+            }
+            else if (type == "notification" && J.S(o, "metadata", "subscription_type") == "channel.channel_points_custom_reward_redemption.add")
+            {
+                string u = J.S(o, "payload", "event", "user_name");
+                if (u.Length == 0) u = J.S(o, "payload", "event", "user_login");
+                string title = J.S(o, "payload", "event", "reward", "title");
+                long cost = J.N(o, 0, "payload", "event", "reward", "cost");
+                // Lo que escribe el espectador (si la recompensa lo pide) llega también como mensaje
+                // normal por el chat, con sus emotes: aquí solo va el canje.
+                hub.Emit(new ChatItem
+                {
+                    t = "ev", p = "twitch", kind = "reward", user = u, uid = J.S(o, "payload", "event", "user_id"),
+                    text = u + " ha canjeado " + title, amount = cost > 0 ? cost.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("es-ES")) + " pts" : null
+                });
+            }
+            else if (type == "revocation" && J.S(o, "payload", "subscription", "type") == "channel.channel_points_custom_reward_redemption.add")
+            {
+                hub.Log("Canjes de puntos de Twitch: Twitch retiró el permiso. Vuelve a conectar Twitch en la pestaña Título.");
             }
             else if (type == "revocation")
             {

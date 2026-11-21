@@ -21,6 +21,52 @@ namespace StreamDelay
 
         public TwitchChat(ChatHub h, string ch) { hub = h; channel = ch; }
 
+        // Imágenes de los emblemas (con Twitch conectado en la pestaña Título; si no, se dibujan los
+        // de la página). Se piden una vez por canal y se renuevan cada hora.
+        static readonly object badgesLock = new object();
+        static Dictionary<string, string[]> badges;
+        static string badgesChannel = "";
+        static DateTime badgesAt = DateTime.MinValue;
+        static bool badgesLoading;
+
+        void LoadBadges()
+        {
+            var api = hub.TwitchApi;
+            if (api == null || !api.Connected) return;
+            lock (badgesLock)
+            {
+                if (badgesLoading) return;
+                if (badgesChannel == channel && DateTime.UtcNow - badgesAt < TimeSpan.FromHours(1)) return;
+                badgesLoading = true;
+            }
+            ChatHub.Background(() =>
+            {
+                Dictionary<string, string[]> map = null;
+                try { map = api.ChatBadges(channel); } catch (Exception ex) { hub.Log("Emblemas de Twitch: " + ex.Message); }
+                lock (badgesLock)
+                {
+                    if (map != null) { badges = map; badgesChannel = channel; }
+                    badgesAt = DateTime.UtcNow;   // si falla, no se reintenta en cada mensaje
+                    badgesLoading = false;
+                }
+            });
+        }
+
+        List<string[]> BadgeImages(string tag)
+        {
+            LoadBadges();
+            Dictionary<string, string[]> map;
+            lock (badgesLock) { map = badgesChannel == channel ? badges : null; }
+            if (map == null || string.IsNullOrEmpty(tag)) return null;
+            var list = new List<string[]>();
+            foreach (var b in tag.Split(','))
+            {
+                string[] x;
+                if (map.TryGetValue(b, out x)) list.Add(x);
+            }
+            return list.Count > 0 ? list : null;
+        }
+
         public void Start() { run = true; th = new Thread(Loop) { IsBackground = true, Name = "chat-twitch" }; th.Start(); }
         public void Stop() { run = false; try { if (tcp != null) tcp.Close(); } catch { } }
 
@@ -207,7 +253,8 @@ namespace StreamDelay
             return new ChatItem
             {
                 t = t, p = "twitch", id = Tag(m, "id"), uid = Tag(m, "user-id"),
-                user = UserName(m), color = Tag(m, "color"), roles = Roles(Tag(m, "badges"))
+                user = UserName(m), color = Tag(m, "color"), roles = Roles(Tag(m, "badges")),
+                bd = BadgeImages(Tag(m, "badges"))
             };
         }
 

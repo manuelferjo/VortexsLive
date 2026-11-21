@@ -29,7 +29,7 @@
   body.cs .ev .body { color: var(--clbl); }
   body.cs.cs-names-fixed .name { color: var(--cname) !important; }
   body.cs.cs-noicons .msg > .pf, body.cs.cs-noicons .ev .head > .pf { display: none; }
-  body.cs.cs-nobadges .role { display: none; }
+  body.cs.cs-nobadges .role, body.cs.cs-nobadges .badge { display: none; }
   body.cs.cs-noevents .ev { display: none; }
   body.cs.cs-fx-shadow .msg, body.cs.cs-fx-shadow .ev { text-shadow: 0 1px 2px rgba(0,0,0,.95), 0 0 4px rgba(0,0,0,.75); }
   body.cs.cs-fx-outline .msg, body.cs.cs-fx-outline .ev { text-shadow: -1.5px -1.5px 0 #000, 1.5px -1.5px 0 #000, -1.5px 1.5px 0 #000, 1.5px 1.5px 0 #000, 0 2px 4px #000; }
@@ -72,9 +72,13 @@
   .msg:hover { background: rgba(255,255,255,.03); }
   @keyframes in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
   .pf { display: inline-block; width: 1.05em; height: 1.05em; vertical-align: -0.17em; margin-right: 5px; }
-  .role { display: inline-flex; align-items: center; justify-content: center; min-width: 1.15em; height: 1.15em; padding: 0 3px; margin-right: 3px; border-radius: 4px; font-size: .72em; font-weight: 800; vertical-align: .08em; color: #000; }
-  .r-broadcaster { background: var(--red); color: #fff; } .r-mod { background: var(--green); } .r-vip { background: #ff6bd6; }
-  .r-sub, .r-member { background: var(--violet); } .r-founder { background: var(--yellow); } .r-verified { background: #8ab4ff; } .r-og { background: #ffb020; }
+  /* Emblemas: las imágenes de Twitch (con Twitch conectado) o iconos propios, del mismo tamaño. */
+  .badge { width: 1.3em; height: 1.3em; margin-right: 4px; vertical-align: -.28em; border-radius: 3px; }
+  .role { display: inline-flex; align-items: center; justify-content: center; min-width: 1.3em; height: 1.3em; margin-right: 4px; border-radius: 4px; vertical-align: -.28em; color: #fff; box-shadow: inset 0 -1px 0 rgba(0,0,0,.18); }
+  .role svg { width: .86em; height: .86em; fill: currentColor; }
+  .role.txt { padding: 0 4px; font-size: .68em; height: 1.9em; min-width: 1.9em; font-weight: 800; letter-spacing: .02em; vertical-align: .12em; }
+  .r-broadcaster { background: #e91916; } .r-mod { background: #00ad03; } .r-vip { background: #e005b9; }
+  .r-sub { background: #8205b4; } .r-member { background: #0f9d58; } .r-founder { background: #d4a017; } .r-verified { background: #9147ff; } .r-og { background: #ff8a00; }
   .name { font-weight: 700; }
   .emote { height: 1.75em; vertical-align: middle; margin: -2px 1px; }
   .announce { border-left: 3px solid var(--violet); background: rgba(192,154,253,.08); padding-left: 8px; }
@@ -86,7 +90,7 @@
   .ev .body { margin-top: 3px; color: var(--muted); }
   .k-sub, .k-resub { --c: var(--violet); } .k-gift, .k-giftbomb, .k-giftmember { --c: #ff6bd6; } .k-raid { --c: #ffb020; }
   .k-bits { --c: #8ab4ff; } .k-follow { --c: var(--green); } .k-superchat, .k-sticker { --c: var(--yellow); } .k-member { --c: var(--green); }
-  .k-kicks { --c: var(--kick); } .k-tiktokgift { --c: var(--tiktok); } .k-other { --c: var(--dim); } .k-tip { --c: var(--yellow); }
+  .k-kicks { --c: var(--kick); } .k-tiktokgift { --c: var(--tiktok); } .k-other { --c: var(--dim); } .k-tip { --c: var(--yellow); } .k-reward { --c: #00c8af; }
 
   #composer { flex: none; border-top: 1px solid var(--border); background: var(--surface); padding: 8px 10px 10px; }
   body.overlay #composer, body.noinput #composer { display: none; }
@@ -341,8 +345,18 @@
     tiktok: '<svg class="pf" viewBox="0 0 24 24"><rect width="24" height="24" rx="5" fill="#111"/><path fill="#25f4ee" d="M12.6 4.5h2.3c.2 1.9 1.4 3.2 3.4 3.4v2.3c-1.3 0-2.4-.4-3.4-1.1v5.2a4.3 4.3 0 1 1-4.3-4.3h.4v2.4h-.4a1.9 1.9 0 1 0 1.9 1.9z"/><path fill="#fe2c55" d="M13.4 5.3h2.3c.2 1.9 1.4 3.2 3.4 3.4V11c-1.3 0-2.4-.4-3.4-1.1v5.2a4.3 4.3 0 1 1-4.3-4.3h.4v2.4h-.4a1.9 1.9 0 1 0 1.9 1.9z" opacity=".85"/><path fill="#fff" d="M13 4.9h2.3c.2 1.9 1.4 3.2 3.4 3.4v2.3c-1.3 0-2.4-.4-3.4-1.1v5.2a4.3 4.3 0 1 1-4.3-4.3h.4v2.4H11a1.9 1.9 0 1 0 1.9 1.9z"/></svg>',
     tip: '<svg class="pf" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#ede103"/><path fill="#111" d="M12.9 5v1.6c1.5.3 2.6 1.2 2.8 2.7h-2c-.1-.7-.7-1.1-1.7-1.1-1 0-1.6.4-1.6 1 0 .6.5.9 2 1.2 2.3.5 3.5 1.3 3.5 3.1 0 1.6-1.2 2.6-3 2.9V18h-1.8v-1.6c-1.8-.3-3-1.3-3.1-3h2c.1.8.8 1.3 1.9 1.3 1.1 0 1.7-.4 1.7-1.1 0-.6-.5-.9-2-1.2-2.1-.4-3.4-1.2-3.4-3 0-1.5 1.1-2.5 2.9-2.8V5z"/></svg>'
   };
-  var ROLES = { broadcaster: ['◉', 'Streamer'], mod: ['⚔', 'Moderador'], vip: ['◆', 'VIP'], sub: ['★', 'Suscriptor'], member: ['★', 'Miembro'], founder: ['✦', 'Fundador'], verified: ['✓', 'Verificado'], og: ['OG', 'OG'] };
-  var EV_ICON = { sub: '⭐', resub: '⭐', gift: '🎁', giftbomb: '🎁', giftmember: '🎁', raid: '🚀', bits: '💎', follow: '❤️', superchat: '💰', sticker: '💰', member: '🎉', kicks: '💚', tiktokgift: '🎁', tip: '💸', other: '📣' };
+  // Iconos de los emblemas (SVG 16x16, en blanco sobre el color de cada uno).
+  var SVG_ROLE = {
+    camera: 'M2 4.5h8.5a1.5 1.5 0 0 1 1.5 1.5v.9l2.4-1.5a.4.4 0 0 1 .6.35v4.5a.4.4 0 0 1-.6.35L12 9.1v.9a1.5 1.5 0 0 1-1.5 1.5H2A1.5 1.5 0 0 1 .5 10V6A1.5 1.5 0 0 1 2 4.5z',
+    sword: 'M13.8 1.2 15 2.4 8.6 8.8l1.1 1.1-1 1-1.2-1.2-2.3 2.3.9.9-1 1-.9-.9-1.9 1.9-1.4-1.4 1.9-1.9-.9-.9 1-1 .9.9L6 6.3 4.8 5.1l1-1 1.1 1.1z',
+    gem: 'M4 2h8l3.5 4.2L8 14.8.5 6.2zM2.9 6.4 8 12.2l5.1-5.8z',
+    star: 'M8 .9l2.15 4.5 4.95.6-3.65 3.4.95 4.9L8 11.9l-4.4 2.4.95-4.9L.9 6l4.95-.6z',
+    crown: 'M1.5 4.5l3.6 3L8 2.5l2.9 5 3.6-3-1.3 8H2.8zM2.8 13.5h10.4V15H2.8z',
+    check: 'M6.4 11.6 2.6 7.8l1.4-1.4 2.4 2.4 5.6-5.6 1.4 1.4z',
+    heart: 'M8 14.2 1.9 8.4A3.7 3.7 0 0 1 8 3.6a3.7 3.7 0 0 1 6.1 4.8z'
+  };
+  var ROLES = { broadcaster: ['camera', 'Streamer'], mod: ['sword', 'Moderador'], vip: ['gem', 'VIP'], sub: ['star', 'Suscriptor'], member: ['heart', 'Miembro'], founder: ['crown', 'Fundador'], verified: ['check', 'Verificado'], og: ['OG', 'OG'] };
+  var EV_ICON = { sub: '⭐', resub: '⭐', gift: '🎁', giftbomb: '🎁', giftmember: '🎁', raid: '🚀', bits: '💎', follow: '❤️', superchat: '💰', sticker: '💰', member: '🎉', kicks: '💚', tiktokgift: '🎁', tip: '💸', reward: '🎯', other: '📣' };
 
   var PL = ['twitch', 'kick', 'youtube', 'tiktok'];
   PL.forEach(function (p) { document.querySelector('#c-' + p + ' .pfi').innerHTML = ICONS[p]; });
@@ -398,8 +412,16 @@
 
   function plain(parts) { return (parts || []).map(function (p) { return p.e ? p.n : p.x; }).join('').trim(); }
 
-  function rolesHtml(roles) {
-    return (roles || []).map(function (r) { var x = ROLES[r]; return x ? '<span class="role r-' + r + '" title="' + x[1] + '">' + x[0] + '</span>' : ''; }).join('');
+  function rolesHtml(roles, imgs) {
+    // Twitch con la cuenta conectada: los emblemas de verdad (los de sub de tu canal, bits, etc.).
+    if (imgs && imgs.length) return imgs.map(function (b) { return '<img class="badge" src="' + esc(b[0]) + '" alt="" title="' + esc(b[1]) + '">'; }).join('');
+    return (roles || []).map(function (r) {
+      var x = ROLES[r];
+      if (!x) return '';
+      var path = SVG_ROLE[x[0]];
+      return path ? '<span class="role r-' + r + '" title="' + x[1] + '"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="' + path + '"/></svg></span>'
+                  : '<span class="role txt r-' + r + '" title="' + x[1] + '">' + x[0] + '</span>';
+    }).join('');
   }
 
   function add(el) {
@@ -419,7 +441,7 @@
     if (m.uid) el.dataset.uid = m.p + ':' + m.uid;
     // TikTok no deja moderar desde otros programas: sus mensajes solo se pueden ocultar.
     if (m.id || m.uid || m.user) { el.dataset.mod = '1'; el._m = { p: m.p, id: m.id || '', uid: m.uid || '', user: m.user || '', text: plain(m.parts) }; }
-    el.innerHTML = ICONS[m.p] + rolesHtml(m.roles) + '<span class="name" style="color:' + nameColor(m.color, m.user) + '">' + esc(m.user) + '</span>: ' + partsHtml(m.parts);
+    el.innerHTML = ICONS[m.p] + rolesHtml(m.roles, m.bd) + '<span class="name" style="color:' + nameColor(m.color, m.user) + '">' + esc(m.user) + '</span>: ' + partsHtml(m.parts);
     add(el);
   }
 
@@ -758,13 +780,15 @@
   if (q.get('demo') === '1') {
     document.body.classList.add('demo');
     var DEMO = [
-      { t: 'msg', p: 'twitch', user: 'Laura', color: '#FF4500', roles: ['mod'], parts: [{ x: '¡Vaya jugada! Esto hay que clipearlo' }] },
-      { t: 'msg', p: 'kick', user: 'KickFan', color: '#53FC18', roles: ['sub'], parts: [{ x: 'saludos desde Kick 👋' }] },
+      { t: 'msg', p: 'twitch', user: 'Laura', color: '#FF4500', roles: ['mod', 'sub'], parts: [{ x: '¡Vaya jugada! Esto hay que clipearlo' }] },
+      { t: 'msg', p: 'twitch', user: 'Vortexs_MC', color: '#9147FF', roles: ['broadcaster', 'verified'], parts: [{ x: 'bienvenidos al directo' }] },
+      { t: 'msg', p: 'kick', user: 'KickFan', color: '#53FC18', roles: ['og', 'founder'], parts: [{ x: 'saludos desde Kick 👋' }] },
       { t: 'msg', p: 'youtube', user: 'ytfan', roles: ['member'], parts: [{ x: 'llego tarde, ¿qué me he perdido?' }] },
       { t: 'msg', p: 'tiktok', user: 'Marta 🌸', roles: [], parts: [{ x: 'holaaa desde TikTok' }] },
       { t: 'ev', p: 'twitch', user: 'Ana', kind: 'resub', text: 'Ana lleva 6 meses suscrita', parts: [{ x: '¡a por el directo!' }] },
       { t: 'msg', p: 'twitch', user: 'Pepe', color: '#1E90FF', roles: ['vip'], parts: [{ x: 'GG, qué nivel' }] },
       { t: 'msg', p: 'twitch', user: 'Laura', color: '#FF4500', roles: ['mod'], parts: [{ x: 'el horario está en vortexs.es/horario y los clips en https://www.twitch.tv/vortexs_mc/clips' }] },
+      { t: 'ev', p: 'twitch', user: 'Pepe', kind: 'reward', text: 'Pepe ha canjeado Hidrátate', amount: '500 pts' },
       { t: 'ev', p: 'tiktok', user: 'Racha', kind: 'tiktokgift', text: 'Racha ha enviado 5 × Rosa', amount: '💎 5' },
       { t: 'msg', p: 'kick', user: 'Nocturno', color: '#B388FF', roles: [], parts: [{ x: 'el delay está en 30 s, tranquilos' }] }
     ];

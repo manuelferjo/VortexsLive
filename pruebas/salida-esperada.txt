@@ -16,17 +16,17 @@
   ""
   ""
   log: Chat de Twitch: conectado.
-  item {amount=null color=null data=[[twitch, conectado], [kick, ], [youtube, ], [tiktok, ], [follows, ], [streamelements, ], [streamlabs, ]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
+  item {amount=null bd=null color=null data=[[twitch, conectado], [kick, ], [youtube, ], [tiktok, ], [follows, ], [streamelements, ], [streamlabs, ]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
   log: Chat de Kick: sin directo.
-  item {amount=null color=null data=[[twitch, conectado], [kick, sin directo], [youtube, ], [tiktok, ], [follows, ], [streamelements, ], [streamlabs, ]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
+  item {amount=null bd=null color=null data=[[twitch, conectado], [kick, sin directo], [youtube, ], [tiktok, ], [follows, ], [streamelements, ], [streamlabs, ]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
   log: Chat de YouTube: error: x.
-  item {amount=null color=null data=[[twitch, conectado], [kick, sin directo], [youtube, error: x], [tiktok, ], [follows, ], [streamelements, ], [streamlabs, ]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
+  item {amount=null bd=null color=null data=[[twitch, conectado], [kick, sin directo], [youtube, error: x], [tiktok, ], [follows, ], [streamelements, ], [streamlabs, ]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
   log: Follows de Twitch: activo.
-  item {amount=null color=null data=[[twitch, conectado], [kick, sin directo], [youtube, error: x], [tiktok, ], [follows, activo], [streamelements, ], [streamlabs, ]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
+  item {amount=null bd=null color=null data=[[twitch, conectado], [kick, sin directo], [youtube, error: x], [tiktok, ], [follows, activo], [streamelements, ], [streamlabs, ]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
   log: Streamlabs: token incorrecto.
-  item {amount=null color=null data=[[twitch, conectado], [kick, sin directo], [youtube, error: x], [tiktok, ], [follows, activo], [streamelements, ], [streamlabs, token incorrecto]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
+  item {amount=null bd=null color=null data=[[twitch, conectado], [kick, sin directo], [youtube, error: x], [tiktok, ], [follows, activo], [streamelements, ], [streamlabs, token incorrecto]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
   log: StreamElements: conectado.
-  item {amount=null color=null data=[[twitch, conectado], [kick, sin directo], [youtube, error: x], [tiktok, ], [follows, activo], [streamelements, conectado], [streamlabs, token incorrecto]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
+  item {amount=null bd=null color=null data=[[twitch, conectado], [kick, sin directo], [youtube, error: x], [tiktok, ], [follows, activo], [streamelements, conectado], [streamlabs, token incorrecto]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
   TwitchFollowsActive=True
 == TwitchChat
   Unescape "hola que;tal\"
@@ -41,80 +41,80 @@
   Roles []
  > PING :tmi.twitch.tv
  > @badge-info=subscriber/8;badges=subscriber/6,premium/1;color
-  item {amount=null color="#1E90FF" data=null id="a1" kind="resub" p="twitch" parts=[{e=null n=null x="Hola! "}, {e="https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/2.0" n="Kappa" x=null}, {e=null n=null x=" "}, {e="https://cdn.7tv.app/emote/K/2x.webp" n="KEKW" x=null}, {e=null n=null x=" qué bien"}] roles=["sub"] t="ev" text="Laura lleva 8 meses suscrito" uid="11" user="Laura"}
+  item {amount=null bd=null color="#1E90FF" data=null id="a1" kind="resub" p="twitch" parts=[{e=null n=null x="Hola! "}, {e="https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/2.0" n="Kappa" x=null}, {e=null n=null x=" "}, {e="https://cdn.7tv.app/emote/K/2x.webp" n="KEKW" x=null}, {e=null n=null x=" qué bien"}] roles=["sub"] t="ev" text="Laura lleva 8 meses suscrito" uid="11" user="Laura"}
  > @badges=;color=;display-name=Pepe;emotes=;id=a2;login=pepe;m
-  item {amount=null color="" data=null id="a2" kind="sub" p="twitch" parts=null roles=[] t="ev" text="Pepe se ha suscrito con Prime" uid="12" user="Pepe"}
+  item {amount=null bd=null color="" data=null id="a2" kind="sub" p="twitch" parts=null roles=[] t="ev" text="Pepe se ha suscrito con Prime" uid="12" user="Pepe"}
  > @badges=;display-name=Pepe2;id=a2b;login=pepe2;msg-id=sub;ms
-  item {amount=null color="" data=null id="a2b" kind="sub" p="twitch" parts=null roles=[] t="ev" text="Pepe2 se ha suscrito de nivel 3" uid="12" user="Pepe2"}
+  item {amount=null bd=null color="" data=null id="a2b" kind="sub" p="twitch" parts=null roles=[] t="ev" text="Pepe2 se ha suscrito de nivel 3" uid="12" user="Pepe2"}
  > @badges=vip/1;display-name=Ana;id=a3;login=ana;msg-id=submys
-  item {amount="5" color="" data=null id="a3" kind="giftbomb" p="twitch" parts=null roles=["vip"] t="ev" text="Ana ha regalado 5 suscripciones al chat" uid="13" user="Ana"}
+  item {amount="5" bd=null color="" data=null id="a3" kind="giftbomb" p="twitch" parts=null roles=["vip"] t="ev" text="Ana ha regalado 5 suscripciones al chat" uid="13" user="Ana"}
  > @badges=;display-name=Ana;id=a3b;login=ana;msg-id=submystery
-  item {amount="1" color="" data=null id="a3b" kind="giftbomb" p="twitch" parts=null roles=[] t="ev" text="Ana ha regalado 1 suscripción al chat" uid="13" user="Ana"}
+  item {amount="1" bd=null color="" data=null id="a3b" kind="giftbomb" p="twitch" parts=null roles=[] t="ev" text="Ana ha regalado 1 suscripción al chat" uid="13" user="Ana"}
  > @badges=;display-name=Ana;id=a4;login=ana;msg-id=subgift;msg
  > @badges=;display-name=AnAnonymousGifter;id=a5;login=ananonym
-  item {amount=null color="" data=null id="a5" kind="gift" p="twitch" parts=null roles=[] t="ev" text="Anónimo ha regalado una suscripción a Marta" uid="274598607" user="Anónimo"}
+  item {amount=null bd=null color="" data=null id="a5" kind="gift" p="twitch" parts=null roles=[] t="ev" text="Anónimo ha regalado una suscripción a Marta" uid="274598607" user="Anónimo"}
  > @badges=broadcaster/1;display-name=OtroStreamer;id=a6;login=
-  item {amount="320" color="" data=null id="a6" kind="raid" p="twitch" parts=null roles=["broadcaster"] t="ev" text="OtroStreamer hace raid con 320 espectadores" uid="14" user="OtroStreamer"}
+  item {amount="320" bd=null color="" data=null id="a6" kind="raid" p="twitch" parts=null roles=["broadcaster"] t="ev" text="OtroStreamer hace raid con 320 espectadores" uid="14" user="OtroStreamer"}
  > @badges=;display-name=X;id=a6b;login=x;msg-id=raid;msg-param
-  item {amount="5" color="" data=null id="a6b" kind="raid" p="twitch" parts=null roles=[] t="ev" text="X hace raid con 5 espectadores" uid="14" user="X"}
+  item {amount="5" bd=null color="" data=null id="a6b" kind="raid" p="twitch" parts=null roles=[] t="ev" text="X hace raid con 5 espectadores" uid="14" user="X"}
  > @badges=;display-name=Y;id=a6c;login=y;msg-id=primepaidupgra
-  item {amount=null color="" data=null id="a6c" kind="sub" p="twitch" parts=null roles=[] t="ev" text="Y continúa su suscripción" uid="15" user="Y"}
+  item {amount=null bd=null color="" data=null id="a6c" kind="sub" p="twitch" parts=null roles=[] t="ev" text="Y continúa su suscripción" uid="15" user="Y"}
  > @badges=;display-name=Z;id=a6d;login=z;msg-id=announcement;e
-  item {amount=null color="" data=null id="a6d" kind="announce" p="twitch" parts=[{e=null n=null x="Anuncio importante "}, {e="https://cdn.betterttv.net/emote/P/2x" n="Pog" x=null}] roles=[] t="msg" text=null uid="15" user="Z"}
+  item {amount=null bd=null color="" data=null id="a6d" kind="announce" p="twitch" parts=[{e=null n=null x="Anuncio importante "}, {e="https://cdn.betterttv.net/emote/P/2x" n="Pog" x=null}] roles=[] t="msg" text=null uid="15" user="Z"}
  > @badges=;display-name=W;id=a6e;login=w;msg-id=bitsbadgetier;
-  item {amount=null color="" data=null id="a6e" kind="other" p="twitch" parts=null roles=[] t="ev" text="W desbloqueó insignia" uid="15" user="W"}
+  item {amount=null bd=null color="" data=null id="a6e" kind="other" p="twitch" parts=null roles=[] t="ev" text="W desbloqueó insignia" uid="15" user="W"}
  > @badges=;display-name=V;id=a6f;login=v;msg-id=desconocido;us
  > @badges=moderator/1;bits=500;color=#00FF7F;display-name=Mod1
-  item {amount="500 bits" color="#00FF7F" data=null id="a7" kind="bits" p="twitch" parts=[{e=null n=null x="Cheer500 vamos!"}] roles=["mod"] t="ev" text="Mod1 ha enviado 500 bits" uid="15" user="Mod1"}
+  item {amount="500 bits" bd=null color="#00FF7F" data=null id="a7" kind="bits" p="twitch" parts=[{e=null n=null x="Cheer500 vamos!"}] roles=["mod"] t="ev" text="Mod1 ha enviado 500 bits" uid="15" user="Mod1"}
  > @badges=;bits=0;display-name=;emotes=;id=a7b;user-id=15 :sin
-  item {amount=null color="" data=null id="a7b" kind=null p="twitch" parts=[{e=null n=null x="bits cero"}] roles=[] t="msg" text=null uid="15" user="sinnombre"}
+  item {amount=null bd=null color="" data=null id="a7b" kind=null p="twitch" parts=[{e=null n=null x="bits cero"}] roles=[] t="msg" text=null uid="15" user="sinnombre"}
  > @badges=;color=#000000;display-name=Oscuro;emotes=1902:0-4,9
-  item {amount=null color="#000000" data=null id="a8" kind=null p="twitch" parts=[{e="https://static-cdn.jtvnw.net/emoticons/v2/1902/default/dark/2.0" n="Keepo" x=null}, {e=null n=null x=" y😀 "}, {e="https://static-cdn.jtvnw.net/emoticons/v2/1902/default/dark/2.0" n="Keepo" x=null}, {e=null n=null x=" fin "}, {e="https://cdn.7tv.app/emote/K/2x.webp" n="KEKW" x=null}] roles=[] t="msg" text=null uid="16" user="Oscuro"}
+  item {amount=null bd=null color="#000000" data=null id="a8" kind=null p="twitch" parts=[{e="https://static-cdn.jtvnw.net/emoticons/v2/1902/default/dark/2.0" n="Keepo" x=null}, {e=null n=null x=" y😀 "}, {e="https://static-cdn.jtvnw.net/emoticons/v2/1902/default/dark/2.0" n="Keepo" x=null}, {e=null n=null x=" fin "}, {e="https://cdn.7tv.app/emote/K/2x.webp" n="KEKW" x=null}] roles=[] t="msg" text=null uid="16" user="Oscuro"}
  > @badges=;display-name=Act;emotes=;id=a9;user-id=17 :act!act@
-  item {amount=null color="" data=null id="a9" kind=null p="twitch" parts=[{e=null n=null x="baila"}] roles=[] t="msg" text=null uid="17" user="Act"}
+  item {amount=null bd=null color="" data=null id="a9" kind=null p="twitch" parts=[{e=null n=null x="baila"}] roles=[] t="msg" text=null uid="17" user="Act"}
  > @badges=;display-name=Mal;emotes=25:99-120/abc;id=a10;user-i
-  item {amount=null color="" data=null id="a10" kind=null p="twitch" parts=[{e=null n=null x="texto corto"}] roles=[] t="msg" text=null uid="18" user="Mal"}
+  item {amount=null bd=null color="" data=null id="a10" kind=null p="twitch" parts=[{e=null n=null x="texto corto"}] roles=[] t="msg" text=null uid="18" user="Mal"}
  > @login=x;target-msg-id=abc-123 :tmi.twitch.tv CLEARMSG #cana
-  item {amount=null color=null data=null id="abc-123" kind=null p="twitch" parts=null roles=null t="del" text=null uid=null user=null}
+  item {amount=null bd=null color=null data=null id="abc-123" kind=null p="twitch" parts=null roles=null t="del" text=null uid=null user=null}
  > @target-user-id=999 :tmi.twitch.tv CLEARCHAT #canal :baneado
-  item {amount=null color=null data=null id=null kind=null p="twitch" parts=null roles=null t="del" text=null uid="999" user=null}
+  item {amount=null bd=null color=null data=null id=null kind=null p="twitch" parts=null roles=null t="del" text=null uid="999" user=null}
  > :tmi.twitch.tv CLEARCHAT #canal
  > @msg-id=msg_channel_suspended :tmi.twitch.tv NOTICE #canal :
   log: Chat de Twitch: error: canal suspendido o inexistente.
-  item {amount=null color=null data=[[twitch, error: canal suspendido o inexistente], [kick, sin directo], [youtube, error: x], [tiktok, ], [follows, ], [streamelements, conectado], [streamlabs, token incorrecto]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
+  item {amount=null bd=null color=null data=[[twitch, error: canal suspendido o inexistente], [kick, sin directo], [youtube, error: x], [tiktok, ], [follows, ], [streamelements, conectado], [streamlabs, token incorrecto]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
  > @msg-id=otro :tmi.twitch.tv NOTICE #canal :otro aviso
   EXCEPCIÓN Handle: IOException: Twitch pidió reconectar
 == KickChat
  > {"event":"App\\Events\\ChatMessageEvent","data":"{\"id\":\"m
-  item {amount=null color="#FF0000" data=null id="m1" kind=null p="kick" parts=[{e=null n=null x="hola "}, {e="https://files.kick.com/emotes/37226/fullsize" n="KEKW" x=null}, {e=null n=null x=" y "}, {e="https://cdn.7tv.app/emote/K/2x.webp" n="KEKW" x=null}, {e=null n=null x=" "}, {e="https://cdn.betterttv.net/emote/P/2x" n="Pog" x=null}, {e=null n=null x=" "}, {e="https://files.kick.com/emotes/1/fullsize" n="x" x=null}] roles=["mod", "og", "sub", "broadcaster", "vip", "founder", "verified"] t="msg" text=null uid="7" user="fan"}
+  item {amount=null bd=null color="#FF0000" data=null id="m1" kind=null p="kick" parts=[{e=null n=null x="hola "}, {e="https://files.kick.com/emotes/37226/fullsize" n="KEKW" x=null}, {e=null n=null x=" y "}, {e="https://cdn.7tv.app/emote/K/2x.webp" n="KEKW" x=null}, {e=null n=null x=" "}, {e="https://cdn.betterttv.net/emote/P/2x" n="Pog" x=null}, {e=null n=null x=" "}, {e="https://files.kick.com/emotes/1/fullsize" n="x" x=null}] roles=["mod", "og", "sub", "broadcaster", "vip", "founder", "verified"] t="msg" text=null uid="7" user="fan"}
  > {"event":"App\\Events\\ChatMessageEvent","data":{"id":"m2","
-  item {amount=null color="" data=null id="m2" kind=null p="kick" parts=[] roles=[] t="msg" text=null uid="" user="vacío"}
+  item {amount=null bd=null color="" data=null id="m2" kind=null p="kick" parts=[] roles=[] t="msg" text=null uid="" user="vacío"}
  > {"event":"App\\Events\\MessageDeletedEvent","data":{"message
-  item {amount=null color=null data=null id="m1" kind=null p="kick" parts=null roles=null t="del" text=null uid=null user=null}
+  item {amount=null bd=null color=null data=null id="m1" kind=null p="kick" parts=null roles=null t="del" text=null uid=null user=null}
  > {"event":"App\\Events\\UserBannedEvent","data":{"user":{"id"
-  item {amount=null color=null data=null id=null kind=null p="kick" parts=null roles=null t="del" text=null uid="7" user=null}
+  item {amount=null bd=null color=null data=null id=null kind=null p="kick" parts=null roles=null t="del" text=null uid="7" user=null}
  > {"event":"App\\Events\\SubscriptionEvent","data":{"username"
-  item {amount=null color=null data=null id=null kind="sub" p="kick" parts=null roles=null t="ev" text="sub1 se ha suscrito" uid=null user="sub1"}
+  item {amount=null bd=null color=null data=null id=null kind="sub" p="kick" parts=null roles=null t="ev" text="sub1 se ha suscrito" uid=null user="sub1"}
  > {"event":"App\\Events\\SubscriptionEvent","data":{"username"
-  item {amount=null color=null data=null id=null kind="sub" p="kick" parts=null roles=null t="ev" text="sub2 lleva 6 meses suscrito" uid=null user="sub2"}
+  item {amount=null bd=null color=null data=null id=null kind="sub" p="kick" parts=null roles=null t="ev" text="sub2 lleva 6 meses suscrito" uid=null user="sub2"}
  > {"event":"App\\Events\\GiftedSubscriptionsEvent","data":{"gi
-  item {amount="3" color=null data=null id=null kind="giftbomb" p="kick" parts=null roles=null t="ev" text="rico ha regalado 3 suscripciones" uid=null user="rico"}
+  item {amount="3" bd=null color=null data=null id=null kind="giftbomb" p="kick" parts=null roles=null t="ev" text="rico ha regalado 3 suscripciones" uid=null user="rico"}
  > {"event":"App\\Events\\GiftedSubscriptionsEvent","data":{"gi
-  item {amount="1" color=null data=null id=null kind="gift" p="kick" parts=null roles=null t="ev" text="Anónimo ha regalado 1 suscripción" uid=null user="Anónimo"}
+  item {amount="1" bd=null color=null data=null id=null kind="gift" p="kick" parts=null roles=null t="ev" text="Anónimo ha regalado 1 suscripción" uid=null user="Anónimo"}
  > {"event":"App\\Events\\StreamHostEvent","data":{"host_userna
-  item {amount="42" color=null data=null id=null kind="raid" p="kick" parts=null roles=null t="ev" text="amigo hace host con 42 espectadores" uid=null user="amigo"}
+  item {amount="42" bd=null color=null data=null id=null kind="raid" p="kick" parts=null roles=null t="ev" text="amigo hace host con 42 espectadores" uid=null user="amigo"}
  > {"event":"App\\Events\\FollowersUpdated","data":{"username":
-  item {amount=null color=null data=null id=null kind="follow" p="kick" parts=null roles=null t="ev" text="nuevo te sigue" uid=null user="nuevo"}
+  item {amount=null bd=null color=null data=null id=null kind="follow" p="kick" parts=null roles=null t="ev" text="nuevo te sigue" uid=null user="nuevo"}
  > {"event":"App\\Events\\FollowersUpdated","data":{"username":
  > {"event":"App\\Events\\KicksGifted","data":{"sender":{"usern
-  item {amount="100 Kicks" color=null data=null id=null kind="kicks" p="kick" parts=null roles=null t="ev" text="generoso ha enviado 100 Kicks" uid=null user="generoso"}
+  item {amount="100 Kicks" bd=null color=null data=null id=null kind="kicks" p="kick" parts=null roles=null t="ev" text="generoso ha enviado 100 Kicks" uid=null user="generoso"}
  > {"event":"App\\Events\\GiftOtro","data":{"sender":{"username
  > {"event":"pusher:error","data":{"message":"fallo"}}
   log: Chat de Kick: error: fallo.
-  item {amount=null color=null data=[[twitch, error: canal suspendido o inexistente], [kick, error: fallo], [youtube, error: x], [tiktok, ], [follows, ], [streamelements, conectado], [streamlabs, token incorrecto]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
+  item {amount=null bd=null color=null data=[[twitch, error: canal suspendido o inexistente], [kick, error: fallo], [youtube, error: x], [tiktok, ], [follows, ], [streamelements, conectado], [streamlabs, token incorrecto]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
  > {"event":"pusher_internal:subscription_succeeded","data":{}}
   log: Chat de Kick: conectado.
-  item {amount=null color=null data=[[twitch, error: canal suspendido o inexistente], [kick, conectado], [youtube, error: x], [tiktok, ], [follows, ], [streamelements, conectado], [streamlabs, token incorrecto]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
+  item {amount=null bd=null color=null data=[[twitch, error: canal suspendido o inexistente], [kick, conectado], [youtube, error: x], [tiktok, ], [follows, ], [streamelements, conectado], [streamlabs, token incorrecto]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
  > {"event":"desconocido","data":{}}
  > no es json
 == YouTubeChat
@@ -131,28 +131,28 @@
   Argb "#FFCA28"
   Argb "#000001"
  > {"addChatItemAction":{"item":{"liveChatTextMessageRenderer":
-  item {amount=null color=null data=null id="y1" kind=null p="youtube" parts=[{e=null n=null x="hola "}, {e="https://cdn.7tv.app/emote/K/2x.webp" n="KEKW" x=null}, {e=null n=null x=" "}, {e=null n=null x="😀"}, {e="grande" n=":gato:" x=null}] roles=["mod", "member", "broadcaster", "verified"] t="msg" text=null uid="UC1" user="Pepa"}
+  item {amount=null bd=null color=null data=null id="y1" kind=null p="youtube" parts=[{e=null n=null x="hola "}, {e="https://cdn.7tv.app/emote/K/2x.webp" n="KEKW" x=null}, {e=null n=null x=" "}, {e=null n=null x="😀"}, {e="grande" n=":gato:" x=null}] roles=["mod", "member", "broadcaster", "verified"] t="msg" text=null uid="UC1" user="Pepa"}
  > {"addChatItemAction":{"item":{"liveChatTextMessageRenderer":
-  item {amount=null color=null data=null id="y1b" kind=null p="youtube" parts=null roles=[] t="msg" text=null uid="" user="SinTexto"}
+  item {amount=null bd=null color=null data=null id="y1b" kind=null p="youtube" parts=null roles=[] t="msg" text=null uid="" user="SinTexto"}
  > {"addChatItemAction":{"item":{"liveChatPaidMessageRenderer":
-  item {amount="5,00 €" color="#2196F3" data=null id="y2" kind="superchat" p="youtube" parts=[{e=null n=null x="gracias"}] roles=[] t="ev" text="Rico ha enviado un Super Chat de 5,00 €" uid="" user="Rico"}
+  item {amount="5,00 €" bd=null color="#2196F3" data=null id="y2" kind="superchat" p="youtube" parts=[{e=null n=null x="gracias"}] roles=[] t="ev" text="Rico ha enviado un Super Chat de 5,00 €" uid="" user="Rico"}
  > {"addChatItemAction":{"item":{"liveChatPaidMessageRenderer":
-  item {amount="$2.00" color=null data=null id="y2b" kind="superchat" p="youtube" parts=null roles=[] t="ev" text="Rico2 ha enviado un Super Chat de $2.00" uid="" user="Rico2"}
+  item {amount="$2.00" bd=null color=null data=null id="y2b" kind="superchat" p="youtube" parts=null roles=[] t="ev" text="Rico2 ha enviado un Super Chat de $2.00" uid="" user="Rico2"}
  > {"addChatItemAction":{"item":{"liveChatPaidStickerRenderer":
-  item {amount="1,99 €" color=null data=null id="y3" kind="sticker" p="youtube" parts=null roles=[] t="ev" text="Pega ha enviado un Super Sticker de 1,99 €" uid="" user="Pega"}
+  item {amount="1,99 €" bd=null color=null data=null id="y3" kind="sticker" p="youtube" parts=null roles=[] t="ev" text="Pega ha enviado un Super Sticker de 1,99 €" uid="" user="Pega"}
  > {"addChatItemAction":{"item":{"liveChatMembershipItemRendere
-  item {amount=null color=null data=null id="y4" kind="member" p="youtube" parts=null roles=[] t="ev" text="Miembro: Te damos la bienvenida" uid="" user="Miembro"}
+  item {amount=null bd=null color=null data=null id="y4" kind="member" p="youtube" parts=null roles=[] t="ev" text="Miembro: Te damos la bienvenida" uid="" user="Miembro"}
  > {"addChatItemAction":{"item":{"liveChatMembershipItemRendere
-  item {amount=null color=null data=null id="y4b" kind="member" p="youtube" parts=[{e=null n=null x="hola"}] roles=[] t="ev" text="Veterano: Miembro durante 5 meses" uid="" user="Veterano"}
+  item {amount=null bd=null color=null data=null id="y4b" kind="member" p="youtube" parts=[{e=null n=null x="hola"}] roles=[] t="ev" text="Veterano: Miembro durante 5 meses" uid="" user="Veterano"}
  > {"addChatItemAction":{"item":{"liveChatMembershipItemRendere
-  item {amount=null color=null data=null id="y4c" kind="member" p="youtube" parts=null roles=[] t="ev" text="Nadie: nuevo miembro" uid="" user="Nadie"}
+  item {amount=null bd=null color=null data=null id="y4c" kind="member" p="youtube" parts=null roles=[] t="ev" text="Nadie: nuevo miembro" uid="" user="Nadie"}
  > {"addChatItemAction":{"item":{"liveChatSponsorshipsGiftPurch
-  item {amount=null color=null data=null id="y5" kind="giftmember" p="youtube" parts=null roles=null t="ev" text="Gen ha regalado 5 membresías" uid=null user="Gen"}
+  item {amount=null bd=null color=null data=null id="y5" kind="giftmember" p="youtube" parts=null roles=null t="ev" text="Gen ha regalado 5 membresías" uid=null user="Gen"}
  > {"addChatItemAction":{"item":{"liveChatViewerEngagementMessa
  > {"markChatItemAsDeletedAction":{"targetItemId":"y1"}}
-  item {amount=null color=null data=null id="y1" kind=null p="youtube" parts=null roles=null t="del" text=null uid=null user=null}
+  item {amount=null bd=null color=null data=null id="y1" kind=null p="youtube" parts=null roles=null t="del" text=null uid=null user=null}
  > {"markChatItemsByAuthorAsDeletedAction":{"externalChannelId"
-  item {amount=null color=null data=null id=null kind=null p="youtube" parts=null roles=null t="del" text=null uid="UC1" user=null}
+  item {amount=null bd=null color=null data=null id=null kind=null p="youtube" parts=null roles=null t="del" text=null uid="UC1" user=null}
  > {"otraAccion":{}}
 == Money
   5 "EUR" → "5,00 €"
@@ -210,65 +210,65 @@
   1234567.891 "" → "1.234.567,89 "
   1234567.891 null → "1.234.567,89 "
 == Avisos
-  item {amount=null color=null data=null id=null kind="follow" p="twitch" parts=null roles=null t="ev" text="Nuevo_Seguidor te sigue" uid="123" user="Nuevo_Seguidor"}
-  item {amount=null color=null data=null id=null kind="follow" p="twitch" parts=null roles=null t="ev" text="solo_login te sigue" uid="124" user="solo_login"}
+  item {amount=null bd=null color=null data=null id=null kind="follow" p="twitch" parts=null roles=null t="ev" text="Nuevo_Seguidor te sigue" uid="123" user="Nuevo_Seguidor"}
+  item {amount=null bd=null color=null data=null id=null kind="follow" p="twitch" parts=null roles=null t="ev" text="solo_login te sigue" uid="124" user="solo_login"}
   log: Follows de Twitch: Twitch retiró el permiso de follows: vuelve a conectar Twitch.
-  item {amount=null color=null data=[[twitch, error: canal suspendido o inexistente], [kick, conectado], [youtube, error: x], [tiktok, ], [follows, Twitch retiró el permiso de follows: vuelve a conectar Twitch], [streamelements, conectado], [streamlabs, token incorrecto]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
-  item {amount="5,00 €" color=null data=null id=null kind="tip" p="tip" parts=[{e=null n=null x="Ánimo "}, {e="https://cdn.7tv.app/emote/K/2x.webp" n="KEKW" x=null}] roles=null t="ev" text="Donante ha donado 5,00 €" uid=null user="Donante"}
-  item {amount="7,50 $" color=null data=null id=null kind="tip" p="tip" parts=null roles=null t="ev" text="Anónimo ha donado 7,50 $" uid=null user="Anónimo"}
-  item {amount=null color=null data=null id=null kind="follow" p="twitch" parts=null roles=null t="ev" text="fan2 te sigue" uid=null user="fan2"}
+  item {amount=null bd=null color=null data=[[twitch, error: canal suspendido o inexistente], [kick, conectado], [youtube, error: x], [tiktok, ], [follows, Twitch retiró el permiso de follows: vuelve a conectar Twitch], [streamelements, conectado], [streamlabs, token incorrecto]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
+  item {amount="5,00 €" bd=null color=null data=null id=null kind="tip" p="tip" parts=[{e=null n=null x="Ánimo "}, {e="https://cdn.7tv.app/emote/K/2x.webp" n="KEKW" x=null}] roles=null t="ev" text="Donante ha donado 5,00 €" uid=null user="Donante"}
+  item {amount="7,50 $" bd=null color=null data=null id=null kind="tip" p="tip" parts=null roles=null t="ev" text="Anónimo ha donado 7,50 $" uid=null user="Anónimo"}
+  item {amount=null bd=null color=null data=null id=null kind="follow" p="twitch" parts=null roles=null t="ev" text="fan2 te sigue" uid=null user="fan2"}
   log: StreamElements: error: err_bad_request.
-  item {amount=null color=null data=[[twitch, error: canal suspendido o inexistente], [kick, conectado], [youtube, error: x], [tiktok, ], [follows, Twitch retiró el permiso de follows: vuelve a conectar Twitch], [streamelements, error: err_bad_request], [streamlabs, token incorrecto]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
+  item {amount=null bd=null color=null data=[[twitch, error: canal suspendido o inexistente], [kick, conectado], [youtube, error: x], [tiktok, ], [follows, Twitch retiró el permiso de follows: vuelve a conectar Twitch], [streamelements, error: err_bad_request], [streamlabs, token incorrecto]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
   log: StreamElements: conectado.
-  item {amount=null color=null data=[[twitch, error: canal suspendido o inexistente], [kick, conectado], [youtube, error: x], [tiktok, ], [follows, Twitch retiró el permiso de follows: vuelve a conectar Twitch], [streamelements, conectado], [streamlabs, token incorrecto]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
+  item {amount=null bd=null color=null data=[[twitch, error: canal suspendido o inexistente], [kick, conectado], [youtube, error: x], [tiktok, ], [follows, Twitch retiró el permiso de follows: vuelve a conectar Twitch], [streamelements, conectado], [streamlabs, token incorrecto]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
   log: StreamElements: token incorrecto o caducado.
-  item {amount=null color=null data=[[twitch, error: canal suspendido o inexistente], [kick, conectado], [youtube, error: x], [tiktok, ], [follows, Twitch retiró el permiso de follows: vuelve a conectar Twitch], [streamelements, token incorrecto o caducado], [streamlabs, token incorrecto]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
+  item {amount=null bd=null color=null data=[[twitch, error: canal suspendido o inexistente], [kick, conectado], [youtube, error: x], [tiktok, ], [follows, Twitch retiró el permiso de follows: vuelve a conectar Twitch], [streamelements, token incorrecto o caducado], [streamlabs, token incorrecto]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
   log: Streamlabs: conectado.
-  item {amount=null color=null data=[[twitch, error: canal suspendido o inexistente], [kick, conectado], [youtube, error: x], [tiktok, ], [follows, Twitch retiró el permiso de follows: vuelve a conectar Twitch], [streamelements, token incorrecto o caducado], [streamlabs, conectado]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
-  item {amount="12,50 €" color=null data=null id=null kind="tip" p="tip" parts=[{e=null n=null x="Para un café "}, {e="https://cdn.betterttv.net/emote/P/2x" n="Pog" x=null}] roles=null t="ev" text="Pablo ha donado 12,50 €" uid=null user="Pablo"}
-  item {amount="3,00 $" color=null data=null id=null kind="tip" p="tip" parts=null roles=null t="ev" text="Anónimo ha donado 3,00 $" uid=null user="Anónimo"}
-  item {amount=null color=null data=null id=null kind="follow" p="twitch" parts=null roles=null t="ev" text="segui te sigue" uid=null user="segui"}
+  item {amount=null bd=null color=null data=[[twitch, error: canal suspendido o inexistente], [kick, conectado], [youtube, error: x], [tiktok, ], [follows, Twitch retiró el permiso de follows: vuelve a conectar Twitch], [streamelements, token incorrecto o caducado], [streamlabs, conectado]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
+  item {amount="12,50 €" bd=null color=null data=null id=null kind="tip" p="tip" parts=[{e=null n=null x="Para un café "}, {e="https://cdn.betterttv.net/emote/P/2x" n="Pog" x=null}] roles=null t="ev" text="Pablo ha donado 12,50 €" uid=null user="Pablo"}
+  item {amount="3,00 $" bd=null color=null data=null id=null kind="tip" p="tip" parts=null roles=null t="ev" text="Anónimo ha donado 3,00 $" uid=null user="Anónimo"}
+  item {amount=null bd=null color=null data=null id=null kind="follow" p="twitch" parts=null roles=null t="ev" text="segui te sigue" uid=null user="segui"}
   log: Streamlabs: token incorrecto.
-  item {amount=null color=null data=[[twitch, error: canal suspendido o inexistente], [kick, conectado], [youtube, error: x], [tiktok, ], [follows, Twitch retiró el permiso de follows: vuelve a conectar Twitch], [streamelements, token incorrecto o caducado], [streamlabs, token incorrecto]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
+  item {amount=null bd=null color=null data=[[twitch, error: canal suspendido o inexistente], [kick, conectado], [youtube, error: x], [tiktok, ], [follows, Twitch retiró el permiso de follows: vuelve a conectar Twitch], [streamelements, token incorrecto o caducado], [streamlabs, token incorrecto]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
   PingMs=25000
 == TikTokChat
  > {"type":"tiktok.connect","data":{"agentId":"a1"}}
   log: Chat de TikTok: conectado.
-  item {amount=null color=null data=[[twitch, error: canal suspendido o inexistente], [kick, conectado], [youtube, error: x], [tiktok, conectado], [follows, Twitch retiró el permiso de follows: vuelve a conectar Twitch], [streamelements, token incorrecto o caducado], [streamlabs, token incorrecto]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
+  item {amount=null bd=null color=null data=[[twitch, error: canal suspendido o inexistente], [kick, conectado], [youtube, error: x], [tiktok, conectado], [follows, Twitch retiró el permiso de follows: vuelve a conectar Twitch], [streamelements, token incorrecto o caducado], [streamlabs, token incorrecto]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
  > {"timestamp":1,"messages":[{"type":"WebcastChatMessage","dat
-  item {amount=null color=null data=null id="7300000000000000001" kind=null p="tiktok" parts=[{e=null n=null x="hola "}, {e="https://p16.tiktokcdn.com/e1.webp" n="emote" x=null}, {e="https://cdn.7tv.app/emote/K/2x.webp" n="KEKW" x=null}, {e=null n=null x=" qué tal"}] roles=["mod", "sub"] t="msg" text=null uid="6800000000000000001" user="Laura 🌸"}
-  item {amount=null color=null data=null id="7300000000000000002" kind=null p="tiktok" parts=[{e=null n=null x="emote al final"}, {e="https://p16.tiktokcdn.com/e2.webp" n="emote" x=null}] roles=["broadcaster"] t="msg" text=null uid="6800000000000000002" user="solo_id"}
+  item {amount=null bd=null color=null data=null id="7300000000000000001" kind=null p="tiktok" parts=[{e=null n=null x="hola "}, {e="https://p16.tiktokcdn.com/e1.webp" n="emote" x=null}, {e="https://cdn.7tv.app/emote/K/2x.webp" n="KEKW" x=null}, {e=null n=null x=" qué tal"}] roles=["mod", "sub"] t="msg" text=null uid="6800000000000000001" user="Laura 🌸"}
+  item {amount=null bd=null color=null data=null id="7300000000000000002" kind=null p="tiktok" parts=[{e=null n=null x="emote al final"}, {e="https://p16.tiktokcdn.com/e2.webp" n="emote" x=null}] roles=["broadcaster"] t="msg" text=null uid="6800000000000000002" user="solo_id"}
  > {"messages":[{"type":"WebcastGiftMessage","data":{"user":{"n
-  item {amount="💎 5" color=null data=null id=null kind="tiktokgift" p="tiktok" parts=null roles=null t="ev" text="Racha ha enviado 5 × Rosa" uid=null user="Racha"}
-  item {amount="💎 29.999" color=null data=null id=null kind="tiktokgift" p="tiktok" parts=null roles=null t="ev" text="Ballena ha enviado León" uid=null user="Ballena"}
-  item {amount=null color=null data=null id=null kind="tiktokgift" p="tiktok" parts=null roles=null t="ev" text="Alguien ha enviado un regalo" uid=null user="Alguien"}
+  item {amount="💎 5" bd=null color=null data=null id=null kind="tiktokgift" p="tiktok" parts=null roles=null t="ev" text="Racha ha enviado 5 × Rosa" uid=null user="Racha"}
+  item {amount="💎 29.999" bd=null color=null data=null id=null kind="tiktokgift" p="tiktok" parts=null roles=null t="ev" text="Ballena ha enviado León" uid=null user="Ballena"}
+  item {amount=null bd=null color=null data=null id=null kind="tiktokgift" p="tiktok" parts=null roles=null t="ev" text="Alguien ha enviado un regalo" uid=null user="Alguien"}
  > {"messages":[{"type":"WebcastSubNotifyMessage","data":{"user
-  item {amount=null color=null data=null id=null kind="sub" p="tiktok" parts=null roles=null t="ev" text="Fiel lleva 3 meses suscrito" uid=null user="Fiel"}
-  item {amount=null color=null data=null id=null kind="sub" p="tiktok" parts=null roles=null t="ev" text="nuevo_sub se ha suscrito" uid=null user="nuevo_sub"}
+  item {amount=null bd=null color=null data=null id=null kind="sub" p="tiktok" parts=null roles=null t="ev" text="Fiel lleva 3 meses suscrito" uid=null user="Fiel"}
+  item {amount=null bd=null color=null data=null id=null kind="sub" p="tiktok" parts=null roles=null t="ev" text="nuevo_sub se ha suscrito" uid=null user="nuevo_sub"}
  > {"messages":[{"type":"WebcastSocialMessage","data":{"common"
-  item {amount=null color=null data=null id=null kind="follow" p="tiktok" parts=null roles=null t="ev" text="Seguidora te sigue" uid=null user="Seguidora"}
+  item {amount=null bd=null color=null data=null id=null kind="follow" p="tiktok" parts=null roles=null t="ev" text="Seguidora te sigue" uid=null user="Seguidora"}
  > {"messages":[{"type":"WebcastLikeMessage","data":{"count":15
  > {"messages":[{"type":"WebcastRoomUserSeqMessage","data":{"to
  > {"messages":[{"type":"WebcastEmoteChatMessage","data":{"comm
-  item {amount=null color=null data=null id="7300000000000000003" kind=null p="tiktok" parts=[{e="https://p16.tiktokcdn.com/s1.webp" n="emote" x=null}] roles=[] t="msg" text=null uid="9" user="Sticker"}
+  item {amount=null bd=null color=null data=null id="7300000000000000003" kind=null p="tiktok" parts=[{e="https://p16.tiktokcdn.com/s1.webp" n="emote" x=null}] roles=[] t="msg" text=null uid="9" user="Sticker"}
  > {"messages":[{"type":"WebcastImDeleteMessage","data":{"delet
-  item {amount=null color=null data=null id="7300000000000000001" kind=null p="tiktok" parts=null roles=null t="del" text=null uid=null user=null}
-  item {amount=null color=null data=null id=null kind=null p="tiktok" parts=null roles=null t="del" text=null uid="6800000000000000002" user=null}
+  item {amount=null bd=null color=null data=null id="7300000000000000001" kind=null p="tiktok" parts=null roles=null t="del" text=null uid=null user=null}
+  item {amount=null bd=null color=null data=null id=null kind=null p="tiktok" parts=null roles=null t="del" text=null uid="6800000000000000002" user=null}
  > {"type":"WebcastChatMessage","data":{"user":{"nickname":"Sue
-  item {amount=null color=null data=null id="" kind=null p="tiktok" parts=[{e=null n=null x="sin paquete "}, {e="https://cdn.betterttv.net/emote/P/2x" n="Pog" x=null}] roles=[] t="msg" text=null uid="" user="Suelto"}
+  item {amount=null bd=null color=null data=null id="" kind=null p="tiktok" parts=[{e=null n=null x="sin paquete "}, {e="https://cdn.betterttv.net/emote/P/2x" n="Pog" x=null}] roles=[] t="msg" text=null uid="" user="Suelto"}
  > {"messages":[{"type":"WebcastChatMessage","data":{"user":{"n
  > {"messages":[{"type":"WebcastControlMessage","data":{"action
   log: Chat de TikTok: sin directo.
-  item {amount=null color=null data=[[twitch, error: canal suspendido o inexistente], [kick, conectado], [youtube, error: x], [tiktok, sin directo], [follows, Twitch retiró el permiso de follows: vuelve a conectar Twitch], [streamelements, token incorrecto o caducado], [streamlabs, token incorrecto]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
+  item {amount=null bd=null color=null data=[[twitch, error: canal suspendido o inexistente], [kick, conectado], [youtube, error: x], [tiktok, sin directo], [follows, Twitch retiró el permiso de follows: vuelve a conectar Twitch], [streamelements, token incorrecto o caducado], [streamlabs, token incorrecto]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
  > {"type":"room.status","data":{"state":"connected"}}
   log: Chat de TikTok: conectado.
-  item {amount=null color=null data=[[twitch, error: canal suspendido o inexistente], [kick, conectado], [youtube, error: x], [tiktok, conectado], [follows, Twitch retiró el permiso de follows: vuelve a conectar Twitch], [streamelements, token incorrecto o caducado], [streamlabs, token incorrecto]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
+  item {amount=null bd=null color=null data=[[twitch, error: canal suspendido o inexistente], [kick, conectado], [youtube, error: x], [tiktok, conectado], [follows, Twitch retiró el permiso de follows: vuelve a conectar Twitch], [streamelements, token incorrecto o caducado], [streamlabs, token incorrecto]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
  > {"type":"workerInfo","data":{}}
  > no es json
   TikTokViewers=-2
  > cierre 4404
   log: Chat de TikTok: sin directo.
-  item {amount=null color=null data=[[twitch, error: canal suspendido o inexistente], [kick, conectado], [youtube, error: x], [tiktok, sin directo], [follows, Twitch retiró el permiso de follows: vuelve a conectar Twitch], [streamelements, token incorrecto o caducado], [streamlabs, token incorrecto]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
+  item {amount=null bd=null color=null data=[[twitch, error: canal suspendido o inexistente], [kick, conectado], [youtube, error: x], [tiktok, sin directo], [follows, Twitch retiró el permiso de follows: vuelve a conectar Twitch], [streamelements, token incorrecto o caducado], [streamlabs, token incorrecto]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
   espera 120000
  > cierre 4005
   espera 120000
@@ -276,13 +276,13 @@
   espera 1000
  > cierre 4429
   log: Chat de TikTok: error: demasiadas conexiones con esta clave de Euler Stream.
-  item {amount=null color=null data=[[twitch, error: canal suspendido o inexistente], [kick, conectado], [youtube, error: x], [tiktok, error: demasiadas conexiones con esta clave de Euler Stream], [follows, Twitch retiró el permiso de follows: vuelve a conectar Twitch], [streamelements, token incorrecto o caducado], [streamlabs, token incorrecto]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
+  item {amount=null bd=null color=null data=[[twitch, error: canal suspendido o inexistente], [kick, conectado], [youtube, error: x], [tiktok, error: demasiadas conexiones con esta clave de Euler Stream], [follows, Twitch retiró el permiso de follows: vuelve a conectar Twitch], [streamelements, token incorrecto o caducado], [streamlabs, token incorrecto]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
   espera 60000
  > cierre 1000
   espera 0
  > cierre 4401
   log: Chat de TikTok: error: la clave de Euler Stream no es válida.
-  item {amount=null color=null data=[[twitch, error: canal suspendido o inexistente], [kick, conectado], [youtube, error: x], [tiktok, error: la clave de Euler Stream no es válida], [follows, Twitch retiró el permiso de follows: vuelve a conectar Twitch], [streamelements, token incorrecto o caducado], [streamlabs, token incorrecto]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
+  item {amount=null bd=null color=null data=[[twitch, error: canal suspendido o inexistente], [kick, conectado], [youtube, error: x], [tiktok, error: la clave de Euler Stream no es válida], [follows, Twitch retiró el permiso de follows: vuelve a conectar Twitch], [streamelements, token incorrecto o caducado], [streamlabs, token incorrecto]] id=null kind=null p=null parts=null roles=null t="status" text=null uid=null user=null}
   espera 0
 == AutoModRules
   apagada → null act=-1

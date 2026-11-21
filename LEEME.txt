@@ -1,7 +1,16 @@
-VORTEXS LIVE 4.12 - delay dinámico y multistream para OBS (by Vortexs)
+VORTEXS LIVE 4.13 - delay dinámico y multistream para OBS (by Vortexs)
 =====================================================================
 
 Abre GUIA.html (doble clic) para ver la guía completa.
+
+Novedades de la 4.13
+- Chat: salen los canjes de puntos del canal de Twitch (quién, qué
+  recompensa y cuántos puntos), también los que no llevan mensaje.
+  Hay que ser el dueño del canal y volver a conectar Twitch una vez
+  (pestaña Título) para dar el permiso nuevo.
+- Chat: emblemas más claros. Con Twitch conectado salen los de verdad
+  (los de suscriptor de tu canal, mod, VIP, bits…); en Kick, YouTube
+  y TikTok, iconos nuevos más grandes con el color de cada uno.
 
 Novedades de la 4.12
 - Overlays: la URL ya no cambia de 8935 a 8936. Al reiniciarse la app
