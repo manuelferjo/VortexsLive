@@ -323,6 +323,38 @@ namespace StreamDelay
 		// canales que puedes usar (tus suscripciones) y los globales. Con el permiso user:read:emotes
 		// salen todos los tuyos; con una conexión antigua, solo los del canal y los globales
 		// (all = false: conviene volver a conectar Twitch).
+		// Emblemas del chat (los globales y los del canal, que pisan a los globales: sub, bits…).
+		// Clave "set/versión" (como en la etiqueta badges del IRC) → { imagen 2x, título }.
+		public Dictionary<string, string[]> ChatBadges(string channelLogin)
+		{
+			Dictionary<string, string[]> map = new Dictionary<string, string[]>();
+			string[] urls = new string[2]
+			{
+				ApiBase + "/chat/badges/global",
+				ApiBase + "/chat/badges?broadcaster_id=" + BroadcasterId(channelLogin)
+			};
+			foreach (string url in urls)
+			{
+				foreach (Dictionary<string, object> set in Http.Arr(Api("GET", url, H(), null), "data"))
+				{
+					string setId = Http.Str(set, "set_id");
+					foreach (Dictionary<string, object> v in Http.Arr(set, "versions"))
+					{
+						string img = Http.Str(v, "image_url_2x");
+						if (img.Length == 0)
+						{
+							img = Http.Str(v, "image_url_1x");
+						}
+						if (img.Length > 0)
+						{
+							map[setId + "/" + Http.Str(v, "id")] = new string[2] { img, Http.Str(v, "title") };
+						}
+					}
+				}
+			}
+			return map;
+		}
+
 		public void ChatEmotes(string channelLogin, List<Dictionary<string, object>> channel, List<Dictionary<string, object>> others, List<Dictionary<string, object>> globals, out bool all)
 		{
 			string chId = BroadcasterId(channelLogin);
