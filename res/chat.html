@@ -86,7 +86,7 @@
   .ev .body { margin-top: 3px; color: var(--muted); }
   .k-sub, .k-resub { --c: var(--violet); } .k-gift, .k-giftbomb, .k-giftmember { --c: #ff6bd6; } .k-raid { --c: #ffb020; }
   .k-bits { --c: #8ab4ff; } .k-follow { --c: var(--green); } .k-superchat, .k-sticker { --c: var(--yellow); } .k-member { --c: var(--green); }
-  .k-kicks { --c: var(--kick); } .k-tiktokgift { --c: var(--tiktok); } .k-other { --c: var(--dim); } .k-tip { --c: var(--yellow); }
+  .k-kicks { --c: var(--kick); } .k-tiktokgift { --c: var(--tiktok); } .k-other { --c: var(--dim); } .k-tip { --c: var(--yellow); } .k-reward { --c: #00c8af; }
 
   #composer { flex: none; border-top: 1px solid var(--border); background: var(--surface); padding: 8px 10px 10px; }
   body.overlay #composer, body.noinput #composer { display: none; }
@@ -342,7 +342,7 @@
     tip: '<svg class="pf" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#ede103"/><path fill="#111" d="M12.9 5v1.6c1.5.3 2.6 1.2 2.8 2.7h-2c-.1-.7-.7-1.1-1.7-1.1-1 0-1.6.4-1.6 1 0 .6.5.9 2 1.2 2.3.5 3.5 1.3 3.5 3.1 0 1.6-1.2 2.6-3 2.9V18h-1.8v-1.6c-1.8-.3-3-1.3-3.1-3h2c.1.8.8 1.3 1.9 1.3 1.1 0 1.7-.4 1.7-1.1 0-.6-.5-.9-2-1.2-2.1-.4-3.4-1.2-3.4-3 0-1.5 1.1-2.5 2.9-2.8V5z"/></svg>'
   };
   var ROLES = { broadcaster: ['◉', 'Streamer'], mod: ['⚔', 'Moderador'], vip: ['◆', 'VIP'], sub: ['★', 'Suscriptor'], member: ['★', 'Miembro'], founder: ['✦', 'Fundador'], verified: ['✓', 'Verificado'], og: ['OG', 'OG'] };
-  var EV_ICON = { sub: '⭐', resub: '⭐', gift: '🎁', giftbomb: '🎁', giftmember: '🎁', raid: '🚀', bits: '💎', follow: '❤️', superchat: '💰', sticker: '💰', member: '🎉', kicks: '💚', tiktokgift: '🎁', tip: '💸', other: '📣' };
+  var EV_ICON = { sub: '⭐', resub: '⭐', gift: '🎁', giftbomb: '🎁', giftmember: '🎁', raid: '🚀', bits: '💎', follow: '❤️', superchat: '💰', sticker: '💰', member: '🎉', kicks: '💚', tiktokgift: '🎁', tip: '💸', reward: '🎯', other: '📣' };
 
   var PL = ['twitch', 'kick', 'youtube', 'tiktok'];
   PL.forEach(function (p) { document.querySelector('#c-' + p + ' .pfi').innerHTML = ICONS[p]; });
@@ -765,6 +765,7 @@
       { t: 'ev', p: 'twitch', user: 'Ana', kind: 'resub', text: 'Ana lleva 6 meses suscrita', parts: [{ x: '¡a por el directo!' }] },
       { t: 'msg', p: 'twitch', user: 'Pepe', color: '#1E90FF', roles: ['vip'], parts: [{ x: 'GG, qué nivel' }] },
       { t: 'msg', p: 'twitch', user: 'Laura', color: '#FF4500', roles: ['mod'], parts: [{ x: 'el horario está en vortexs.es/horario y los clips en https://www.twitch.tv/vortexs_mc/clips' }] },
+      { t: 'ev', p: 'twitch', user: 'Pepe', kind: 'reward', text: 'Pepe ha canjeado Hidrátate', amount: '500 pts' },
       { t: 'ev', p: 'tiktok', user: 'Racha', kind: 'tiktokgift', text: 'Racha ha enviado 5 × Rosa', amount: '💎 5' },
       { t: 'msg', p: 'kick', user: 'Nocturno', color: '#B388FF', roles: [], parts: [{ x: 'el delay está en 30 s, tranquilos' }] }
     ];

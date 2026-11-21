@@ -642,7 +642,7 @@ namespace StreamDelay
 				Painter = delegate(Graphics g, Rectangle r)
 				{
 					ChatHub hub = chatHub;
-					string s = ((!twitch.Connected) ? "Twitch no está conectado. Conéctalo para ver los follows en el chat (tienes que ser el dueño del canal o moderador)." : ((hub == null || hub.FollowsState.Length <= 0) ? ("Cuenta: " + twitch.Account + ". Se activa al encender el chat. Si conectaste Twitch antes de esta versión, vuelve a conectarlo una vez para dar el permiso de follows.") : ("Cuenta: " + twitch.Account + ". Estado: " + hub.FollowsState + ".")));
+					string s = ((!twitch.Connected) ? "Twitch no está conectado. Conéctalo para ver los follows en el chat (tienes que ser el dueño del canal o moderador)." : ((hub == null || hub.FollowsState.Length <= 0) ? ("Cuenta: " + twitch.Account + ". Se activa al encender el chat (follows y canjes de puntos). Si conectaste Twitch antes de la 4.13, vuelve a conectarlo una vez para dar los permisos.") : ("Cuenta: " + twitch.Account + ". Estado: " + hub.FollowsState + ".")));
 					Theme.DrawWrapped(g, s, Theme.Body(8.5f), Theme.Text, r);
 				}
 			};
