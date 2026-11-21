@@ -1,7 +1,12 @@
-VORTEXS LIVE 4.10 - delay dinámico y multistream para OBS (by Vortexs)
+VORTEXS LIVE 4.11 - delay dinámico y multistream para OBS (by Vortexs)
 =====================================================================
 
 Abre GUIA.html (doble clic) para ver la guía completa.
+
+Novedades de la 4.11
+- Chat: los enlaces de los mensajes (https://…, www.… o dominios como
+  vortexs.es) se pueden pulsar y se abren en una pestaña nueva. En el
+  chat en pantalla (OBS) se ven como texto normal.
 
 Novedades de la 4.10
 - Pestaña Clips: arriba se ve cómo guardar un clip (Ctrl+Alt+C, botón
