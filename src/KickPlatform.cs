@@ -106,6 +106,7 @@ namespace StreamDelay
 				try
 				{
 					TcpListener listener = new TcpListener(localaddr, CallbackPort);
+					Sockets.NoInherit(listener);
 					listener.Start();
 					listeners.Add(listener);
 				}

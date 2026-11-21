@@ -60,6 +60,7 @@ namespace StreamDelay
 						// Solo IPv6 en este socket: el de IPv4 va aparte.
 						l.Server.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, true);
 					}
+					Sockets.NoInherit(l);
 					l.Start();
 					listeners.Add(l);
 					Thread worker = new Thread((ThreadStart)delegate
@@ -131,6 +132,7 @@ namespace StreamDelay
 					}
 					continue;
 				}
+				Sockets.NoInherit(client);
 				client.NoDelay = true;
 				RtmpSession s = new RtmpSession(this, client);
 				lock (sessions)
