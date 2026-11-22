@@ -11,6 +11,9 @@ namespace StreamDelay
 	{
 		public string[] Items = new string[0];
 
+		// Iconos (Icons.cs) de cada pestaña, encima del nombre. null = solo texto.
+		public string[] IconNames;
+
 		private int sel;
 
 		private int hot = -1;
@@ -142,7 +145,7 @@ namespace StreamDelay
 			Graphics graphics = e.Graphics;
 			Theme.Quality(graphics);
 			RectangleF r = new RectangleF(0.5f, 0.5f, (float)base.Width - 1.5f, (float)base.Height - 1.5f);
-			using (GraphicsPath path = Theme.Round(r, r.Height / 2f))
+			using (GraphicsPath path = Theme.Round(r, IconNames != null ? Theme.S(14f) : r.Height / 2f))
 			{
 				using (SolidBrush brush = new SolidBrush(Color.FromArgb(230, Theme.Surface)))
 				{
@@ -162,7 +165,7 @@ namespace StreamDelay
 				int b = Math.Min(cells.Length - 1, a + 1);
 				float f = pos - (float)a;
 				RectangleF pill = new RectangleF(cells[a].X + (cells[b].X - cells[a].X) * f, cells[a].Y, cells[a].Width + (cells[b].Width - cells[a].Width) * f, cells[a].Height);
-				using (GraphicsPath path2 = Theme.Round(pill, pill.Height / 2f))
+				using (GraphicsPath path2 = Theme.Round(pill, IconNames != null ? Theme.S(11f) : pill.Height / 2f))
 				{
 					using (SolidBrush brush2 = new SolidBrush(Color.FromArgb(34, Theme.Violet)))
 					{
@@ -180,6 +183,16 @@ namespace StreamDelay
 				// El texto se ilumina según lo cerca que esté el resalte.
 				float near = Math.Max(0f, 1f - Math.Abs(pos - (float)i));
 				Color c = Theme.Mix((i == hot) ? Theme.Text : Theme.Muted, Theme.VioletPale, near);
+				if (IconNames != null && i < IconNames.Length)
+				{
+					float isz = Theme.S(14f);
+					float top = cell.Y + (cell.Height - isz - Theme.S(15f)) / 2f;
+					// El icono de la elegida sube un poco y se pone violeta.
+					float lift = Theme.S(1.5f) * near;
+					Icons.Draw(graphics, IconNames[i], new RectangleF(cell.X + (cell.Width - isz) / 2f, top - lift, isz, isz), Theme.Mix(c, Theme.Violet, near * 0.6f));
+					Theme.DrawText(graphics, Items[i], Theme.BodySemi(7.75f), c, new RectangleF(cell.X, top + isz + Theme.S(1f), cell.Width, Theme.S(14f)), StringAlignment.Center, StringAlignment.Center);
+					continue;
+				}
 				Theme.DrawText(graphics, Items[i], Theme.BodySemi(8.5f), c, cell, StringAlignment.Center, StringAlignment.Center);
 			}
 		}

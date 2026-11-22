@@ -403,6 +403,7 @@ namespace StreamDelay
 				}
 			}
 			LogLater("Encuesta terminada.");
+			Toast(result != null ? result.Replace("📊 ", "") : I18n.Tr("Encuesta terminada."), "info");
 			PollBroadcast();
 			if (result != null)
 			{
@@ -626,6 +627,7 @@ namespace StreamDelay
 				{ "t", "ev" }, { "p", t[0] }, { "kind", t[1] }, { "user", t[2] }, { "text", I18n.Tr(t[3]) }, { "amount", t[4] }, { "test", true }
 			};
 			chatServer.Send(new ChatItem { t = "alert", data = ev });
+			Toast("Alerta de prueba enviada a los overlays de alertas abiertos.", "info");
 		}
 
 		// ---------- Pestaña Overlays: un recuadro por overlay nuevo ----------
@@ -664,9 +666,9 @@ namespace StreamDelay
 			Label(a, "POSICIÓN", 20f, 192f, 180f);
 			string[] apos = new string[3] { "top", "center", "bottom" };
 			Choice(a, new string[3] { "Arriba", "Centro", "Abajo" }, Math.Max(0, Array.IndexOf(apos, alertPos)), 20f, 210f, 90f, delegate(int i) { lock (wgLock) { alertPos = apos[i]; } });
-			VButton test = new VButton { Kind = ButtonKind.Ghost, Text = "Probar una alerta", FontSize = 9f };
+			VButton test = new VButton { Kind = ButtonKind.Ghost, Text = "Probar una alerta", FontSize = 9f, Icon = "play" };
 			Place(a, test, 20f, 250f, 186f, 34f);
-			VButton snd = new VButton { Kind = ButtonKind.Ghost, Text = "🔊 Elegir sonidos", FontSize = 9f };
+			VButton snd = new VButton { Kind = ButtonKind.Ghost, Text = "Elegir sonidos", FontSize = 9f, Icon = "sound" };
 			Place(a, snd, 214f, 250f, 186f, 34f);
 			snd.Click += delegate { AlertSoundsDialog(); };
 			test.Click += delegate { SendTestAlert(); };
@@ -686,7 +688,7 @@ namespace StreamDelay
 			Label(f, "SE QUITA SOLO", 20f, 106f, 180f);
 			int[] fh = new int[4] { 0, 15, 30, 60 };
 			Choice(f, new string[4] { "Nunca", "15 s", "30 s", "1 min" }, Math.Max(0, Array.IndexOf(fh, featHide)), 20f, 124f, 70f, delegate(int i) { lock (wgLock) { featHide = fh[i]; } });
-			VButton unf = new VButton { Kind = ButtonKind.Ghost, Text = "Quitar de la pantalla", FontSize = 9f };
+			VButton unf = new VButton { Kind = ButtonKind.Ghost, Text = "Quitar de la pantalla", FontSize = 9f, Icon = "x" };
 			Place(f, unf, 20f, 166f, 380f, 34f);
 			unf.Click += delegate { Unfeature(); };
 			UrlButtons(f, "destacado", "mensaje destacado", 214f);
@@ -813,7 +815,7 @@ namespace StreamDelay
 			Label(p, "POSICIÓN", 20f, 54f, 180f);
 			string[] ppos = new string[2] { "left", "right" };
 			Choice(p, new string[2] { "Izquierda", "Derecha" }, Math.Max(0, Array.IndexOf(ppos, pollPos)), 20f, 72f, 90f, delegate(int i) { lock (wgLock) { pollPos = ppos[i]; } PollBroadcast(); });
-			VButton openChat = new VButton { Kind = ButtonKind.Ghost, Text = "Abrir el chat conjunto", FontSize = 9f };
+			VButton openChat = new VButton { Kind = ButtonKind.Ghost, Text = "Abrir el chat conjunto", FontSize = 9f, Icon = "chat" };
 			Place(p, openChat, 20f, 112f, 380f, 34f);
 			openChat.Click += delegate
 			{
@@ -998,6 +1000,7 @@ namespace StreamDelay
 			if (raw.TryGetValue("wg_tick_pos", out v) && v.Length > 0) tickPos = v;
 			if (raw.TryGetValue("wg_poll_pos", out v) && v.Length > 0) pollPos = v;
 			if (raw.TryGetValue("ov_pick", out v) && int.TryParse(v, out n) && n >= 0 && n < 8) ovPick = n;
+			if (raw.TryGetValue("win_w", out v) && int.TryParse(v, out n) && n >= 460 && n <= 1180) winWidth = n;
 		}
 
 		private void SaveWidgetsConfig(List<string> lines)
@@ -1027,6 +1030,7 @@ namespace StreamDelay
 				lines.Add("wg_poll_pos=" + pollPos);
 			}
 			lines.Add("ov_pick=" + ovPick);
+			lines.Add("win_w=" + winWidth);
 		}
 	}
 }

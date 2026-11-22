@@ -21,7 +21,7 @@ namespace StreamDelay
 				Accent = true
 			};
 			Place(this, delayCard, 20f, y0, 420f, 256f, PageLive);
-			Box(delayCard, 20f, 12f, 240f, 22f, delegate(Graphics g, Rectangle r)
+			Box(delayCard, 20f, 12f, 200f, 22f, delegate(Graphics g, Rectangle r)
 			{
 				Theme.DrawText(g, "DELAY EN DIRECTO", Theme.Mono(7.5f), Theme.Muted, r, StringAlignment.Near, StringAlignment.Center);
 			});
@@ -30,6 +30,11 @@ namespace StreamDelay
 				Text = "Activado"
 			};
 			Place(delayCard, tgDelay, 268f, 9f, 136f, 28f);
+			// Ventana mini (siempre encima, con lo esencial).
+			VButton miniBtn = new VButton { Kind = ButtonKind.Ghost, Icon = "mini", Text = "", FontSize = 9f };
+			Place(delayCard, miniBtn, 226f, 9f, 34f, 28f);
+			miniBtn.Click += delegate { ShowMini(); };
+			tip.SetToolTip(miniBtn, I18n.Tr("Ventana mini: siempre encima, con el delay, ±5 s y el botón de clip"));
 			tgDelay.CheckedChanged += delegate
 			{
 				if (!loading && tgDelay.Checked != engine.Enabled)
@@ -81,7 +86,8 @@ namespace StreamDelay
 			{
 				Kind = ButtonKind.Primary,
 				Text = "Aplicar delay",
-				FontSize = 10f
+				FontSize = 10f,
+				Icon = "check"
 			};
 			Place(delayCard, btnApply, 20f, 202f, 380f, 38f);
 			btnApply.Click += delegate
@@ -134,10 +140,12 @@ namespace StreamDelay
 			VButton clip = new VButton
 			{
 				Kind = ButtonKind.Ghost,
-				Text = "Clip",
-				FontSize = 10f
+				Text = "",
+				FontSize = 10f,
+				Icon = "film"
 			};
 			Place(this, clip, 260f, buttonsTop, 62f, 46f, PageLive);
+			tip.SetToolTip(clip, I18n.Tr("Guardar un clip (últimos 60 s)"));
 			clip.Click += delegate
 			{
 				if (!ClipsAllowed())
@@ -148,7 +156,7 @@ namespace StreamDelay
 				}
 				if (SaveClip("botón Clip", null))
 				{
-					clip.Text = "…";
+					clip.Icon = "check";
 					clip.Invalidate();
 					System.Windows.Forms.Timer back = new System.Windows.Forms.Timer
 					{
@@ -157,7 +165,7 @@ namespace StreamDelay
 					back.Tick += delegate
 					{
 						back.Dispose();
-						clip.Text = "Clip";
+						clip.Icon = "film";
 						clip.Invalidate();
 					};
 					back.Start();
@@ -213,7 +221,8 @@ namespace StreamDelay
 			bool enabled = engine.Enabled;
 			float left = S(18f);
 			Font font = Theme.Display(40f);
-			string number = seconds.ToString();
+			// La cifra cuenta hasta el valor nuevo en vez de saltar.
+			string number = HeroValue(seconds).ToString();
 			SizeF numberSize = Theme.Measure(g, number, font);
 			RectangleF numberRect = new RectangleF(left, 0f, numberSize.Width, numberSize.Height);
 			if (enabled)

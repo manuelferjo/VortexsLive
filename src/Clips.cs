@@ -56,6 +56,13 @@ namespace StreamDelay
 		// Devuelve false si no se empieza (ya se está guardando o se acaba de guardar uno).
 		private bool SaveClip(string who, Action<bool, string> done)
 		{
+			return SaveClip(who, done, null, null);
+		}
+
+		// plat y user: plataforma y usuario de quien escribió !guardar (null si fue el atajo, el botón
+		// o el Mando). Al guardarse sale un aviso en el chat conjunto.
+		private bool SaveClip(string who, Action<bool, string> done, string plat, string user)
+		{
 			// Los clips son del plan Completo.
 			if (!ClipsAllowed())
 			{
@@ -92,6 +99,8 @@ namespace StreamDelay
 					string file = ToMp4(flv) ?? flv;
 					ok = true;
 					message = "Clip de " + Math.Round(seconds) + " s guardado: " + file;
+					SummaryClip(who);
+					ClipNotice((int)Math.Round(seconds), who, plat, user);
 				}
 				catch (Exception ex)
 				{
@@ -99,6 +108,7 @@ namespace StreamDelay
 				}
 				clipBusy = false;
 				LogLater(message + " (" + who + ")");
+				Toast(ok ? I18n.Tr("Clip guardado") + " · " + who : message, ok ? "clip" : "error");
 				// La pestaña Clips enseña el nuevo.
 				try
 				{
@@ -244,6 +254,30 @@ namespace StreamDelay
 		// La lista solo vale en Twitch y Kick, donde el nombre es único (en YouTube y TikTok cualquiera
 		// podría ponerse el mismo nombre visible).
 		// (!clip no es de Vortexs Live: es para el bot que hace clips de Twitch, como StreamElements.)
+		// Aviso en el chat conjunto (y en el chat en pantalla) de que se ha guardado un clip.
+		private void ClipNotice(int seconds, string who, string plat, string user)
+		{
+			try
+			{
+				if (chatServer == null || !chatServer.Running)
+				{
+					return;
+				}
+				bool byUser = !string.IsNullOrEmpty(user);
+				chatServer.Send(new ChatItem
+				{
+					t = "ev",
+					p = byUser ? plat : "local",
+					kind = "clip",
+					user = byUser ? user : "",
+					text = byUser ? (user + " ha guardado un clip de " + seconds + " s") : ("Clip de " + seconds + " s guardado · " + who)
+				});
+			}
+			catch
+			{
+			}
+		}
+
 		private void ChatClip(ChatItem it, string plat)
 		{
 			bool owner = it.roles != null && Array.IndexOf(it.roles, "broadcaster") >= 0;
@@ -253,7 +287,7 @@ namespace StreamDelay
 			{
 				return;
 			}
-			SaveClip(ClipCommand + " en " + plat + (owner ? "" : (" (" + it.user + ")")), null);
+			SaveClip(ClipCommand + " en " + plat + (owner ? "" : (" (" + it.user + ")")), null, it.p, it.user);
 		}
 
 		private bool ClipUserAllowed(string user)
