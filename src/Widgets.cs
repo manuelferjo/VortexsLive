@@ -1001,6 +1001,8 @@ namespace StreamDelay
 			if (raw.TryGetValue("wg_poll_pos", out v) && v.Length > 0) pollPos = v;
 			if (raw.TryGetValue("ov_pick", out v) && int.TryParse(v, out n) && n >= 0 && n < 8) ovPick = n;
 			if (raw.TryGetValue("win_w", out v) && int.TryParse(v, out n) && n >= 460 && n <= 1180) winWidth = n;
+			if (raw.TryGetValue("wide_w", out v) && int.TryParse(v, out n) && n >= 760 && n <= 1180) wideWidth = n;
+			if (raw.TryGetValue("panel_tip", out v)) panelTipShown = v == "1";
 		}
 
 		private void SaveWidgetsConfig(List<string> lines)
@@ -1031,6 +1033,8 @@ namespace StreamDelay
 			}
 			lines.Add("ov_pick=" + ovPick);
 			lines.Add("win_w=" + winWidth);
+			lines.Add("wide_w=" + wideWidth);
+			lines.Add("panel_tip=" + (panelTipShown ? "1" : "0"));
 		}
 	}
 }
