@@ -86,6 +86,9 @@ namespace StreamDelay
 
 		public Func<string, string[], Dictionary<string, object>> OnSend = (string t, string[] to) => new Dictionary<string, object>();
 
+		// Igual, respondiendo a un mensaje de Twitch (texto, plataformas, id del mensaje).
+		public Func<string, string[], string, Dictionary<string, object>> OnSendReply;
+
 		// Emotes para el botón 😊 de la página del chat: { "groups": [{ "name", "items": [{ "n", "u" }] }], "hint" }.
 		public Func<Dictionary<string, object>> OnEmotes = () => new Dictionary<string, object>();
 
@@ -565,7 +568,9 @@ namespace StreamDelay
 						Respond(s, "400 Bad Request", "text/plain", "");
 						return;
 					}
-					o = OnSend(message, targets.ToArray());
+					// "reply": id del mensaje de Twitch al que se responde (opcional).
+					string reply = J.S(body, "reply");
+					o = (reply.Length > 0 && OnSendReply != null) ? OnSendReply(message, targets.ToArray(), reply) : OnSend(message, targets.ToArray());
 				}
 			}
 			catch (Exception ex)

@@ -242,6 +242,7 @@ namespace StreamDelay
 					};
 					chatServer.OnInfo = ChatSendInfo;
 					chatServer.OnSend = ChatSendAll;
+					chatServer.OnSendReply = ChatSendAll;
 					chatServer.OnDelayState = DelayStateJson;
 					chatServer.OnViewersState = ViewersStateJson;
 					WireServer();
@@ -271,6 +272,7 @@ namespace StreamDelay
 					};
 					chatServer.OnInfo = ChatSendInfo;
 					chatServer.OnSend = ChatSendAll;
+					chatServer.OnSendReply = ChatSendAll;
 					chatServer.OnDelayState = DelayStateJson;
 					chatServer.OnViewersState = ViewersStateJson;
 					WireServer();
@@ -303,6 +305,12 @@ namespace StreamDelay
 		// y devuelve el resultado de cada una ("ok" o el error).
 		private Dictionary<string, object> ChatSendAll(string text, string[] to)
 		{
+			return ChatSendAll(text, to, null);
+		}
+
+		// twitchReply: id del mensaje de Twitch al que se responde (botón "Responder" del chat).
+		private Dictionary<string, object> ChatSendAll(string text, string[] to, string twitchReply)
+		{
 			string twCh = "";
 			string kcCh = "";
 			Invoke((Action)delegate
@@ -317,7 +325,7 @@ namespace StreamDelay
 				string pid = target;
 				Action send = ((pid == "twitch") ? ((Action)delegate
 				{
-					twitch.SendChat(twCh, text);
+					twitch.SendChat(twCh, text, twitchReply);
 				}) : ((pid == "kick") ? ((Action)delegate
 				{
 					kick.SendChat(kcCh, text);

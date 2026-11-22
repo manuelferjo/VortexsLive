@@ -152,6 +152,20 @@
   .modbar .mres.ok { color: var(--green); } .modbar .mres.bad { color: #ff8a95; }
   .modbar button.undo { border-color: var(--yellow); color: var(--yellow); }
   .modbar .sep { width: 1px; align-self: stretch; background: var(--border); margin: 0 2px; }
+  /* Ficha del usuario (botón Ficha) */
+  .ucard { flex-basis: 100%; margin-top: 4px; padding: 9px 11px; border: 1px solid var(--border); border-radius: 10px; background: var(--elev); font-size: .85em; }
+  .ucard .uh { display: flex; align-items: center; gap: 2px; font-weight: 700; margin-bottom: 6px; }
+  .ucard .ur { color: var(--muted); margin: 2px 0; } .ucard .ur b { color: var(--text); font-weight: 600; }
+  .ucard .ur.warn b { color: #ff8a95; }
+  .ucard .ul { margin: 6px 0 0; padding: 0; list-style: none; border-top: 1px solid var(--border); }
+  .ucard .ul li { padding: 3px 0; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ucard .ul li span { color: var(--dim); margin-right: 6px; font-variant-numeric: tabular-nums; }
+  .ucard .un { color: var(--dim); font-size: .9em; margin-top: 5px; }
+  #reply { display: flex; align-items: center; gap: 6px; font-size: .8em; color: var(--muted); margin-bottom: 6px; }
+  #reply[hidden] { display: none; }
+  #reply b { color: var(--violet); }
+  #reply button { font: inherit; border: 0; background: none; color: var(--dim); cursor: pointer; padding: 0 4px; }
+  #reply button:hover { color: var(--text); }
 
   /* Panel de moderación (botón 🛡 de arriba): modos del chat de Twitch y borrar el chat. */
   #modbtn { margin-left: auto; }
@@ -196,6 +210,7 @@
 </div>
 <div id="composer">
   <div id="targets"><span>Enviar a:</span><span id="tgts"></span><span id="count"></span></div>
+  <div id="reply" hidden></div>
   <div class="row">
     <input id="msg" type="text" maxlength="500" placeholder="Escribe en el chat de todas tus plataformas…" autocomplete="off">
     <button id="emo-btn" title="Emotes">😊</button>
@@ -261,6 +276,16 @@
     '🔇 No ver más': '🔇 Never show',
     '↩ Deshacer': '↩ Undo',
     'Un momento…': 'One moment…',
+    '↩ Responder': '↩ Reply', '📋 Copiar': '📋 Copy', '👤 Ficha': '👤 Profile', '🧹 Borrar todos': '🧹 Delete all',
+    '💎 Dar VIP': '💎 Give VIP', '💎 Quitar VIP': '💎 Remove VIP', '⚔ Hacer mod': '⚔ Make mod', '⚔ Quitar mod': '⚔ Remove mod',
+    'Copiado': 'Copied', 'No se pudo copiar': 'Could not copy', 'Respondiendo a ': 'Replying to ', 'Quitar la respuesta': 'Cancel reply',
+    '¿Seguro? Borrar ': 'Sure? Delete ', ' mensajes': ' messages', ' mensaje': ' message', '¿Seguro?': 'Sure?',
+    'No hay mensajes suyos con los datos para borrarlos': 'None of their messages can be deleted',
+    'Cuenta creada': 'Account created', 'Te sigue desde': 'Following since', 'No te sigue': 'Not following you',
+    'Mensajes en este chat': 'Messages in this chat', 'Cuenta nueva': 'New account',
+    'La antigüedad y el follow solo se pueden ver en Twitch con tu cuenta conectada.': 'Account age and follow date are only shown for Twitch with your account connected.',
+    'Copiar el mensaje': 'Copy the message', 'Responder a este mensaje': 'Reply to this message', 'Ver quién es': 'See who this is',
+    'Borrar todos sus mensajes del chat, sin expulsarle': 'Delete all their messages in the chat, without a timeout',
     'Ocultar este mensaje solo en tu chat y en pantalla': 'Hide this message only in your chat and on screen',
     'No volver a enseñar a esta persona (Chat → Moderación para quitarla de la lista)': 'Never show this person again (Chat → Moderation to remove them from the list)',
     'Leyendo los modos del chat…': 'Reading the chat modes…'
@@ -440,7 +465,7 @@
     if (m.id) el.dataset.id = m.p + ':' + m.id;
     if (m.uid) el.dataset.uid = m.p + ':' + m.uid;
     // TikTok no deja moderar desde otros programas: sus mensajes solo se pueden ocultar.
-    if (m.id || m.uid || m.user) { el.dataset.mod = '1'; el._m = { p: m.p, id: m.id || '', uid: m.uid || '', user: m.user || '', text: plain(m.parts) }; }
+    if (m.id || m.uid || m.user) { el.dataset.mod = '1'; el._m = { p: m.p, id: m.id || '', uid: m.uid || '', user: m.user || '', text: plain(m.parts), roles: (m.roles || []).slice(), at: Date.now() }; }
     el.innerHTML = ICONS[m.p] + rolesHtml(m.roles, m.bd) + '<span class="name" style="color:' + nameColor(m.color, m.user) + '">' + esc(m.user) + '</span>: ' + partsHtml(m.parts);
     add(el);
   }
@@ -549,7 +574,10 @@
     if (!text || !to.length || text.length > limit()) return;
     sendBtn.disabled = true; input.disabled = true;
     result.textContent = T('Enviando…');
-    fetch('/api/send', { method: 'POST', headers: { 'X-SD-Secret': SECRET, 'Content-Type': 'application/json' }, body: JSON.stringify({ text: text, to: to }) })
+    var sendBody = { text: text, to: to };
+    // Respuesta en Twitch: solo si sigue empezando por @usuario y va también a Twitch.
+    if (replyTo && to.indexOf('twitch') >= 0 && text.indexOf('@' + replyTo.user) === 0) sendBody.reply = replyTo.id;
+    fetch('/api/send', { method: 'POST', headers: { 'X-SD-Secret': SECRET, 'Content-Type': 'application/json' }, body: JSON.stringify(sendBody) })
       .then(function (r) { return r.json(); })
       .then(function (res) {
         var anyOk = false;
@@ -558,7 +586,7 @@
           if (v === 'ok') { anyOk = true; return '<span class="ok">✓ ' + NAMES[p] + '</span>'; }
           return '<span class="bad">✗ ' + NAMES[p] + ': ' + esc(v || res.error || 'error') + '</span>';
         }).join(' &nbsp; ');
-        if (anyOk) input.value = '';
+        if (anyOk) { input.value = ''; replyTo = null; renderReply(); }
       })
       .catch(function () { result.innerHTML = '<span class="bad">' + T('No se pudo contactar con Vortexs Live.') + '</span>'; })
       .then(function () { input.disabled = false; input.focus(); updateCount(); });
@@ -668,17 +696,101 @@
   // ---------- Moderar: pulsa un mensaje ----------
   if (q.get('moderar') === '0') document.body.classList.add('nomod');
   // En la plataforma: borrar, expulsar un rato o banear (con "Deshacer"). Solo aquí: ocultar el mensaje o a la persona.
-  var ACTS = [['del', T('🗑 Borrar')], ['t60', '⏱ 1 min'], ['t600', '⏱ 10 min'], ['t3600', '⏱ 1 h'], ['t86400', '⏱ 24 h'], ['ban', '⛔ Ban'], ['-'], ['hide', T('🙈 Ocultar')], ['ignore', T('🔇 No ver más')]];
-  var LOCAL = { hide: 1, ignore: 1 };
+  var ACTS = [['reply', T('↩ Responder')], ['copy', T('📋 Copiar')], ['info', T('👤 Ficha')], ['-'],
+    ['del', T('🗑 Borrar')], ['purge', T('🧹 Borrar todos')], ['t60', '⏱ 1 min'], ['t600', '⏱ 10 min'], ['t3600', '⏱ 1 h'], ['t86400', '⏱ 24 h'], ['ban', '⛔ Ban'], ['-'],
+    ['vip', ''], ['mod', ''], ['-'],
+    ['hide', T('🙈 Ocultar')], ['ignore', T('🔇 No ver más')]];
+  // Lo que se hace aquí mismo, sin pedir nada a la plataforma (vale también para TikTok).
+  var LOCAL = { hide: 1, ignore: 1, copy: 1, info: 1, reply: 1 };
+  function actShown(a, m) {
+    if (a === 'reply') return m.p !== 'tiktok';          // en TikTok no se puede escribir
+    if (a === 'vip' || a === 'mod') return m.p === 'twitch';
+    if (m.p === 'tiktok') return !!LOCAL[a];
+    return true;
+  }
+  function hasRole(m, r) { return (m.roles || []).indexOf(r) >= 0; }
+  function roleLabel(a, m) {
+    if (a === 'vip') return hasRole(m, 'vip') ? T('💎 Quitar VIP') : T('💎 Dar VIP');
+    return hasRole(m, 'mod') ? T('⚔ Quitar mod') : T('⚔ Hacer mod');
+  }
+  // Los mensajes de esa persona que hay en el chat (para la ficha y "Borrar todos").
+  function userMsgs(m) {
+    if (!m.uid) return [];
+    var sel = '.msg[data-uid="' + (window.CSS && CSS.escape ? CSS.escape(m.p + ':' + m.uid) : (m.p + ':' + m.uid)) + '"]';
+    return Array.prototype.map.call(list.querySelectorAll(sel), function (x) { return x._m; }).filter(Boolean);
+  }
+  // Primero la forma clásica (funciona también en los paneles de OBS); si no, la del navegador.
+  function copyText(s) {
+    var done = false, t = document.createElement('textarea');
+    t.value = s; t.setAttribute('readonly', ''); t.style.position = 'fixed'; t.style.top = '0'; t.style.opacity = '0';
+    document.body.appendChild(t); t.select();
+    try { done = document.execCommand('copy'); } catch (x) {}
+    t.remove();
+    if (done) return Promise.resolve();
+    if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(s);
+    return Promise.reject();
+  }
+  // ---- Responder: @usuario en la caja (y en Twitch, respuesta enlazada a su mensaje) ----
+  var replyTo = null, replyBox = document.getElementById('reply');
+  function renderReply() {
+    if (!replyTo) { replyBox.hidden = true; replyBox.innerHTML = ''; return; }
+    replyBox.hidden = false;
+    replyBox.innerHTML = '<span>↩ ' + esc(T('Respondiendo a ')) + '<b>@' + esc(replyTo.user) + '</b></span><button type="button" title="' + esc(T('Quitar la respuesta')) + '">✕</button>';
+    replyBox.querySelector('button').onclick = function () { replyTo = null; renderReply(); input.focus(); };
+  }
+  function startReply(m) {
+    var at = '@' + m.user + ' ';
+    if (input.value.indexOf(at) !== 0) input.value = at + input.value.replace(/^@\S+\s*/, '');
+    replyTo = (m.p === 'twitch' && m.id) ? { id: m.id, user: m.user } : null;
+    renderReply();
+    input.focus();
+    try { input.setSelectionRange(input.value.length, input.value.length); } catch (x) {}
+    updateCount();
+  }
+  // ---- Ficha ----
+  function since(iso) {
+    var d = new Date(iso); if (isNaN(d)) return '';
+    var days = Math.floor((Date.now() - d.getTime()) / 864e5), en = LANG === 'en', n, u;
+    if (days < 1) return en ? 'today' : 'hoy';
+    if (days >= 365) { n = Math.floor(days / 365); u = en ? (n > 1 ? 'years' : 'year') : (n > 1 ? 'años' : 'año'); }
+    else if (days >= 30) { n = Math.floor(days / 30); u = en ? (n > 1 ? 'months' : 'month') : (n > 1 ? 'meses' : 'mes'); }
+    else { n = days; u = en ? (n > 1 ? 'days' : 'day') : (n > 1 ? 'días' : 'día'); }
+    return en ? n + ' ' + u + ' ago' : 'hace ' + n + ' ' + u;
+  }
+  function day(iso) {
+    var d = new Date(iso);
+    return isNaN(d) ? '' : d.toLocaleDateString(LANG === 'en' ? 'en-GB' : 'es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+  function hhmm(t) { var d = new Date(t); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); }
+  function showCard(el, bar, info) {
+    var m = el._m, old = bar.querySelector('.ucard'); if (old) old.remove();
+    var c = document.createElement('div'); c.className = 'ucard';
+    var msgs = userMsgs(m), h = '<div class="uh">' + ICONS[m.p] + rolesHtml(m.roles) + '<span>' + esc(m.user) + '</span></div>';
+    if (info && info.created) {
+      var young = (Date.now() - new Date(info.created).getTime()) < 7 * 864e5;
+      h += '<div class="ur' + (young ? ' warn' : '') + '">' + esc(T('Cuenta creada')) + ': <b>' + esc(day(info.created)) + '</b> · ' + esc(since(info.created)) + (young ? ' · <b>' + esc(T('Cuenta nueva')) + '</b>' : '') + '</div>';
+    }
+    if (info && typeof info.followed === 'string') {
+      h += '<div class="ur">' + (info.followed ? esc(T('Te sigue desde')) + ': <b>' + esc(day(info.followed)) + '</b> · ' + esc(since(info.followed)) : '<b>' + esc(T('No te sigue')) + '</b>') + '</div>';
+    }
+    h += '<div class="ur">' + esc(T('Mensajes en este chat')) + ': <b>' + (msgs.length || (m.uid ? 0 : 1)) + '</b></div>';
+    var last = (msgs.length ? msgs : [m]).slice(-5);
+    h += '<ul class="ul">' + last.map(function (x) { return '<li><span>' + hhmm(x.at || Date.now()) + '</span>' + esc(x.text) + '</li>'; }).join('') + '</ul>';
+    if (m.p !== 'twitch' || !info || (!info.created && typeof info.followed !== 'string')) h += '<div class="un">' + esc(T('La antigüedad y el follow solo se pueden ver en Twitch con tu cuenta conectada.')) + '</div>';
+    c.innerHTML = h;
+    bar.appendChild(c);
+  }
   function closeBars(except) {
     Array.prototype.forEach.call(list.querySelectorAll('.modbar'), function (b) { if (b.parentNode !== except) { b.parentNode.classList.remove('modsel'); b.remove(); } });
   }
-  function doMod(el, a, bar, btn) {
+  function doMod(el, a, bar, btn, extra, after) {
     var m = el._m, res = bar.querySelector('.mres');
     Array.prototype.forEach.call(bar.querySelectorAll('button'), function (b) { b.disabled = true; });
     res.className = 'mres'; res.textContent = T('Un momento…');
+    var body = { p: m.p, a: a, id: m.id, uid: m.uid, user: m.user, text: m.text };
+    if (extra) for (var k in extra) body[k] = extra[k];
     fetch('/api/mod', { method: 'POST', headers: { 'X-SD-Secret': SECRET, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ p: m.p, a: a, id: m.id, uid: m.uid, user: m.user, text: m.text }) })
+      body: JSON.stringify(body) })
       .then(function (r) { return r.json(); })
       .then(function (r) {
         if (r.ok && r.undo) {
@@ -690,7 +802,7 @@
           bar.insertBefore(u, res);
           setTimeout(function () { if (u.isConnected) closeBars(null); }, 15000);
         }
-        else if (r.ok) { res.className = 'mres ok'; res.textContent = '✓ ' + (r.msg || T('Hecho')); setTimeout(function () { closeBars(null); }, 1500); }
+        else if (r.ok) { if (after) after(r); res.className = 'mres ok'; res.textContent = '✓ ' + (r.msg || T('Hecho')); setTimeout(function () { closeBars(null); }, 1500); }
         else { res.className = 'mres bad'; res.textContent = '✗ ' + (r.error || 'error'); Array.prototype.forEach.call(bar.querySelectorAll('button'), function (b) { b.disabled = false; }); }
       })
       .catch(function () { res.className = 'mres bad'; res.textContent = T('✗ No se pudo contactar con Vortexs Live'); });
@@ -707,24 +819,67 @@
     if (open) return;
     var bar = document.createElement('div');
     bar.className = 'modbar';
-    ACTS.forEach(function (x) {
-      // TikTok: solo lo de este chat (ocultar).
-      if (el._m.p === 'tiktok' && !LOCAL[x[0]]) return;
-      if (x[0] === '-') { if (el._m.p !== 'tiktok') { var sep = document.createElement('span'); sep.className = 'sep'; bar.appendChild(sep); } return; }
+    var m = el._m, shown = ACTS.filter(function (x) { return x[0] === '-' || actShown(x[0], m); });
+    // Sin separadores al principio, al final ni dos seguidos.
+    shown = shown.filter(function (x, i) { return x[0] !== '-' || (i > 0 && i < shown.length - 1 && shown[i - 1][0] !== '-'); });
+    shown.forEach(function (x) {
+      var a = x[0];
+      if (a === '-') { var sep = document.createElement('span'); sep.className = 'sep'; bar.appendChild(sep); return; }
       var b = document.createElement('button');
-      b.textContent = x[1];
-      if (x[0] === 'ban') b.className = 'ban';
-      if (x[0] === 'hide') b.title = T('Ocultar este mensaje solo en tu chat y en pantalla');
-      if (x[0] === 'ignore') b.title = T('No volver a enseñar a esta persona (Chat → Moderación para quitarla de la lista)');
-      if (x[0] === 'del' && !el._m.id && el._m.p !== 'youtube') b.disabled = true;
-      if (!LOCAL[x[0]] && x[0] !== 'del' && !el._m.uid) b.disabled = true;
+      var label = (a === 'vip' || a === 'mod') ? roleLabel(a, m) : x[1];
+      b.textContent = label;
+      if (a === 'ban') b.className = 'ban';
+      if (a === 'hide') b.title = T('Ocultar este mensaje solo en tu chat y en pantalla');
+      if (a === 'ignore') b.title = T('No volver a enseñar a esta persona (Chat → Moderación para quitarla de la lista)');
+      if (a === 'copy') b.title = T('Copiar el mensaje');
+      if (a === 'reply') b.title = T('Responder a este mensaje');
+      if (a === 'info') b.title = T('Ver quién es');
+      if (a === 'purge') b.title = T('Borrar todos sus mensajes del chat, sin expulsarle');
+      if (a === 'del' && !m.id && m.p !== 'youtube') b.disabled = true;
+      if (!LOCAL[a] && a !== 'del' && !m.uid) b.disabled = true;
+      function sure(text) {
+        if (b.classList.contains('sure')) return true;
+        b.classList.add('sure'); b.textContent = text;
+        setTimeout(function () { if (b.isConnected) { b.classList.remove('sure'); b.textContent = label; } }, 3500);
+        return false;
+      }
       b.onclick = function () {
-        if (x[0] === 'ban' && !b.classList.contains('sure')) {
-          b.classList.add('sure'); b.textContent = T('¿Seguro? Banear a ') + el._m.user;
-          setTimeout(function () { if (b.isConnected) { b.classList.remove('sure'); b.textContent = x[1]; } }, 3500);
+        var res = bar.querySelector('.mres');
+        if (a === 'reply') { closeBars(null); startReply(m); return; }
+        if (a === 'copy') {
+          copyText(m.text).then(function () { res.className = 'mres ok'; res.textContent = '✓ ' + T('Copiado'); setTimeout(function () { closeBars(null); }, 1000); },
+            function () { res.className = 'mres bad'; res.textContent = '✗ ' + T('No se pudo copiar'); });
           return;
         }
-        doMod(el, x[0], bar, b);
+        if (a === 'info') {
+          if (m.p !== 'twitch' || !m.uid) { showCard(el, bar, null); return; }
+          res.className = 'mres'; res.textContent = T('Un momento…');
+          fetch('/api/mod', { method: 'POST', headers: { 'X-SD-Secret': SECRET, 'Content-Type': 'application/json' }, body: JSON.stringify({ p: m.p, a: 'info', uid: m.uid, user: m.user }) })
+            .then(function (r) { return r.json(); }).catch(function () { return null; })
+            .then(function (r) { res.textContent = '@' + m.user; showCard(el, bar, r); });
+          return;
+        }
+        if (a === 'ban' && !sure(T('¿Seguro? Banear a ') + m.user)) return;
+        if (a === 'purge') {
+          var items = userMsgs(m).filter(function (x) { return x.id || m.p === 'youtube'; }).map(function (x) { return { id: x.id, text: x.text }; });
+          if (!items.length) { res.className = 'mres bad'; res.textContent = '✗ ' + T('No hay mensajes suyos con los datos para borrarlos'); return; }
+          if (!sure(T('¿Seguro? Borrar ') + items.length + (items.length > 1 ? T(' mensajes') : T(' mensaje')))) return;
+          doMod(el, 'purge', bar, b, { items: items });
+          return;
+        }
+        if (a === 'vip' || a === 'mod') {
+          var has = hasRole(m, a), act = a + (has ? '-' : '+');
+          if (a === 'mod' && !sure(T('¿Seguro?') + ' ' + label)) return;
+          doMod(el, act, bar, b, null, function () {
+            // Se apunta en todos sus mensajes, para que el botón cambie la próxima vez.
+            userMsgs(m).concat([m]).forEach(function (x) {
+              x.roles = (x.roles || []).filter(function (r) { return r !== a; });
+              if (!has) x.roles.push(a);
+            });
+          });
+          return;
+        }
+        doMod(el, a, bar, b);
       };
       bar.appendChild(b);
     });
