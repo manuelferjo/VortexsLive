@@ -144,12 +144,13 @@
   .msg img, .msg svg { -webkit-user-drag: none; user-drag: none; }
   .msg.swiping { background: rgba(255,120,60,.07); transition: none; }
   .msg.swipe-back { transition: transform .18s ease-out; }
-  .tswipe { position: absolute; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 6px; padding: 2px 8px 2px 7px; border-radius: 999px;
-    background: var(--elev); border: 1px solid var(--border); font-size: .74em; font-weight: 700; white-space: nowrap; z-index: 3; pointer-events: none; font-variant-numeric: tabular-nums; }
-  .tswipe .tb { width: 44px; height: 4px; border-radius: 2px; background: rgba(255,255,255,.12); overflow: hidden; }
-  .tswipe .tb i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #ffb020, #ff4655); }
-  .tswipe.ok { color: var(--green); border-color: rgba(64,255,128,.35); } .tswipe.bad { color: #ff8a95; border-color: rgba(255,70,85,.45); }
-  .tswipe button { pointer-events: auto; font: inherit; border: 0; background: none; color: var(--yellow); cursor: pointer; padding: 0 0 0 4px; }
+  .tswipe { position: absolute; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 5px; height: 1.5em; padding: 0 7px; border-radius: 6px;
+    background: rgba(255,70,85,.18); color: #ffb8be; font-family: 'JetBrains Mono', ui-monospace, Consolas, monospace; font-size: .8em; font-weight: 700;
+    white-space: nowrap; z-index: 3; pointer-events: none; font-variant-numeric: tabular-nums; letter-spacing: .02em; }
+  .tswipe svg { width: 1.1em; height: 1.1em; fill: currentColor; flex: none; }
+  .tswipe.cancel { background: rgba(255,255,255,.07); color: var(--dim); }
+  .tswipe.ok { background: rgba(64,255,128,.14); color: var(--green); } .tswipe.bad { background: rgba(255,70,85,.2); color: #ff8a95; font-family: inherit; }
+  .tswipe button { pointer-events: auto; font: inherit; border: 0; background: none; color: var(--yellow); cursor: pointer; padding: 0 0 0 3px; }
   .tswipe.fade { opacity: 0; transition: opacity .4s; }
   /* Enlaces del chat: se abren en una pestaña nueva (en pantalla, como texto normal). */
   a.lnk { color: var(--violet); text-decoration: underline; text-decoration-color: rgba(192,154,253,.45); text-underline-offset: 2px; word-break: break-all; }
@@ -901,14 +902,33 @@
     if (!c) { c = document.createElement('div'); c.className = 'tswipe'; el.appendChild(c); }
     c.className = 'tswipe'; return c;
   }
+  // El tiempo sube seguido (no a saltos): de 10 s a 24 h, más fino al principio.
+  function swipeSecs(dx, span) {
+    if (dx < 14) return 0;
+    var f = Math.min(1, (dx - 14) / Math.max(40, span - 14));
+    if (f >= 1) return 86400;
+    var v = 10 * Math.pow(8640, f);
+    var step = v < 60 ? 1 : v < 300 ? 5 : v < 3600 ? 15 : v < 21600 ? 60 : 300;
+    return Math.max(10, Math.min(86400, Math.round(v / step) * step));
+  }
+  function clock(t) {
+    var h = Math.floor(t / 3600), m = Math.floor(t % 3600 / 60), x = t % 60;
+    function p2(n) { return (n < 10 ? '0' : '') + n; }
+    return h ? h + ':' + p2(m) + ':' + p2(x) : p2(m) + ':' + p2(x);
+  }
+  var SW_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 1h6v2H9zM12 4a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm0 2a7 7 0 1 1 0 14 7 7 0 0 1 0-14zm-1 2v5.4l3.8 2.3 1-1.7-2.8-1.7V8z"/></svg>';
   function swipeShow(dx) {
-    var s = swipe, n = TSTEPS.length, f = Math.max(0, Math.min(1, dx / s.span));
-    var i = dx < 14 ? -1 : Math.min(n - 1, Math.floor(f * n));
-    s.val = i < 0 ? 0 : TSTEPS[i];
-    var shift = Math.max(0, Math.min(dx, 118));
+    var s = swipe;
+    s.val = swipeSecs(dx, s.span);
+    var shift = Math.max(0, Math.min(dx, 104));
     s.el.style.transform = 'translateX(' + shift + 'px)';
-    s.chip.style.left = (2 - shift) + 'px';   // la barrita se queda quieta a la izquierda
-    s.chip.innerHTML = '<span>' + (s.val ? '⏱ ' + tLabel(s.val) : '✕ ' + esc(T('cancelar'))) + '</span><span class="tb"><i style="width:' + (i < 0 ? 0 : (i + 1) / n * 100) + '%"></i></span>';
+    s.chip.style.left = (2 - shift) + 'px';   // la barra se queda quieta a la izquierda
+    if (!s.val) { s.chip.className = 'tswipe cancel'; s.chip.style.background = ''; s.chip.innerHTML = '<span>✕</span>'; return; }
+    s.chip.className = 'tswipe';
+    // Cuanto más tiempo, más roja.
+    var k = Math.log(s.val / 10) / Math.log(8640);
+    s.chip.style.background = 'rgba(255,70,85,' + (0.14 + 0.36 * k).toFixed(2) + ')';
+    s.chip.innerHTML = '<span>' + clock(s.val) + '</span>' + SW_ICON;
   }
   function swipeEnd(apply) {
     var s = swipe; if (!s) return;
@@ -927,14 +947,14 @@
   function chipDone(chip, ms) { setTimeout(function () { chip.classList.add('fade'); setTimeout(function () { chip.remove(); }, 450); }, ms); }
   function quickTimeout(el, chip, secs) {
     var m = el._m;
-    chip.innerHTML = '<span>' + esc(T('Un momento…')) + '</span>';
+    chip.innerHTML = '<span>' + clock(secs) + ' …</span>';
     fetch('/api/mod', { method: 'POST', headers: { 'X-SD-Secret': SECRET, 'Content-Type': 'application/json' },
       body: JSON.stringify({ p: m.p, a: 't' + secs, id: m.id, uid: m.uid, user: m.user, text: m.text }) })
       .then(function (r) { return r.json(); })
       .then(function (r) {
         if (!r || !r.ok) { chip.className = 'tswipe bad'; chip.innerHTML = '<span>✗ ' + esc((r && r.error) || 'error') + '</span>'; chipDone(chip, 4000); return; }
-        chip.className = 'tswipe ok';
-        chip.innerHTML = '<span>✓ ⏱ ' + tLabel(secs) + '</span><button type="button" title="' + esc(T('Deshacer')) + '">↩</button>';
+        chip.className = 'tswipe ok'; chip.style.background = '';
+        chip.innerHTML = '<span>✓ ' + clock(secs) + '</span><button type="button" title="' + esc(T('Deshacer')) + '">↩</button>';
         var undo = chip.querySelector('button');
         undo.onclick = function (e) {
           e.stopPropagation(); undo.remove(); chip.className = 'tswipe'; chip.innerHTML = '<span>' + esc(T('Un momento…')) + '</span>';
