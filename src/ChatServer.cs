@@ -52,6 +52,16 @@ namespace StreamDelay
 		// Código común de los overlays para aplicar el estilo (res\overlay-style.js).
 		private string styleJs;
 
+		// Overlays de alertas, mensaje destacado, objetivo, últimos eventos y encuesta (res\widgets.html).
+		private string widgetsHtml;
+
+		// Último estado de lo que se ve en pantalla (mensaje destacado, objetivo, encuesta): lo recibe
+		// también quien se conecta después.
+		private readonly Dictionary<string, string> sticky = new Dictionary<string, string>();
+
+		// Ajustes y estado de esos overlays (/widgets.json).
+		public Func<string> OnWidgets = () => "{}";
+
 		// Mando a distancia (móvil, Stream Deck, panel de OBS): acción + parámetros -> JSON de estado.
 		// Exige la clave del mando (?k=...) en cada petición.
 		public Func<string, Dictionary<string, string>, string> OnRemote = (string a, Dictionary<string, string> q) => "{}";
@@ -177,6 +187,17 @@ namespace StreamDelay
 					styleJs = Encoding.UTF8.GetString(memoryStream5.ToArray());
 				}
 			}
+			using (Stream stream6 = typeof(ChatServer).Assembly.GetManifestResourceStream("StreamDelay.widgets.html"))
+			{
+				using (MemoryStream memoryStream6 = new MemoryStream())
+				{
+					if (stream6 != null)
+					{
+						stream6.CopyTo(memoryStream6);
+					}
+					widgetsHtml = Encoding.UTF8.GetString(memoryStream6.ToArray());
+				}
+			}
 			listener = new TcpListener(Lan ? IPAddress.Any : IPAddress.Loopback, port);
 			Sockets.NoInherit(listener);   // si ffmpeg lo heredara, el 8935 seguiría ocupado al reabrir
 			listener.Start();
@@ -243,6 +264,14 @@ namespace StreamDelay
 				{
 					// Chat borrado: las páginas que se abran después tampoco ven lo anterior.
 					recent.Clear();
+				}
+				else if (it.t == "feature" || it.t == "goal" || it.t == "poll")
+				{
+					sticky[it.t] = text;
+				}
+				else if (it.t == "alert")
+				{
+					// Alerta de prueba: solo para quien está conectado ahora.
 				}
 				else
 				{
@@ -403,6 +432,12 @@ namespace StreamDelay
 						{
 							backlog.Append("data: ").Append(item).Append("\n\n");
 						}
+						foreach (string item in sticky.Values)
+						{
+							backlog.Append("data: ").Append(item).Append("\n\n");
+						}
+						// A partir de aquí, lo que llega es nuevo (las alertas no repiten lo de antes).
+						backlog.Append("data: {\"t\":\"live\"}\n\n");
 						byte[] bytes = Encoding.UTF8.GetBytes(backlog.ToString());
 						stream.Write(bytes, 0, bytes.Length);
 						stream.Flush();
@@ -419,6 +454,27 @@ namespace StreamDelay
 				case "/espectadores":
 					Respond(stream, "200 OK", "text/html; charset=utf-8", viewersHtml.Replace("__SD_LANG__", I18n.Lang));
 					break;
+				case "/alertas":
+				case "/destacado":
+				case "/objetivo":
+				case "/eventos":
+				case "/encuesta":
+					Respond(stream, "200 OK", "text/html; charset=utf-8", (widgetsHtml ?? "").Replace("__SD_LANG__", I18n.Lang));
+					break;
+				case "/widgets.json":
+				{
+					string ws;
+					try
+					{
+						ws = OnWidgets();
+					}
+					catch
+					{
+						ws = "{}";
+					}
+					Respond(stream, "200 OK", "application/json; charset=utf-8", ws);
+					break;
+				}
 				case "/viewers.json":
 				{
 					string vs;

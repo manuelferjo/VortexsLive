@@ -189,7 +189,33 @@
   #reply button:hover { color: var(--text); }
 
   /* Panel de moderación (botón 🛡 de arriba): modos del chat de Twitch y borrar el chat. */
-  #modbtn { margin-left: auto; }
+  .hsp { flex: 1; }
+  #pollbtn, #modbtn { margin-left: 6px; }
+  #featchip { color: var(--yellow); border-color: rgba(255,209,102,.35); }
+  #featchip[hidden] { display: none; }
+  body.overlay #pollbtn, body.nomod #pollbtn, body.overlay #featchip, body.nomod #featchip, body.overlay #pollpanel, body.nomod #pollpanel { display: none !important; }
+  /* Panel de la encuesta (botón 🗳 Encuesta) */
+  #pollpanel { display: none; flex: none; padding: 10px 12px 12px; border-bottom: 1px solid var(--border); background: var(--surface); font-size: .85em; }
+  #pollpanel.open { display: block; }
+  #pollpanel input[type=text] { width: 100%; box-sizing: border-box; font: inherit; padding: 7px 10px; margin: 3px 0; border-radius: 8px; border: 1px solid var(--border); background: var(--elev); color: var(--text); outline: none; }
+  #pollpanel input[type=text]:focus { border-color: var(--violet); }
+  #pollpanel .orow { display: flex; align-items: center; gap: 6px; }
+  #pollpanel .orow span { flex: none; width: 20px; text-align: center; color: var(--dim); font-weight: 700; }
+  #pollpanel .orow button { flex: none; }
+  #pollpanel .mrow { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 6px 0 0; }
+  #pollpanel .mlbl { color: var(--dim); min-width: 70px; }
+  #pollpanel button { font: inherit; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--border); background: var(--elev); color: var(--muted); cursor: pointer; }
+  #pollpanel button.on { color: var(--text); border-color: var(--violet); background: rgba(192,154,253,.14); }
+  #pollpanel button.go { color: #111; background: linear-gradient(90deg, var(--violet), var(--yellow)); border: 0; font-weight: 700; padding: 6px 16px; }
+  #pollpanel button.sure { background: var(--red); color: #fff; border-color: var(--red); }
+  #pollpanel .pchk { display: flex; align-items: center; gap: 6px; color: var(--muted); cursor: pointer; }
+  #prq { font-weight: 700; font-size: 1.08em; margin: 2px 0 8px; }
+  .prb { position: relative; display: flex; align-items: center; gap: 8px; height: 28px; padding: 0 10px; margin: 5px 0; border-radius: 8px; background: var(--elev); overflow: hidden; }
+  .prb i { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, var(--violet), var(--yellow)); opacity: .28; transition: width .5s; }
+  .prb b, .prb span, .prb em { position: relative; } .prb b { width: 16px; color: var(--dim); } .prb em { margin-left: auto; font-style: normal; font-weight: 700; }
+  .prb.win { box-shadow: inset 0 0 0 1.5px var(--yellow); }
+  #prfoot { color: var(--dim); margin-top: 6px; }
+  #pollstate { margin-top: 6px; font-size: .95em; } #pollstate.bad { color: #ff8a95; }
   body.overlay #modbtn, body.nomod #modbtn, body.overlay #modpanel, body.nomod #modpanel { display: none !important; }
   #modpanel { display: none; flex: none; padding: 8px 12px 10px; border-bottom: 1px solid var(--border); background: var(--surface); font-size: .85em; }
   #modpanel.open { display: block; }
@@ -214,6 +240,9 @@
   <span class="chip" id="c-kick"><span class="dot"></span><span class="pfi"></span><b id="v-kick">—</b></span>
   <span class="chip" id="c-youtube"><span class="dot"></span><span class="pfi"></span><b id="v-youtube">—</b></span>
   <span class="chip" id="c-tiktok"><span class="dot"></span><span class="pfi"></span><b id="v-tiktok">—</b></span>
+  <span class="hsp"></span>
+  <span class="chip" id="featchip" hidden title="Quitar el mensaje destacado de la pantalla">📌 <b>En pantalla</b> ✕</span>
+  <span class="chip" id="pollbtn" title="Crear una encuesta para tu chat">🗳 <b>Encuesta</b></span>
   <span class="chip" id="modbtn" title="Moderar el chat">🛡 <b>Moderar</b></span>
 </header>
 <div id="modpanel">
@@ -221,6 +250,23 @@
   <div class="mrow"><span class="mlbl">Twitch · solo</span><button data-k="followers">seguidores</button><button data-k="subscribers">suscriptores</button><button data-k="emotes">emotes</button></div>
   <div class="mrow"><span class="mlbl">Todo el chat</span><button id="clearchat" class="danger">🧹 Borrar el chat</button></div>
   <div id="modstate"></div>
+</div>
+<div id="pollpanel">
+  <div id="pollnew">
+    <input id="pq" type="text" maxlength="120" placeholder="Pregunta (por ejemplo: ¿Qué jugamos después?)" autocomplete="off">
+    <div id="popts"></div>
+    <div class="mrow"><button id="paddopt">＋ Añadir opción</button></div>
+    <div class="mrow"><span class="mlbl">Duración</span><span id="pdur"></span></div>
+    <div class="mrow"><label class="pchk"><input type="checkbox" id="pann" checked> Avisar en el chat (cómo votar y quién gana)</label></div>
+    <div class="mrow"><button id="pstart" class="go">🗳 Empezar encuesta</button></div>
+  </div>
+  <div id="pollrun" hidden>
+    <div id="prq"></div>
+    <div id="prbars"></div>
+    <div id="prfoot"></div>
+    <div class="mrow"><button id="pend">⏹ Terminar ahora</button><button id="pshow"></button><button id="pnew">＋ Nueva encuesta</button></div>
+  </div>
+  <div id="pollstate"></div>
 </div>
 <div id="list"><div id="empty">Esperando mensajes…<br><small>Activa el chat en Vortexs Live → pestaña Chat.</small></div></div>
 <div id="emo">
@@ -284,6 +330,16 @@
     '¿Seguro? Banear a ': 'Sure? Ban ',
     'Moderar': 'Moderate',
     'Moderar el chat': 'Moderate the chat',
+    'Encuesta': 'Poll', 'Crear una encuesta para tu chat': 'Create a poll for your chat', 'En pantalla': 'On screen',
+    'Quitar el mensaje destacado de la pantalla': 'Remove the highlighted message from the screen',
+    'Pregunta (por ejemplo: ¿Qué jugamos después?)': 'Question (for example: What should we play next?)',
+    '＋ Añadir opción': '＋ Add option', 'Duración': 'Duration', 'Sin límite': 'No limit',
+    'Avisar en el chat (cómo votar y quién gana)': 'Announce in chat (how to vote and who wins)', '🗳 Empezar encuesta': '🗳 Start poll',
+    '⏹ Terminar ahora': '⏹ End now', '＋ Nueva encuesta': '＋ New poll', '🙈 Ocultar de pantalla': '🙈 Hide from screen', '👁 Enseñar en pantalla': '👁 Show on screen',
+    'Opción ': 'Option ', 'Pon la pregunta y al menos dos opciones.': 'Enter the question and at least two options.',
+    'Abierta': 'Open', 'Terminada': 'Ended', 'votos': 'votes', 'voto': 'vote', 'quedan ': '', ' para terminar': ' left',
+    'Se vota escribiendo 1, 2… en el chat': 'Vote by typing 1, 2… in chat', '¿Seguro? Se borra la actual': 'Sure? The current one is deleted',
+    '📌 En pantalla': '📌 On screen', '📌 Quitar de pantalla': '📌 Remove from screen', 'Enseñar este mensaje en el overlay «Destacado»': 'Show this message in the «Highlighted» overlay',
     'Twitch · modo lento': 'Twitch · slow mode',
     'Twitch · solo': 'Twitch · only',
     'seguidores': 'followers',
@@ -489,6 +545,7 @@
     if (m.id) el.dataset.id = m.p + ':' + m.id;
     if (m.uid) el.dataset.uid = m.p + ':' + m.uid;
     // TikTok no deja moderar desde otros programas: sus mensajes solo se pueden ocultar.
+    el._raw = m;
     if (m.id || m.uid || m.user) { el.dataset.mod = '1'; el._m = { p: m.p, id: m.id || '', uid: m.uid || '', user: m.user || '', text: plain(m.parts), roles: (m.roles || []).slice(), at: Date.now() }; }
     el.innerHTML = ICONS[m.p] + rolesHtml(m.roles, m.bd) + '<span class="name" style="color:' + nameColor(m.color, m.user) + '">' + esc(m.user) + '</span>: ' + partsHtml(m.parts);
     if (m.uid && m.p !== 'tiktok') el.querySelector('.name').title = T('Pulsa para moderar · arrastra hacia la derecha para un timeout');
@@ -721,12 +778,15 @@
   // ---------- Moderar: pulsa un mensaje ----------
   if (q.get('moderar') === '0') document.body.classList.add('nomod');
   // En la plataforma: borrar, expulsar un rato o banear (con "Deshacer"). Solo aquí: ocultar el mensaje o a la persona.
-  var ACTS = [['reply', T('↩ Responder')], ['copy', T('📋 Copiar')], ['-'],
+  var ACTS = [['reply', T('↩ Responder')], ['copy', T('📋 Copiar')], ['feature', ''], ['-'],
     ['del', T('🗑 Borrar')], ['purge', T('🧹 Borrar todos')], ['timeout', ''], ['ban', '⛔ Ban'], ['-'],
     ['vip', ''], ['mod', ''], ['-'],
     ['hide', T('🙈 Ocultar')], ['ignore', T('🔇 No ver más')]];
   // Lo que se hace aquí mismo, sin pedir nada a la plataforma (vale también para TikTok).
-  var LOCAL = { hide: 1, ignore: 1, copy: 1, info: 1, reply: 1 };
+  var LOCAL = { hide: 1, ignore: 1, copy: 1, info: 1, reply: 1, feature: 1 };
+  // Mensaje que está ahora en el overlay «Destacado» (lo manda la app).
+  var featNow = null;
+  function isFeatured(m) { return !!(featNow && featNow.p === m.p && ((m.id && featNow.id === m.id) || (!m.id && featNow.user === m.user))); }
   function actShown(a, m) {
     if (a === 'reply') return m.p !== 'tiktok';          // en TikTok no se puede escribir
     if (a === 'vip' || a === 'mod') return m.p === 'twitch';
@@ -1019,7 +1079,7 @@
       if (a === '-') { var sep = document.createElement('span'); sep.className = 'sep'; bar.appendChild(sep); return; }
       if (a === 'timeout') { bar.appendChild(timeoutDrag(el, bar, m)); return; }
       var b = document.createElement('button');
-      var label = (a === 'vip' || a === 'mod') ? roleLabel(a, m) : x[1];
+      var label = (a === 'vip' || a === 'mod') ? roleLabel(a, m) : a === 'feature' ? (isFeatured(m) ? T('📌 Quitar de pantalla') : T('📌 En pantalla')) : x[1];
       b.textContent = label;
       if (a === 'ban') b.className = 'ban';
       if (a === 'hide') b.title = T('Ocultar este mensaje solo en tu chat y en pantalla');
@@ -1028,6 +1088,7 @@
       if (a === 'reply') b.title = T('Responder a este mensaje');
       if (a === 'info') b.title = T('Ver quién es');
       if (a === 'purge') b.title = T('Borrar todos sus mensajes del chat, sin expulsarle');
+      if (a === 'feature') b.title = T('Enseñar este mensaje en el overlay «Destacado»');
       if (a === 'del' && !m.id && m.p !== 'youtube') b.disabled = true;
       if (!LOCAL[a] && a !== 'del' && !m.uid) b.disabled = true;
       function sure(text) {
@@ -1039,6 +1100,7 @@
       b.onclick = function () {
         var res = bar.querySelector('.mres');
         if (a === 'reply') { closeBars(null); startReply(m); return; }
+        if (a === 'feature') { if (isFeatured(m)) doMod(el, 'unfeature', bar, b); else doMod(el, 'feature', bar, b, { item: el._raw }); return; }
         if (a === 'copy') {
           copyText(m.text).then(function () { res.className = 'mres ok'; res.textContent = '✓ ' + T('Copiado'); setTimeout(function () { closeBars(null); }, 1000); },
             function () { res.className = 'mres bad'; res.textContent = '✗ ' + T('No se pudo copiar'); });
@@ -1102,6 +1164,7 @@
     modCall({ a: 'modes' }).then(function (r) { showModResult(r); if (r && r.ok) modstate.textContent = ''; }).catch(function () { showModResult(null); });
   }
   document.getElementById('modbtn').onclick = function () {
+    document.getElementById('pollpanel').classList.remove('open');
     var open = modpanel.classList.toggle('open');
     if (open) loadModes();
   };
@@ -1116,6 +1179,81 @@
     modCall({ a: 'clear' }).then(showModResult).catch(function () { showModResult(null); });
   };
   renderModes();
+
+  // ---------- Encuesta (botón 🗳 Encuesta) y mensaje destacado ----------
+  var pollpanel = document.getElementById('pollpanel'), pollNew = document.getElementById('pollnew'), pollRun = document.getElementById('pollrun');
+  var pollMsg = document.getElementById('pollstate'), popts = document.getElementById('popts'), pdurBox = document.getElementById('pdur');
+  var pollNow = null, pollOff = 0, pdur = 60;
+  var PDUR = [[0, T('Sin límite')], [30, '30 s'], [60, '1 min'], [120, '2 min'], [300, '5 min']];
+  function addOpt(v) {
+    if (popts.children.length >= 6) return;
+    var r = document.createElement('div'); r.className = 'orow';
+    r.innerHTML = '<span></span><input type="text" maxlength="60" autocomplete="off"><button type="button" title="✕">✕</button>';
+    r.querySelector('input').value = v || '';
+    r.querySelector('button').onclick = function () { if (popts.children.length > 2) { r.remove(); numberOpts(); } };
+    r.querySelector('input').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); if (r === popts.lastElementChild && this.value.trim()) { addOpt(''); popts.lastElementChild.querySelector('input').focus(); } } });
+    popts.appendChild(r); numberOpts();
+  }
+  function numberOpts() {
+    Array.prototype.forEach.call(popts.children, function (r, i) { r.querySelector('span').textContent = i + 1; r.querySelector('input').placeholder = T('Opción ') + (i + 1); });
+    document.getElementById('paddopt').disabled = popts.children.length >= 6;
+  }
+  addOpt(''); addOpt('');
+  document.getElementById('paddopt').onclick = function () { addOpt(''); popts.lastElementChild.querySelector('input').focus(); };
+  PDUR.forEach(function (x) {
+    var b = document.createElement('button'); b.type = 'button'; b.textContent = x[1]; b.dataset.s = x[0];
+    b.onclick = function () { pdur = x[0]; renderDur(); };
+    pdurBox.appendChild(b);
+  });
+  function renderDur() { Array.prototype.forEach.call(pdurBox.children, function (b) { b.classList.toggle('on', +b.dataset.s === pdur); }); }
+  renderDur();
+  function pollCall(body) { body.a = 'poll'; return modCall(body).then(function (r) { if (!r || !r.ok) { pollMsg.className = 'bad'; pollMsg.textContent = '✗ ' + ((r && r.error) || 'error'); } else { pollMsg.className = ''; pollMsg.textContent = ''; } return r; }).catch(function () { pollMsg.className = 'bad'; pollMsg.textContent = T('✗ No se pudo contactar con Vortexs Live'); }); }
+  document.getElementById('pstart').onclick = function () {
+    var qq = document.getElementById('pq').value.trim();
+    var opts = Array.prototype.map.call(popts.querySelectorAll('input'), function (i) { return i.value.trim(); }).filter(Boolean);
+    if (!qq || opts.length < 2) { pollMsg.className = 'bad'; pollMsg.textContent = '✗ ' + T('Pon la pregunta y al menos dos opciones.'); return; }
+    pollCall({ op: 'start', q: qq, opts: opts, secs: pdur, announce: document.getElementById('pann').checked });
+  };
+  document.getElementById('pend').onclick = function () { pollCall({ op: 'end' }); };
+  var pshow = document.getElementById('pshow');
+  pshow.onclick = function () { pollCall({ op: pollNow && pollNow.shown ? 'hide' : 'show' }); };
+  var pnew = document.getElementById('pnew');
+  pnew.onclick = function () {
+    if (pollNow && pollNow.open && !pnew.classList.contains('sure')) {
+      pnew.classList.add('sure'); pnew.textContent = T('¿Seguro? Se borra la actual');
+      setTimeout(function () { pnew.classList.remove('sure'); pnew.textContent = T('＋ Nueva encuesta'); }, 3500);
+      return;
+    }
+    pnew.classList.remove('sure'); pnew.textContent = T('＋ Nueva encuesta');
+    pollCall({ op: 'clear' });
+  };
+  function clockLeft(ms) { var s = Math.max(0, Math.ceil(ms / 1000)), mm = Math.floor(s / 60); s = s % 60; return mm + ':' + (s < 10 ? '0' : '') + s; }
+  function renderPollPanel() {
+    var p = pollNow;
+    pollNew.hidden = !!p; pollRun.hidden = !p;
+    document.getElementById('pollbtn').classList.toggle('on', !!(p && p.open));
+    if (!p) return;
+    var total = 0, best = 0;
+    p.opts.forEach(function (o) { total += o.n; if (o.n > best) best = o.n; });
+    document.getElementById('prq').textContent = p.q;
+    document.getElementById('prbars').innerHTML = p.opts.map(function (o, i) {
+      var pct = total ? Math.round(o.n * 100 / total) : 0;
+      return '<div class="prb' + (!p.open && total && o.n === best ? ' win' : '') + '"><i style="width:' + pct + '%"></i><b>' + (i + 1) + '</b><span>' + esc(o.t) + '</span><em>' + pct + ' % · ' + o.n + '</em></div>';
+    }).join('');
+    var votes = total + ' ' + T(total === 1 ? 'voto' : 'votos');
+    document.getElementById('prfoot').textContent = (p.open ? T('Abierta') + ' · ' + T('Se vota escribiendo 1, 2… en el chat') + (p.ends ? ' · ' + clockLeft(p.ends - (Date.now() + pollOff)) : '') : T('Terminada')) + ' · ' + votes;
+    document.getElementById('pend').hidden = !p.open;
+    pshow.textContent = p.shown ? T('🙈 Ocultar de pantalla') : T('👁 Enseñar en pantalla');
+  }
+  setInterval(function () { if (pollNow && pollNow.open && pollNow.ends && !pollRun.hidden) renderPollPanel(); }, 500);
+  document.getElementById('pollbtn').onclick = function () {
+    modpanel.classList.remove('open');
+    if (pollpanel.classList.toggle('open') && !pollNow) setTimeout(function () { document.getElementById('pq').focus(); }, 0);
+  };
+  var featChip = document.getElementById('featchip');
+  featChip.onclick = function () { modCall({ a: 'unfeature' }).catch(function () {}); };
+  function onPoll(d) { pollNow = d || null; if (d) pollOff = (d.now || Date.now()) - Date.now(); renderPollPanel(); }
+  function onFeature(d) { featNow = d || null; featChip.hidden = !featNow; }
 
   // ---------- Vista previa (?demo=1): mensajes de ejemplo ----------
   if (q.get('demo') === '1') {
@@ -1151,6 +1289,8 @@
       else if (m.t === 'clear') { list.innerHTML = ''; }
       else if (m.t === 'viewers') { viewers = m.data || {}; renderHeader(); }
       else if (m.t === 'status') { states = m.data || {}; renderHeader(); }
+      else if (m.t === 'poll') onPoll(m.data);
+      else if (m.t === 'feature') onFeature(m.data);
     };
   }
 })();
