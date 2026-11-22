@@ -9,7 +9,7 @@ namespace StreamDelay
 {
 	internal class TwitchPlatform : Platform
 	{
-		private const string Scopes = "channel:manage:broadcast moderator:read:followers user:write:chat moderator:manage:chat_messages moderator:manage:banned_users moderator:manage:chat_settings user:read:emotes";
+		private const string Scopes = "channel:manage:broadcast moderator:read:followers user:write:chat moderator:manage:chat_messages moderator:manage:banned_users moderator:manage:chat_settings user:read:emotes channel:read:redemptions";
 
 		public static string IdBase = "https://id.twitch.tv";
 
@@ -110,6 +110,19 @@ namespace StreamDelay
 		// ¿El token tiene el permiso de leer follows? (si se conectó con una versión antigua, no).
 		public bool CanReadFollows()
 		{
+			return HasScope("moderator:read:followers");
+		}
+
+		// ¿El canal es el de la cuenta conectada? (los canjes de puntos solo los ve el dueño).
+		public bool IsOwnChannel(string channelLogin)
+		{
+			EnsureUser();
+			return string.IsNullOrEmpty(channelLogin) || channelLogin.Equals(Account, StringComparison.OrdinalIgnoreCase);
+		}
+
+		// ¿El token tiene este permiso? (si se conectó con una versión anterior, puede que no).
+		public bool HasScope(string scope)
+		{
 			Dictionary<string, object> validation = Http.Send("GET", IdBase + "/oauth2/validate", null, new Dictionary<string, string> {
 			{
 				"Authorization",
@@ -121,7 +134,7 @@ namespace StreamDelay
 			{
 				foreach (object item in scopes)
 				{
-					if ("moderator:read:followers".Equals(item))
+					if (scope.Equals(item))
 					{
 						return true;
 					}
@@ -310,6 +323,38 @@ namespace StreamDelay
 		// canales que puedes usar (tus suscripciones) y los globales. Con el permiso user:read:emotes
 		// salen todos los tuyos; con una conexión antigua, solo los del canal y los globales
 		// (all = false: conviene volver a conectar Twitch).
+		// Emblemas del chat (los globales y los del canal, que pisan a los globales: sub, bits…).
+		// Clave "set/versión" (como en la etiqueta badges del IRC) → { imagen 2x, título }.
+		public Dictionary<string, string[]> ChatBadges(string channelLogin)
+		{
+			Dictionary<string, string[]> map = new Dictionary<string, string[]>();
+			string[] urls = new string[2]
+			{
+				ApiBase + "/chat/badges/global",
+				ApiBase + "/chat/badges?broadcaster_id=" + BroadcasterId(channelLogin)
+			};
+			foreach (string url in urls)
+			{
+				foreach (Dictionary<string, object> set in Http.Arr(Api("GET", url, H(), null), "data"))
+				{
+					string setId = Http.Str(set, "set_id");
+					foreach (Dictionary<string, object> v in Http.Arr(set, "versions"))
+					{
+						string img = Http.Str(v, "image_url_2x");
+						if (img.Length == 0)
+						{
+							img = Http.Str(v, "image_url_1x");
+						}
+						if (img.Length > 0)
+						{
+							map[setId + "/" + Http.Str(v, "id")] = new string[2] { img, Http.Str(v, "title") };
+						}
+					}
+				}
+			}
+			return map;
+		}
+
 		public void ChatEmotes(string channelLogin, List<Dictionary<string, object>> channel, List<Dictionary<string, object>> others, List<Dictionary<string, object>> globals, out bool all)
 		{
 			string chId = BroadcasterId(channelLogin);
@@ -410,6 +455,19 @@ namespace StreamDelay
 			r["subscribers"] = Http.Str(d, "subscriber_mode").ToLowerInvariant() == "true";
 			r["emotes"] = Http.Str(d, "emote_mode").ToLowerInvariant() == "true";
 			return r;
+		}
+
+		// Pide a Twitch que avise de los canjes de puntos del canal (solo el dueño del canal).
+		public void SubscribeRedemptions(string sessionId, string channelLogin)
+		{
+			Dictionary<string, object> body = new Dictionary<string, object>
+			{
+				{ "type", "channel.channel_points_custom_reward_redemption.add" },
+				{ "version", "1" },
+				{ "condition", new Dictionary<string, object> { { "broadcaster_user_id", BroadcasterId(channelLogin) } } },
+				{ "transport", new Dictionary<string, object> { { "method", "websocket" }, { "session_id", sessionId } } }
+			};
+			Api("POST", ApiBase + "/eventsub/subscriptions", H(), body);
 		}
 
 		public void SubscribeFollows(string sessionId, string channelLogin)
