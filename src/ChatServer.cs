@@ -62,6 +62,9 @@ namespace StreamDelay
 		// Ajustes y estado de esos overlays (/widgets.json).
 		public Func<string> OnWidgets = () => "{}";
 
+		// Sonido elegido para un tipo de alerta (/sonido/follow…): ruta del archivo o null.
+		public Func<string, string> OnSound = (string kind) => null;
+
 		// Mando a distancia (móvil, Stream Deck, panel de OBS): acción + parámetros -> JSON de estado.
 		// Exige la clave del mando (?k=...) en cada petición.
 		public Func<string, Dictionary<string, string>, string> OnRemote = (string a, Dictionary<string, string> q) => "{}";
@@ -398,6 +401,12 @@ namespace StreamDelay
 				string path = request.Path;
 				int query = path.IndexOf('?');
 				string route = ((query >= 0) ? path.Substring(0, query) : path);
+				if (route.StartsWith("/sonido/") && request.Method == "GET")
+				{
+					Sound(stream, route.Substring(8));
+					c.Close();
+					return;
+				}
 				if (route.StartsWith("/api/"))
 				{
 					Api(stream, request, route);
@@ -828,6 +837,30 @@ namespace StreamDelay
 		{
 			byte[] bytes = Encoding.UTF8.GetBytes(body);
 			Write(s, "HTTP/1.1 " + status + "\r\nContent-Type: " + type + "\r\nCache-Control: no-cache\r\nContent-Length: " + bytes.Length + "\r\nConnection: close\r\n\r\n");
+			s.Write(bytes, 0, bytes.Length);
+			s.Flush();
+		}
+
+		// Sonido de una alerta (solo los de la carpeta "sonidos" de Vortexs Live).
+		private void Sound(Stream s, string kind)
+		{
+			string file = null;
+			try
+			{
+				file = OnSound(kind);
+			}
+			catch
+			{
+			}
+			if (file == null || !File.Exists(file))
+			{
+				Respond(s, "404 Not Found", "text/plain", "");
+				return;
+			}
+			string ext = Path.GetExtension(file).ToLowerInvariant();
+			string type = ext == ".mp3" ? "audio/mpeg" : ext == ".wav" ? "audio/wav" : ext == ".ogg" ? "audio/ogg" : ext == ".m4a" ? "audio/mp4" : "application/octet-stream";
+			byte[] bytes = File.ReadAllBytes(file);
+			Write(s, "HTTP/1.1 200 OK\r\nContent-Type: " + type + "\r\nCache-Control: no-cache\r\nContent-Length: " + bytes.Length + "\r\nConnection: close\r\n\r\n");
 			s.Write(bytes, 0, bytes.Length);
 			s.Flush();
 		}

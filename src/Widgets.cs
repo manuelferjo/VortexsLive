@@ -6,6 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
+using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
@@ -24,6 +26,33 @@ namespace StreamDelay
 		private int alertDur = 6;
 		private bool alertSound = true;
 		private string alertPos = "top";
+		private int alertVolume = 80;    // %
+
+		// Sonidos propios: se copian a la carpeta "sonidos" junto a Vortexs Live con el nombre del tipo
+		// (follow.mp3, sub.wav…). Sin archivo, suena el sonido de siempre.
+		private static readonly string[] SoundExts = new string[4] { ".mp3", ".wav", ".ogg", ".m4a" };
+
+		private static string SoundDir
+		{
+			get { return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "sonidos"); }
+		}
+
+		private string AlertSoundFile(string kind)
+		{
+			if (Array.IndexOf(AlertKinds, kind) < 0)
+			{
+				return null;
+			}
+			foreach (string ext in SoundExts)
+			{
+				string f = Path.Combine(SoundDir, kind + ext);
+				if (File.Exists(f))
+				{
+					return f;
+				}
+			}
+			return null;
+		}
 
 		// ---- Mensaje destacado ----
 		private string featPos = "bl";
@@ -78,7 +107,17 @@ namespace StreamDelay
 						kinds.Add(AlertKinds[i]);
 					}
 				}
-				d["alerts"] = new Dictionary<string, object> { { "kinds", kinds }, { "dur", alertDur }, { "sound", alertSound }, { "pos", alertPos } };
+				Dictionary<string, object> sounds = new Dictionary<string, object>();
+				foreach (string k in AlertKinds)
+				{
+					string f = AlertSoundFile(k);
+					if (f != null)
+					{
+						// La fecha en la URL: si cambias el archivo, OBS no usa el viejo.
+						sounds[k] = "/sonido/" + k + "?v=" + File.GetLastWriteTimeUtc(f).Ticks;
+					}
+				}
+				d["alerts"] = new Dictionary<string, object> { { "kinds", kinds }, { "dur", alertDur }, { "sound", alertSound }, { "pos", alertPos }, { "sounds", sounds }, { "vol", alertVolume } };
 				d["feature"] = new Dictionary<string, object> { { "pos", featPos }, { "item", featItem } };
 				d["goal"] = GoalState();
 				d["ticker"] = new Dictionary<string, object> { { "n", tickN }, { "speed", tickSpeed }, { "pos", tickPos } };
@@ -626,7 +665,10 @@ namespace StreamDelay
 			string[] apos = new string[3] { "top", "center", "bottom" };
 			Choice(a, new string[3] { "Arriba", "Centro", "Abajo" }, Math.Max(0, Array.IndexOf(apos, alertPos)), 20f, 210f, 90f, delegate(int i) { lock (wgLock) { alertPos = apos[i]; } });
 			VButton test = new VButton { Kind = ButtonKind.Ghost, Text = "Probar una alerta", FontSize = 9f };
-			Place(a, test, 20f, 250f, 380f, 34f);
+			Place(a, test, 20f, 250f, 186f, 34f);
+			VButton snd = new VButton { Kind = ButtonKind.Ghost, Text = "🔊 Elegir sonidos", FontSize = 9f };
+			Place(a, snd, 214f, 250f, 186f, 34f);
+			snd.Click += delegate { AlertSoundsDialog(); };
 			test.Click += delegate { SendTestAlert(); };
 			Box(a, 20f, 288f, 380f, 30f, delegate(Graphics g, Rectangle r)
 			{
@@ -791,6 +833,148 @@ namespace StreamDelay
 			return new Card[5] { a, f, o, e, p };
 		}
 
+		// ---------- Ventana "Sonidos de las alertas" ----------
+
+		[DllImport("winmm.dll", CharSet = CharSet.Unicode)]
+		private static extern int mciSendString(string command, StringBuilder ret, int retLen, IntPtr callback);
+
+		// Escuchar un sonido en el PC (MP3 y WAV; los OGG se oyen en OBS pero aquí no).
+		private void PlaySoundPreview(string file, int volume)
+		{
+			try
+			{
+				mciSendString("close vlprev", null, 0, IntPtr.Zero);
+				if (file == null)
+				{
+					return;
+				}
+				if (mciSendString("open \"" + file + "\" type mpegvideo alias vlprev", null, 0, IntPtr.Zero) != 0)
+				{
+					return;
+				}
+				mciSendString("setaudio vlprev volume to " + Math.Max(0, Math.Min(1000, volume * 10)), null, 0, IntPtr.Zero);
+				mciSendString("play vlprev", null, 0, IntPtr.Zero);
+			}
+			catch
+			{
+			}
+		}
+
+		private void AlertSoundsDialog()
+		{
+			Form f = DarkForm("Sonidos de las alertas", 460, 486);
+			Card c = new Card { Title = "Un sonido para cada alerta", Subtitle = "MP3, WAV u OGG de hasta 5 MB. Sin elegir, suena el de siempre." };
+			Place(f, c, 20f, 18f, 420f, 384f);
+			string[] names = new string[6] { "Follows", "Subs y regalos", "Raids", "Bits", "Canjes", "Donaciones" };
+			for (int i = 0; i < AlertKinds.Length; i++)
+			{
+				string kind = AlertKinds[i];
+				float y = 58f + (float)i * 40f;
+				PaintBox row = Box(c, 20f, y, 206f, 34f, delegate(Graphics g, Rectangle r)
+				{
+					string file = AlertSoundFile(kind);
+					Rectangle top = new Rectangle(r.X, r.Y, r.Width, r.Height / 2 + 1);
+					Rectangle bottom = new Rectangle(r.X, r.Y + r.Height / 2, r.Width, r.Height / 2);
+					Theme.DrawText(g, names[Array.IndexOf(AlertKinds, kind)], Theme.BodyBold(9f), Theme.Text, top, StringAlignment.Near, StringAlignment.Far);
+					Theme.DrawText(g, file == null ? "Sonido de siempre" : Path.GetFileName(file), Theme.Body(7.5f), file == null ? Theme.Muted : Theme.Violet, bottom, StringAlignment.Near, StringAlignment.Near);
+				});
+				VButton pick = new VButton { Kind = ButtonKind.Ghost, Text = "Elegir…", FontSize = 8.5f };
+				Place(c, pick, 232f, y + 2f, 84f, 30f);
+				VButton play = new VButton { Kind = ButtonKind.Ghost, Text = "▶", FontSize = 9f };
+				Place(c, play, 322f, y + 2f, 36f, 30f);
+				VButton clear = new VButton { Kind = ButtonKind.Ghost, Text = "✕", FontSize = 9f };
+				Place(c, clear, 364f, y + 2f, 36f, 30f);
+				pick.Click += delegate
+				{
+					using (OpenFileDialog dlg = new OpenFileDialog())
+					{
+						dlg.Title = I18n.Tr("Sonido para ") + I18n.Tr(names[Array.IndexOf(AlertKinds, kind)]);
+						dlg.Filter = I18n.Tr("Sonidos") + " (*.mp3;*.wav;*.ogg;*.m4a)|*.mp3;*.wav;*.ogg;*.m4a";
+						if (dlg.ShowDialog(f) != DialogResult.OK)
+						{
+							return;
+						}
+						try
+						{
+							FileInfo info = new FileInfo(dlg.FileName);
+							if (info.Length > 5 * 1024 * 1024)
+							{
+								I18n.Show(f, "Ese archivo pesa más de 5 MB. Elige un sonido más corto.", "Sonidos");
+								return;
+							}
+							string ext = info.Extension.ToLowerInvariant();
+							if (Array.IndexOf(SoundExts, ext) < 0)
+							{
+								return;
+							}
+							PlaySoundPreview(null, 0);
+							Directory.CreateDirectory(SoundDir);
+							foreach (string e2 in SoundExts)
+							{
+								string old = Path.Combine(SoundDir, kind + e2);
+								if (File.Exists(old))
+								{
+									File.Delete(old);
+								}
+							}
+							string dest = Path.Combine(SoundDir, kind + ext);
+							File.Copy(dlg.FileName, dest, true);
+							File.SetLastWriteTimeUtc(dest, DateTime.UtcNow);
+							AppendLog("Alertas: sonido de " + names[Array.IndexOf(AlertKinds, kind)] + " → " + info.Name);
+						}
+						catch (Exception ex)
+						{
+							I18n.Show(f, "No se pudo copiar el sonido: " + ex.Message, "Sonidos");
+						}
+						row.Invalidate();
+					}
+				};
+				play.Click += delegate { PlaySoundPreview(AlertSoundFile(kind), alertVolume); };
+				clear.Click += delegate
+				{
+					PlaySoundPreview(null, 0);
+					foreach (string e2 in SoundExts)
+					{
+						try
+						{
+							string old = Path.Combine(SoundDir, kind + e2);
+							if (File.Exists(old))
+							{
+								File.Delete(old);
+							}
+						}
+						catch
+						{
+						}
+					}
+					row.Invalidate();
+				};
+			}
+			Label(c, "VOLUMEN EN OBS", 20f, 304f, 380f);
+			int[] vols = new int[5] { 20, 40, 60, 80, 100 };
+			int vk = 0;
+			for (int i = 0; i < vols.Length; i++)
+			{
+				if (Math.Abs(vols[i] - alertVolume) < Math.Abs(vols[vk] - alertVolume))
+				{
+					vk = i;
+				}
+			}
+			Choice(c, new string[5] { "20 %", "40 %", "60 %", "80 %", "100 %" }, vk, 20f, 322f, 70f, delegate(int i) { lock (wgLock) { alertVolume = vols[i]; } });
+			Box(c, 20f, 352f, 380f, 26f, delegate(Graphics g, Rectangle r)
+			{
+				Theme.DrawWrapped(g, "Para oírlas en el directo, en OBS marca «Controlar audio mediante OBS» en la fuente Navegador.", Theme.Body(7.25f), Theme.Muted, r);
+			});
+			VButton test = new VButton { Kind = ButtonKind.Ghost, Text = "Probar una alerta", FontSize = 9.5f };
+			VButton ok = new VButton { Kind = ButtonKind.Primary, Text = "Listo", FontSize = 10f };
+			Place(f, test, 20f, 420f, 190f, 44f);
+			Place(f, ok, 218f, 420f, 222f, 44f);
+			test.Click += delegate { SendTestAlert(); };
+			ok.Click += delegate { f.Close(); };
+			f.FormClosing += delegate { PlaySoundPreview(null, 0); SaveConfig(); };
+			f.ShowDialog(this);
+		}
+
 		// ---------- Configuración ----------
 
 		private void LoadWidgetsConfig(Dictionary<string, string> raw)
@@ -801,6 +985,7 @@ namespace StreamDelay
 			if (raw.TryGetValue("wg_alert_dur", out v) && int.TryParse(v, out n) && n >= 2 && n <= 30) alertDur = n;
 			if (raw.TryGetValue("wg_alert_sound", out v)) alertSound = v != "0";
 			if (raw.TryGetValue("wg_alert_pos", out v) && v.Length > 0) alertPos = v;
+			if (raw.TryGetValue("wg_alert_vol", out v) && int.TryParse(v, out n) && n >= 0 && n <= 100) alertVolume = n;
 			if (raw.TryGetValue("wg_feat_pos", out v) && v.Length > 0) featPos = v;
 			if (raw.TryGetValue("wg_feat_hide", out v) && int.TryParse(v, out n) && n >= 0) featHide = n;
 			if (raw.TryGetValue("wg_goal_type", out v) && v.Length > 0) goalType = v;
@@ -828,6 +1013,7 @@ namespace StreamDelay
 				lines.Add("wg_alert_dur=" + alertDur);
 				lines.Add("wg_alert_sound=" + (alertSound ? "1" : "0"));
 				lines.Add("wg_alert_pos=" + alertPos);
+				lines.Add("wg_alert_vol=" + alertVolume);
 				lines.Add("wg_feat_pos=" + featPos);
 				lines.Add("wg_feat_hide=" + featHide);
 				lines.Add("wg_goal_type=" + goalType);
