@@ -128,7 +128,7 @@ namespace StreamDelay
 
 		// ---------- Constantes ----------
 
-		private const string Version = "4.17";
+		private const string Version = "4.18";
 
 		private const string TikTokName = "TikTok";
 
