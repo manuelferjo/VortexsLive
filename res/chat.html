@@ -153,7 +153,7 @@
   .modbar button.undo { border-color: var(--yellow); color: var(--yellow); }
   .modbar .sep { width: 1px; align-self: stretch; background: var(--border); margin: 0 2px; }
   /* Ficha del usuario (botón Ficha) */
-  .ucard { flex-basis: 100%; margin-top: 4px; padding: 9px 11px; border: 1px solid var(--border); border-radius: 10px; background: var(--elev); font-size: .85em; }
+  .ucard { order: -1; flex-basis: 100%; margin-bottom: 2px; padding: 9px 11px; border: 1px solid var(--border); border-radius: 10px; background: var(--elev); font-size: .85em; }
   .ucard .uh { display: flex; align-items: center; gap: 2px; font-weight: 700; margin-bottom: 6px; }
   .ucard .ur { color: var(--muted); margin: 2px 0; } .ucard .ur b { color: var(--text); font-weight: 600; }
   .ucard .ur.warn b { color: #ff8a95; }
@@ -161,6 +161,13 @@
   .ucard .ul li { padding: 3px 0; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .ucard .ul li span { color: var(--dim); margin-right: 6px; font-variant-numeric: tabular-nums; }
   .ucard .un { color: var(--dim); font-size: .9em; margin-top: 5px; }
+  /* Timeout: mantener pulsado y arrastrar hacia la derecha */
+  .modbar button.tdrag { position: relative; overflow: hidden; min-width: 168px; text-align: left; cursor: ew-resize; touch-action: none; user-select: none; }
+  .modbar button.tdrag .tfill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: linear-gradient(90deg, rgba(255,176,32,.30), rgba(255,70,85,.55)); transition: width .08s ease-out; pointer-events: none; }
+  .modbar button.tdrag .tlbl { position: relative; font-variant-numeric: tabular-nums; }
+  .modbar button.tdrag.on { border-color: var(--yellow); }
+  body.tdragging, body.tdragging * { cursor: ew-resize !important; user-select: none !important; }
+  .ucard .uload { color: var(--dim); }
   #reply { display: flex; align-items: center; gap: 6px; font-size: .8em; color: var(--muted); margin-bottom: 6px; }
   #reply[hidden] { display: none; }
   #reply b { color: var(--violet); }
@@ -278,6 +285,8 @@
     'Un momento…': 'One moment…',
     '↩ Responder': '↩ Reply', '📋 Copiar': '📋 Copy', '👤 Ficha': '👤 Profile', '🧹 Borrar todos': '🧹 Delete all',
     '💎 Dar VIP': '💎 Give VIP', '💎 Quitar VIP': '💎 Remove VIP', '⚔ Hacer mod': '⚔ Make mod', '⚔ Quitar mod': '⚔ Remove mod',
+    '⏱ Timeout: arrastra →': '⏱ Timeout: drag →', '← suelta aquí para cancelar': '← release here to cancel', 'máximo': 'maximum',
+    'Mantén pulsado y arrastra hacia la derecha: cuanto más lejos, más tiempo (de 10 s a 24 h). Suelta para aplicarlo; vuelve al principio o pulsa Esc para cancelar.': 'Hold and drag to the right: the further, the longer (10 s to 24 h). Release to apply it; go back to the start or press Esc to cancel.',
     'Copiado': 'Copied', 'No se pudo copiar': 'Could not copy', 'Respondiendo a ': 'Replying to ', 'Quitar la respuesta': 'Cancel reply',
     '¿Seguro? Borrar ': 'Sure? Delete ', ' mensajes': ' messages', ' mensaje': ' message', '¿Seguro?': 'Sure?',
     'No hay mensajes suyos con los datos para borrarlos': 'None of their messages can be deleted',
@@ -696,8 +705,8 @@
   // ---------- Moderar: pulsa un mensaje ----------
   if (q.get('moderar') === '0') document.body.classList.add('nomod');
   // En la plataforma: borrar, expulsar un rato o banear (con "Deshacer"). Solo aquí: ocultar el mensaje o a la persona.
-  var ACTS = [['reply', T('↩ Responder')], ['copy', T('📋 Copiar')], ['info', T('👤 Ficha')], ['-'],
-    ['del', T('🗑 Borrar')], ['purge', T('🧹 Borrar todos')], ['t60', '⏱ 1 min'], ['t600', '⏱ 10 min'], ['t3600', '⏱ 1 h'], ['t86400', '⏱ 24 h'], ['ban', '⛔ Ban'], ['-'],
+  var ACTS = [['reply', T('↩ Responder')], ['copy', T('📋 Copiar')], ['-'],
+    ['del', T('🗑 Borrar')], ['purge', T('🧹 Borrar todos')], ['timeout', ''], ['ban', '⛔ Ban'], ['-'],
     ['vip', ''], ['mod', ''], ['-'],
     ['hide', T('🙈 Ocultar')], ['ignore', T('🔇 No ver más')]];
   // Lo que se hace aquí mismo, sin pedir nada a la plataforma (vale también para TikTok).
@@ -762,7 +771,7 @@
     return isNaN(d) ? '' : d.toLocaleDateString(LANG === 'en' ? 'en-GB' : 'es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
   }
   function hhmm(t) { var d = new Date(t); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); }
-  function showCard(el, bar, info) {
+  function showCard(el, bar, info, loading) {
     var m = el._m, old = bar.querySelector('.ucard'); if (old) old.remove();
     var c = document.createElement('div'); c.className = 'ucard';
     var msgs = userMsgs(m), h = '<div class="uh">' + ICONS[m.p] + rolesHtml(m.roles) + '<span>' + esc(m.user) + '</span></div>';
@@ -776,9 +785,70 @@
     h += '<div class="ur">' + esc(T('Mensajes en este chat')) + ': <b>' + (msgs.length || (m.uid ? 0 : 1)) + '</b></div>';
     var last = (msgs.length ? msgs : [m]).slice(-5);
     h += '<ul class="ul">' + last.map(function (x) { return '<li><span>' + hhmm(x.at || Date.now()) + '</span>' + esc(x.text) + '</li>'; }).join('') + '</ul>';
-    if (m.p !== 'twitch' || !info || (!info.created && typeof info.followed !== 'string')) h += '<div class="un">' + esc(T('La antigüedad y el follow solo se pueden ver en Twitch con tu cuenta conectada.')) + '</div>';
+    if (loading) h += '<div class="un uload">' + esc(T('Un momento…')) + '</div>';
+    else if (m.p !== 'twitch' || !info || (!info.created && typeof info.followed !== 'string')) h += '<div class="un">' + esc(T('La antigüedad y el follow solo se pueden ver en Twitch con tu cuenta conectada.')) + '</div>';
     c.innerHTML = h;
-    bar.appendChild(c);
+    bar.appendChild(c);   // con order: -1 sale encima de los botones
+  }
+  // Abre la ficha nada más pulsar el mensaje. Lo de Twitch se guarda 5 min por persona.
+  var cardCache = {};
+  function loadCard(el, bar) {
+    var m = el._m;
+    if (m.p !== 'twitch' || !m.uid) { showCard(el, bar, null); return; }
+    var key = m.p + ':' + m.uid, c = cardCache[key];
+    if (c && Date.now() - c.at < 300000) { showCard(el, bar, c.info); return; }
+    showCard(el, bar, null, true);
+    fetch('/api/mod', { method: 'POST', headers: { 'X-SD-Secret': SECRET, 'Content-Type': 'application/json' }, body: JSON.stringify({ p: m.p, a: 'info', uid: m.uid, user: m.user }) })
+      .then(function (r) { return r.json(); }).catch(function () { return null; })
+      .then(function (r) {
+        if (r && r.ok) cardCache[key] = { at: Date.now(), info: r };
+        if (bar.isConnected && bar.querySelector('.ucard')) showCard(el, bar, r);
+      });
+  }
+  // ---- Timeout arrastrando: cuanto más a la derecha, más tiempo (10 s … 24 h) ----
+  var TSTEPS = [10, 30, 60, 120, 300, 600, 900, 1800, 3600, 7200, 14400, 28800, 43200, 86400];
+  function tLabel(s) { return s < 60 ? s + ' s' : s < 3600 ? (s / 60) + ' min' : (s / 3600) + ' h'; }
+  function timeoutDrag(el, bar, m) {
+    var d = document.createElement('button');
+    d.type = 'button'; d.className = 'tdrag';
+    d.innerHTML = '<span class="tfill"></span><span class="tlbl"></span>';
+    var lbl = d.querySelector('.tlbl'), fill = d.querySelector('.tfill'), idle = T('⏱ Timeout: arrastra →');
+    lbl.textContent = idle;
+    d.title = T('Mantén pulsado y arrastra hacia la derecha: cuanto más lejos, más tiempo (de 10 s a 24 h). Suelta para aplicarlo; vuelve al principio o pulsa Esc para cancelar.');
+    if (!m.uid) d.disabled = true;
+    var x0 = 0, span = 260, val = 0, on = false, pid = null;
+    function show(dx) {
+      var n = TSTEPS.length, f = Math.max(0, Math.min(1, dx / span));
+      var i = dx < 12 ? -1 : Math.min(n - 1, Math.floor(f * n));
+      val = i < 0 ? 0 : TSTEPS[i];
+      fill.style.width = (i < 0 ? 0 : (i + 1) / n * 100) + '%';
+      lbl.textContent = val ? '⏱ ' + tLabel(val) + (val === 86400 ? ' · ' + T('máximo') : '') : T('← suelta aquí para cancelar');
+    }
+    function onKey(e) { if (e.key === 'Escape') { e.preventDefault(); end(false); } }
+    function end(apply) {
+      if (!on) return;
+      on = false; d.classList.remove('on'); document.body.classList.remove('tdragging');
+      document.removeEventListener('keydown', onKey);
+      try { if (pid != null) d.releasePointerCapture(pid); } catch (x) {}
+      var v = val; val = 0; fill.style.width = '0'; lbl.textContent = idle;
+      if (apply && v) doMod(el, 't' + v, bar, d);
+    }
+    d.addEventListener('pointerdown', function (e) {
+      if (d.disabled || e.button !== 0) return;
+      e.preventDefault();
+      on = true; x0 = e.clientX; pid = e.pointerId;
+      // El recorrido: lo que quede hasta el borde derecho, entre 120 y 360 px.
+      span = Math.max(120, Math.min(360, window.innerWidth - e.clientX - 16));
+      try { d.setPointerCapture(pid); } catch (x) {}
+      d.classList.add('on'); document.body.classList.add('tdragging');
+      document.addEventListener('keydown', onKey);
+      show(0);
+    });
+    d.addEventListener('pointermove', function (e) { if (on) show(e.clientX - x0); });
+    d.addEventListener('pointerup', function () { end(true); });
+    d.addEventListener('pointercancel', function () { end(false); });
+    d.addEventListener('lostpointercapture', function () { end(false); });
+    return d;
   }
   function closeBars(except) {
     Array.prototype.forEach.call(list.querySelectorAll('.modbar'), function (b) { if (b.parentNode !== except) { b.parentNode.classList.remove('modsel'); b.remove(); } });
@@ -825,6 +895,7 @@
     shown.forEach(function (x) {
       var a = x[0];
       if (a === '-') { var sep = document.createElement('span'); sep.className = 'sep'; bar.appendChild(sep); return; }
+      if (a === 'timeout') { bar.appendChild(timeoutDrag(el, bar, m)); return; }
       var b = document.createElement('button');
       var label = (a === 'vip' || a === 'mod') ? roleLabel(a, m) : x[1];
       b.textContent = label;
@@ -851,14 +922,6 @@
             function () { res.className = 'mres bad'; res.textContent = '✗ ' + T('No se pudo copiar'); });
           return;
         }
-        if (a === 'info') {
-          if (m.p !== 'twitch' || !m.uid) { showCard(el, bar, null); return; }
-          res.className = 'mres'; res.textContent = T('Un momento…');
-          fetch('/api/mod', { method: 'POST', headers: { 'X-SD-Secret': SECRET, 'Content-Type': 'application/json' }, body: JSON.stringify({ p: m.p, a: 'info', uid: m.uid, user: m.user }) })
-            .then(function (r) { return r.json(); }).catch(function () { return null; })
-            .then(function (r) { res.textContent = '@' + m.user; showCard(el, bar, r); });
-          return;
-        }
         if (a === 'ban' && !sure(T('¿Seguro? Banear a ') + m.user)) return;
         if (a === 'purge') {
           var items = userMsgs(m).filter(function (x) { return x.id || m.p === 'youtube'; }).map(function (x) { return { id: x.id, text: x.text }; });
@@ -883,9 +946,10 @@
       };
       bar.appendChild(b);
     });
-    var r = document.createElement('span'); r.className = 'mres'; r.textContent = '@' + el._m.user; bar.appendChild(r);
+    var r = document.createElement('span'); r.className = 'mres'; bar.appendChild(r);
     el.appendChild(bar);
     el.classList.add('modsel');
+    loadCard(el, bar);
   });
 
   // ---------- Panel de moderación: modos del chat de Twitch y borrar el chat ----------
