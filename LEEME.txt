@@ -1,7 +1,13 @@
-VORTEXS LIVE 4.21 - delay dinámico y multistream para OBS (by Vortexs)
+VORTEXS LIVE 4.22 - delay dinámico y multistream para OBS (by Vortexs)
 =====================================================================
 
 Abre GUIA.html (doble clic) para ver la guía completa.
+
+Novedades de la 4.22
+- Panel de la derecha más fácil de encontrar: una pestaña en el borde
+  derecho de la ventana ("CHAT · VISTA PREVIA") lo abre y lo cierra con
+  un clic, sin tener que arrastrar el borde. Recuerda el ancho que
+  usaste. La primera vez sale un aviso que lo explica.
 
 Novedades de la 4.21
 - Resumen del directo: al terminar cada directo (de 3 minutos o más)

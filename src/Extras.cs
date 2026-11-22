@@ -315,7 +315,7 @@ namespace StreamDelay
 					Theme.DrawText(g, "Chat conjunto apagado: este overlay no recibe nada. Pulsa para activarlo.", Theme.BodySemi(7.25f), Theme.Yellow, new RectangleF(r.X + isz + S(5f), r.Y, r.Width - isz - S(5f), r.Height), StringAlignment.Near, StringAlignment.Center);
 					return;
 				}
-				Theme.DrawText(g, "En OBS: + → Navegador → pega la URL · 1920x1080 (chat: 500x700). Ensancha la ventana para ver la vista previa.", Theme.Body(7.25f), Theme.Muted, r, StringAlignment.Near, StringAlignment.Center);
+				Theme.DrawText(g, "En OBS: + → Navegador → pega la URL · 1920x1080 (chat: 500x700). Vista previa: pestaña › del borde.", Theme.Body(7.25f), Theme.Muted, r, StringAlignment.Near, StringAlignment.Center);
 			}, 5);
 			ovHint.Click += delegate
 			{

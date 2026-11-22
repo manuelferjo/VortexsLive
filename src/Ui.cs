@@ -478,6 +478,9 @@ namespace StreamDelay
 		// ======================= Ventana ancha: panel lateral =======================
 
 		private SidePanel side;
+		private PanelHandle panelHandle;
+		private int wideWidth = 960;        // ancho al abrir el panel (el último que usaste)
+		private bool panelTipShown;         // el aviso de la pestaña ya salió una vez
 		private PaintBox ovHint;
 		private int winWidth = 460;   // ancho guardado (medida de diseño)
 		private readonly List<ChatItem> activity = new List<ChatItem>();
@@ -544,6 +547,27 @@ namespace StreamDelay
 			side = new SidePanel(this);
 			Controls.Add(side);
 			side.Visible = false;
+			panelHandle = new PanelHandle();
+			Controls.Add(panelHandle);
+			panelHandle.Click += delegate { TogglePanel(); };
+			tip.SetToolTip(panelHandle, I18n.Tr("Abrir o cerrar el panel de la derecha: actividad del chat y vista previa de los overlays"));
+			// La primera vez se explica con un aviso.
+			if (!panelTipShown)
+			{
+				System.Windows.Forms.Timer once = new System.Windows.Forms.Timer { Interval = 2500 };
+				once.Tick += delegate
+				{
+					once.Stop();
+					once.Dispose();
+					if (!panelTipShown && side != null && !side.Visible)
+					{
+						panelTipShown = true;
+						SaveConfig();
+						Toast("Nuevo: pulsa la pestaña del borde derecho para ver el chat y la vista previa de los overlays.", "info");
+					}
+				};
+				once.Start();
+			}
 			Resize += delegate { LayoutWide(); };
 			if (winWidth > 460)
 			{
@@ -560,6 +584,13 @@ namespace StreamDelay
 				header.Width = ClientSize.Width;
 			}
 			bool wide = ClientSize.Width >= S(760f);
+			if (panelHandle != null)
+			{
+				panelHandle.Bounds = new Rectangle(S(443f), S(250f), S(16f), S(150f));
+				panelHandle.Open = wide;
+				panelHandle.BringToFront();
+				panelHandle.Invalidate();
+			}
 			if (side != null)
 			{
 				side.Visible = wide;
@@ -574,6 +605,31 @@ namespace StreamDelay
 			{
 				winWidth = w;
 			}
+			if (wide)
+			{
+				wideWidth = Math.Max(760, Math.Min(1180, w));
+			}
+		}
+
+		// Pestaña del borde: abre el panel (con el último ancho) o lo cierra.
+		private void TogglePanel()
+		{
+			panelTipShown = true;
+			if (ClientSize.Width >= S(760f))
+			{
+				ClientSize = new Size(S(460f), ClientSize.Height);
+			}
+			else
+			{
+				ClientSize = new Size(S((float)Math.Max(760, wideWidth)), ClientSize.Height);
+				// Que no se salga de la pantalla.
+				Rectangle wa = Screen.FromControl(this).WorkingArea;
+				if (Right > wa.Right)
+				{
+					Left = Math.Max(wa.Left, wa.Right - Width);
+				}
+			}
+			SaveConfig();
 		}
 
 		// ======================= Ventana mini =======================
@@ -696,6 +752,50 @@ namespace StreamDelay
 				setPickBtns[i].Selected = i == setPick;
 				setPickBtns[i].Invalidate();
 			}
+		}
+	}
+
+	// ======================= Pestaña del borde que abre y cierra el panel =======================
+	internal class PanelHandle : VControl
+	{
+		public bool Open;
+
+		public PanelHandle()
+		{
+			Cursor = Cursors.Hand;
+			TabStop = false;
+		}
+
+		protected override void OnPaint(PaintEventArgs e)
+		{
+			Graphics g = e.Graphics;
+			Theme.Quality(g);
+			float h = Ease(hoverT);
+			RectangleF r = new RectangleF(0.5f, 0.5f, Width - 1.5f, Height - 1.5f);
+			using (GraphicsPath p = Theme.Round(r, r.Width / 2f))
+			{
+				using (LinearGradientBrush b = new LinearGradientBrush(r, Theme.Mix(Theme.Elevated, Theme.Violet, 0.10f + 0.12f * h), Theme.Mix(Theme.Elevated, Theme.Yellow, 0.05f + 0.08f * h), LinearGradientMode.Vertical))
+				{
+					g.FillPath(b, p);
+				}
+				using (Pen pen = new Pen(Theme.Mix(Theme.BorderHi, Theme.Violet, 0.35f + 0.5f * h), 1.2f))
+				{
+					g.DrawPath(pen, p);
+				}
+			}
+			// Flecha: › abre, ‹ cierra.
+			float cx = Width / 2f, cy = Theme.S(16f), a = Theme.S(3.5f);
+			using (Pen pen = new Pen(Theme.Mix(Theme.Muted, Theme.VioletLight, 0.4f + 0.6f * h), Theme.S(1.6f)) { StartCap = LineCap.Round, EndCap = LineCap.Round })
+			{
+				float d = Open ? a * 0.6f : -a * 0.6f;
+				g.DrawLines(pen, new[] { new PointF(cx + d, cy - a), new PointF(cx - d, cy), new PointF(cx + d, cy + a) });
+			}
+			// Texto en vertical.
+			GraphicsState st = g.Save();
+			g.TranslateTransform(cx, Height - Theme.S(12f));
+			g.RotateTransform(-90f);
+			Theme.DrawText(g, Open ? "OCULTAR PANEL" : "CHAT · VISTA PREVIA", Theme.Mono(6.5f), Theme.Mix(Theme.Muted, Theme.VioletLight, 0.5f * h), new RectangleF(0f, -Theme.S(8f), Height - Theme.S(40f), Theme.S(16f)), StringAlignment.Near, StringAlignment.Center);
+			g.Restore(st);
 		}
 	}
 
