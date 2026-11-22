@@ -1,7 +1,14 @@
-VORTEXS LIVE 4.19 - delay dinámico y multistream para OBS (by Vortexs)
+VORTEXS LIVE 4.20 - delay dinámico y multistream para OBS (by Vortexs)
 =====================================================================
 
 Abre GUIA.html (doble clic) para ver la guía completa.
+
+Novedades de la 4.20
+- Alertas: un sonido propio para cada tipo (follows, subs, raids, bits,
+  canjes y donaciones). Pestaña Overlays → Alertas → "Elegir sonidos":
+  MP3, WAV u OGG, con botón para escucharlo y volumen. Los que no
+  elijas suenan con el sonido de siempre. En OBS, marca "Controlar
+  audio mediante OBS" en la fuente Navegador para oírlas en directo.
 
 Novedades de la 4.19
 - Overlays nuevos (pestaña Overlays, ahora con un selector arriba):
