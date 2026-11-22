@@ -9,7 +9,7 @@ namespace StreamDelay
 {
 	internal class TwitchPlatform : Platform
 	{
-		private const string Scopes = "channel:manage:broadcast moderator:read:followers user:write:chat moderator:manage:chat_messages moderator:manage:banned_users moderator:manage:chat_settings user:read:emotes channel:read:redemptions";
+		private const string Scopes = "channel:manage:broadcast moderator:read:followers user:write:chat moderator:manage:chat_messages moderator:manage:banned_users moderator:manage:chat_settings user:read:emotes channel:read:redemptions channel:manage:vips channel:manage:moderators";
 
 		public static string IdBase = "https://id.twitch.tv";
 
@@ -161,6 +161,12 @@ namespace StreamDelay
 
 		public void SendChat(string channelLogin, string text)
 		{
+			SendChat(channelLogin, text, null);
+		}
+
+		// replyTo: id del mensaje al que se responde (en Twitch sale como respuesta a ese mensaje).
+		public void SendChat(string channelLogin, string text, string replyTo)
+		{
 			string broadcasterId = BroadcasterId(channelLogin);
 			Dictionary<string, object> body = new Dictionary<string, object>
 			{
@@ -168,6 +174,10 @@ namespace StreamDelay
 				{ "sender_id", userId },
 				{ "message", text }
 			};
+			if (!string.IsNullOrEmpty(replyTo))
+			{
+				body["reply_parent_message_id"] = replyTo;
+			}
 			Dictionary<string, object> d;
 			try
 			{
@@ -199,6 +209,68 @@ namespace StreamDelay
 				return new ApiException(ex.Status, "falta permiso de moderación: vuelve a conectar Twitch en la pestaña Título (o no eres moderador de ese canal)");
 			}
 			return ex;
+		}
+
+		// Ficha de un usuario: cuándo creó la cuenta y desde cuándo sigue el canal ("" si no sigue).
+		// Lo que no se pueda saber (permisos, error) se deja sin poner.
+		public Dictionary<string, object> UserCard(string channelLogin, string targetUserId)
+		{
+			Dictionary<string, object> r = new Dictionary<string, object>();
+			string b = BroadcasterId(channelLogin);
+			try
+			{
+				List<Dictionary<string, object>> u = Http.Arr(Api("GET", ApiBase + "/users?id=" + Uri.EscapeDataString(targetUserId), H(), null), "data");
+				if (u.Count > 0)
+				{
+					r["created"] = Http.Str(u[0], "created_at");
+					r["login"] = Http.Str(u[0], "login");
+				}
+			}
+			catch
+			{
+			}
+			try
+			{
+				List<Dictionary<string, object>> f = Http.Arr(Api("GET", ApiBase + "/channels/followers?broadcaster_id=" + b + "&user_id=" + Uri.EscapeDataString(targetUserId), H(), null), "data");
+				r["followed"] = (f.Count > 0) ? Http.Str(f[0], "followed_at") : "";
+			}
+			catch
+			{
+			}
+			return r;
+		}
+
+		// Dar o quitar VIP / moderador (solo el dueño del canal; permisos channel:manage:vips y
+		// channel:manage:moderators).
+		public void SetVip(string channelLogin, string targetUserId, bool on)
+		{
+			RoleCall(ApiBase + "/channels/vips", channelLogin, targetUserId, on);
+		}
+
+		public void SetModerator(string channelLogin, string targetUserId, bool on)
+		{
+			RoleCall(ApiBase + "/moderation/moderators", channelLogin, targetUserId, on);
+		}
+
+		private void RoleCall(string url, string channelLogin, string targetUserId, bool on)
+		{
+			string b = BroadcasterId(channelLogin);
+			if (b != userId)
+			{
+				throw new ApiException(403, "solo el dueño del canal puede dar o quitar VIP y moderador");
+			}
+			try
+			{
+				Api(on ? "POST" : "DELETE", url + "?broadcaster_id=" + b + "&user_id=" + Uri.EscapeDataString(targetUserId), H(), null);
+			}
+			catch (ApiException ex)
+			{
+				if (ex.Status == 401 || ex.Status == 403)
+				{
+					throw new ApiException(ex.Status, "falta permiso: vuelve a conectar Twitch en la pestaña Título");
+				}
+				throw;
+			}
 		}
 
 		public void DeleteMessage(string channelLogin, string messageId)

@@ -251,6 +251,136 @@ namespace StreamDelay
 				return res;
 			}
 
+			// ---- Ficha del usuario (Twitch: antigüedad de la cuenta y desde cuándo sigue) ----
+			if (a == "info")
+			{
+				res["ok"] = true;
+				if (p == "twitch" && twitch.Connected && twCh.Length > 0 && uid.Length > 0)
+				{
+					try
+					{
+						foreach (KeyValuePair<string, object> kv in twitch.UserCard(twCh, uid))
+						{
+							res[kv.Key] = kv.Value;
+						}
+					}
+					catch (Exception ex)
+					{
+						res["note"] = ex.Message;
+					}
+				}
+				return res;
+			}
+
+			// ---- VIP y moderador (Twitch, solo el dueño del canal) ----
+			if (a == "vip+" || a == "vip-" || a == "mod+" || a == "mod-")
+			{
+				if (p != "twitch")
+				{
+					res["error"] = "dar VIP o moderador desde aquí solo se puede en Twitch";
+					return res;
+				}
+				if (!twitch.Connected || twCh.Length == 0)
+				{
+					res["error"] = "conecta tu cuenta de Twitch en la pestaña Título";
+					return res;
+				}
+				if (uid.Length == 0)
+				{
+					res["error"] = "este mensaje no trae los datos necesarios";
+					return res;
+				}
+				bool on = a.EndsWith("+");
+				bool vip = a.StartsWith("vip");
+				try
+				{
+					if (vip)
+					{
+						twitch.SetVip(twCh, uid, on);
+					}
+					else
+					{
+						twitch.SetModerator(twCh, uid, on);
+					}
+					string what = vip ? (on ? (user + " ahora es VIP") : (user + " ya no es VIP")) : (on ? (user + " ahora es moderador") : (user + " ya no es moderador"));
+					LogLater("Moderación Twitch: " + what + ".");
+					res["ok"] = true;
+					res["msg"] = what;
+				}
+				catch (Exception ex)
+				{
+					res["error"] = ex.Message;
+					LogLater("Moderación Twitch: " + ex.Message);
+				}
+				return res;
+			}
+
+			// ---- Borrar todos sus mensajes (los que hay en el chat), sin expulsarle ----
+			if (a == "purge")
+			{
+				if (p == "tiktok")
+				{
+					res["error"] = "TikTok no deja moderar desde otros programas: usa Ocultar";
+					return res;
+				}
+				Platform pp = (p == "twitch") ? twitch : ((p == "kick") ? ((Platform)kick) : ((p == "youtube") ? ((Platform)youtube) : null));
+				if (pp == null || !pp.Connected)
+				{
+					res["error"] = (pp == null) ? "plataforma desconocida" : ("conecta tu cuenta de " + pp.Name + " en la pestaña Título para moderar");
+					return res;
+				}
+				int done = 0, total = 0;
+				string lastError = "";
+				foreach (object o in J.L(d, "items"))
+				{
+					if (total >= 50)
+					{
+						break;
+					}
+					string mid = J.S(o, "id");
+					string mtext = J.S(o, "text");
+					if (mid.Length == 0 && p != "youtube")
+					{
+						continue;
+					}
+					total++;
+					try
+					{
+						if (p == "twitch")
+						{
+							twitch.DeleteMessage(twCh, mid);
+						}
+						else if (p == "kick")
+						{
+							kick.DeleteMessage(mid);
+						}
+						else
+						{
+							youtube.DeleteMessage(uid, mtext);
+						}
+						done++;
+						if (mid.Length > 0)
+						{
+							chatServer.Send(new ChatItem { t = "del", p = p, id = mid });
+						}
+					}
+					catch (Exception ex)
+					{
+						lastError = ex.Message;
+					}
+				}
+				if (done == 0)
+				{
+					res["error"] = (lastError.Length > 0) ? lastError : "no hay mensajes suyos que borrar";
+					return res;
+				}
+				string pmsg = (done == 1) ? ("1 mensaje de " + user + " borrado") : (done + " mensajes de " + user + " borrados");
+				LogLater("Moderación " + pp.Name + ": " + pmsg + ".");
+				res["ok"] = true;
+				res["msg"] = pmsg;
+				return res;
+			}
+
 			// ---- Una persona o un mensaje, en la plataforma ----
 			int secs = (a == "t60") ? 60 : ((a == "t600") ? 600 : ((a == "t3600") ? 3600 : ((a == "t86400") ? 86400 : 0)));
 			bool del = a == "del";

@@ -1,7 +1,18 @@
-VORTEXS LIVE 4.13 - delay dinámico y multistream para OBS (by Vortexs)
+VORTEXS LIVE 4.14 - delay dinámico y multistream para OBS (by Vortexs)
 =====================================================================
 
 Abre GUIA.html (doble clic) para ver la guía completa.
+
+Novedades de la 4.14
+- Chat: al pulsar un mensaje hay más opciones:
+  · Responder: pone @usuario en la caja (en Twitch sale como respuesta
+    a su mensaje).
+  · Copiar el mensaje.
+  · Ficha: cuándo creó la cuenta y desde cuándo te sigue (Twitch) y sus
+    últimos mensajes en el chat.
+  · Borrar todos: borra todos sus mensajes del chat sin expulsarle.
+  · Twitch: dar o quitar VIP y moderador (solo el dueño del canal; hay
+    que volver a conectar Twitch una vez en la pestaña Título).
 
 Novedades de la 4.13
 - Chat: salen los canjes de puntos del canal de Twitch (quién, qué
