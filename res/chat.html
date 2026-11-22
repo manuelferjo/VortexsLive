@@ -140,7 +140,8 @@
   .msg.modsel { background: rgba(192,154,253,.08); }
   /* Timeout arrastrando el nombre hacia la derecha: la barrita sale a la izquierda del mensaje. */
   .msg { position: relative; }
-  body:not(.overlay):not(.nomod) .msg[data-mod] .name { touch-action: pan-y; }
+  body:not(.overlay):not(.nomod) .msg[data-mod] .name { touch-action: pan-y; user-select: none; cursor: grab; }
+  .msg img, .msg svg { -webkit-user-drag: none; user-drag: none; }
   .msg.swiping { background: rgba(255,120,60,.07); transition: none; }
   .msg.swipe-back { transition: transform .18s ease-out; }
   .tswipe { position: absolute; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 6px; padding: 2px 8px 2px 7px; border-radius: 999px;
@@ -461,7 +462,7 @@
 
   function rolesHtml(roles, imgs) {
     // Twitch con la cuenta conectada: los emblemas de verdad (los de sub de tu canal, bits, etc.).
-    if (imgs && imgs.length) return imgs.map(function (b) { return '<img class="badge" src="' + esc(b[0]) + '" alt="" title="' + esc(b[1]) + '">'; }).join('');
+    if (imgs && imgs.length) return imgs.map(function (b) { return '<img class="badge" draggable="false" src="' + esc(b[0]) + '" alt="" title="' + esc(b[1]) + '">'; }).join('');
     return (roles || []).map(function (r) {
       var x = ROLES[r];
       if (!x) return '';
@@ -949,11 +950,16 @@
   list.addEventListener('pointerdown', function (e) {
     if (e.button !== 0 || swipe) return;
     if (document.body.classList.contains('overlay') || document.body.classList.contains('nomod')) return;
-    var name = e.target.closest('.name'), el = name && name.closest('.msg[data-mod]');
-    if (!el || !el._m || !el._m.uid || el._m.p === 'tiktok' || el.querySelector('.modbar')) return;
-    e.preventDefault();   // que no empiece a seleccionar texto
+    var el = e.target.closest('.msg[data-mod]');
+    if (!el || !el._m || !el._m.uid || el._m.p === 'tiktok' || el.querySelector('.modbar') || e.target.closest('a, .modbar, .tswipe')) return;
+    var name = el.querySelector('.name');
+    if (!name) return;
+    // Vale pulsar en el icono de la plataforma, en los emblemas o en el nombre (todo lo que va antes de ":").
+    var nr = name.getBoundingClientRect();
+    if (e.clientX > nr.right + 4 || e.clientY < nr.top - 4 || e.clientY > nr.bottom + 4) return;
+    e.preventDefault();   // que no empiece a seleccionar texto ni a arrastrar una imagen
     swipe = { el: el, x0: e.clientX, val: 0, moved: false, id: e.pointerId, span: Math.max(120, Math.min(360, window.innerWidth - e.clientX - 16)) };
-    try { name.setPointerCapture(e.pointerId); } catch (x) {}
+    try { el.setPointerCapture(e.pointerId); } catch (x) {}
   });
   list.addEventListener('pointermove', function (e) {
     var s = swipe; if (!s || e.pointerId !== s.id) return;
@@ -967,6 +973,8 @@
     swipeShow(dx);
   });
   list.addEventListener('pointerup', function (e) { if (swipe && e.pointerId === swipe.id) swipeEnd(true); });
+  document.addEventListener('selectstart', function (e) { if (swipe) e.preventDefault(); });
+  list.addEventListener('dragstart', function (e) { if (swipe || (e.target.tagName === 'IMG' && e.target.closest('.msg[data-mod]'))) e.preventDefault(); });
   list.addEventListener('pointercancel', function () { swipeEnd(false); });
   list.addEventListener('lostpointercapture', function (e) { if (swipe && e.pointerId === swipe.id) swipeEnd(false); });
 

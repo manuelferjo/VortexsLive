@@ -1,7 +1,13 @@
-VORTEXS LIVE 4.16 - delay dinámico y multistream para OBS (by Vortexs)
+VORTEXS LIVE 4.17 - delay dinámico y multistream para OBS (by Vortexs)
 =====================================================================
 
 Abre GUIA.html (doble clic) para ver la guía completa.
+
+Novedades de la 4.17
+- Chat: el timeout arrastrando funciona también empezando en el icono
+  de la plataforma o en los emblemas, no solo en las letras del nombre.
+  Arreglado: al pulsar sobre un emblema, el navegador arrastraba la
+  imagen y no salía la barrita.
 
 Novedades de la 4.16
 - Chat: timeout rápido sin abrir nada. Mantén pulsado el NOMBRE de quien
