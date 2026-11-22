@@ -164,6 +164,12 @@ namespace StreamDelay
 			{
 			}
 
+			// ---- Overlays: mensaje destacado y encuesta ----
+			if (a == "feature" || a == "unfeature" || a == "poll")
+			{
+				return WidgetMod(d, a);
+			}
+
 			// ---- Solo en tu chat y en la pantalla (vale también para TikTok) ----
 			if (a == "hide")
 			{

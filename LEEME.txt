@@ -1,7 +1,20 @@
-VORTEXS LIVE 4.18 - delay dinámico y multistream para OBS (by Vortexs)
+VORTEXS LIVE 4.19 - delay dinámico y multistream para OBS (by Vortexs)
 =====================================================================
 
 Abre GUIA.html (doble clic) para ver la guía completa.
+
+Novedades de la 4.19
+- Overlays nuevos (pestaña Overlays, ahora con un selector arriba):
+  · Alertas: follows, subs, regalos, raids, bits, canjes, Super Chats,
+    Kicks, regalos de TikTok y donaciones de todas las plataformas en
+    una sola fuente, con animación y sonido. Botón para probarlas.
+  · Mensaje destacado: en el chat conjunto, pulsa un mensaje →
+    "📌 En pantalla" y sale grande en el directo.
+  · Barra de objetivo: follows, subs o bits (o a mano), sumando todas
+    las plataformas.
+  · Últimos eventos: una cinta que pasa con los últimos eventos.
+  · Encuesta: botón "🗳 Encuesta" al lado de Moderar en el chat
+    conjunto. Se vota escribiendo 1, 2… en cualquier plataforma.
 
 Novedades de la 4.18
 - Chat: al arrastrar el nombre para un timeout, a la izquierda del

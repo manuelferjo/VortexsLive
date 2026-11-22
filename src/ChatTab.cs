@@ -243,6 +243,7 @@ namespace StreamDelay
 					chatServer.OnInfo = ChatSendInfo;
 					chatServer.OnSend = ChatSendAll;
 					chatServer.OnSendReply = ChatSendAll;
+					chatServer.OnWidgets = WidgetsJson;
 					chatServer.OnDelayState = DelayStateJson;
 					chatServer.OnViewersState = ViewersStateJson;
 					WireServer();
@@ -273,6 +274,7 @@ namespace StreamDelay
 					chatServer.OnInfo = ChatSendInfo;
 					chatServer.OnSend = ChatSendAll;
 					chatServer.OnSendReply = ChatSendAll;
+					chatServer.OnWidgets = WidgetsJson;
 					chatServer.OnDelayState = DelayStateJson;
 					chatServer.OnViewersState = ViewersStateJson;
 					WireServer();
@@ -463,6 +465,7 @@ namespace StreamDelay
 				}
 				chatServer.Send(it);
 				OnChatItem(it);
+				WidgetsOnItem(it);
 			};
 			chatHub.Start();
 			if (tk.Length > 0 && tkKey.Length == 0)
@@ -852,6 +855,7 @@ namespace StreamDelay
 			chatAutoStart = get("chat_on") == "1";
 			tgChat.Checked = chatAutoStart;
 			LoadExtrasConfig(raw);
+			LoadWidgetsConfig(raw);
 			LoadCmdConfig(raw);
 			LoadAutoModConfig(raw);
 			LoadChatStyleConfig(raw);
@@ -872,6 +876,7 @@ namespace StreamDelay
 				lines.Add("chat_se=" + Secret.Protect(seToken));
 				lines.Add("chat_sl=" + Secret.Protect(slToken));
 				SaveExtrasConfig(lines);
+				SaveWidgetsConfig(lines);
 				SaveCmdConfig(lines);
 				SaveAutoModConfig(lines);
 				SaveChatStyleConfig(lines);

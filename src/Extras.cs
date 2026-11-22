@@ -137,6 +137,28 @@ namespace StreamDelay
 		private bool vwVertical;
 		private float vwScale = 1f;
 
+		// Qué overlay se está viendo en la pestaña (selector de arriba) y su recuadro.
+		private int ovPick;
+		private Card[] ovCards = new Card[0];
+		private VButton[] ovPickBtns = new VButton[0];
+
+		// Solo se ve el recuadro del overlay elegido (ShowPage enseña todos los de la pestaña).
+		private void ApplyOverlayPick()
+		{
+			for (int i = 0; i < ovCards.Length; i++)
+			{
+				if (ovCards[i] != null)
+				{
+					ovCards[i].Visible = i == ovPick;
+				}
+			}
+			for (int i = 0; i < ovPickBtns.Length; i++)
+			{
+				ovPickBtns[i].Selected = i == ovPick;
+				ovPickBtns[i].Invalidate();
+			}
+		}
+
 		private string OverlayUrl(string path)
 		{
 			return EnsureChatServer() ? ("http://127.0.0.1:" + chatServer.Port + "/" + path) : null;
@@ -198,9 +220,26 @@ namespace StreamDelay
 			};
 		}
 
-		private void BuildOverlays(int y0)
+		private void BuildOverlays(int pageTop)
 		{
 			float[] scales = new float[3] { 1f, 1.3f, 1.6f };
+
+			// Selector: los ocho overlays en dos filas; debajo, el recuadro del elegido.
+			string[] picks = new string[8] { "Delay", "Espectadores", "Chat", "Alertas", "Destacado", "Objetivo", "Eventos", "Encuesta" };
+			ovPickBtns = new VButton[8];
+			for (int i = 0; i < 8; i++)
+			{
+				int idx = i;
+				ovPickBtns[i] = new VButton { Kind = ButtonKind.Pill, Text = picks[i], Selected = i == ovPick, FontSize = 8f };
+				Place(this, ovPickBtns[i], 20f + (float)(i % 4) * 106.5f, (float)pageTop + (float)(i / 4) * 32f, 100.5f, 28f, 5);
+				ovPickBtns[i].Click += delegate
+				{
+					ovPick = idx;
+					ApplyOverlayPick();
+					SaveConfig();
+				};
+			}
+			int y0 = pageTop + 70;
 
 			// --- Delay ---
 			Card c1 = new Card();
@@ -217,7 +256,7 @@ namespace StreamDelay
 			StyleLink(c1);
 
 			// --- Espectadores ---
-			int y2 = y0 + 160;
+			int y2 = y0;
 			Card c2 = new Card();
 			c2.Title = "Espectadores";
 			c2.Subtitle = "De cada plataforma y el total. Necesita el chat activado.";
@@ -250,7 +289,7 @@ namespace StreamDelay
 			StyleLink(c2);
 
 			// --- Chat en pantalla ---
-			int y3 = y2 + 244;
+			int y3 = y0;
 			Card c3 = new Card();
 			c3.Title = "Chat en pantalla";
 			c3.Subtitle = "Twitch, Kick, YouTube y TikTok juntos, con su propio estilo.";
@@ -261,10 +300,14 @@ namespace StreamDelay
 			Place(c3, chatLink, 230f, 13f, 170f, 24f);
 			chatLink.Click += delegate { ChatStyleDialog(); };
 
-			Box(this, 22f, y3 + 104, 416f, 18f, delegate(Graphics g, Rectangle r)
+			Card[] more = BuildWidgetCards(y0);
+			ovCards = new Card[8] { c1, c2, c3, more[0], more[1], more[2], more[3], more[4] };
+
+			Box(this, 22f, 620f, 416f, 18f, delegate(Graphics g, Rectangle r)
 			{
 				Theme.DrawText(g, "En OBS: + → Navegador → pega la URL · 1920x1080 (chat: 500x700).", Theme.Body(7.25f), Theme.Muted, r, StringAlignment.Near, StringAlignment.Center);
 			}, 5);
+			ApplyOverlayPick();
 		}
 
 		// ---------- Ventana "Avisos de delay en el chat" ----------

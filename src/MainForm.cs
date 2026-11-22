@@ -128,7 +128,7 @@ namespace StreamDelay
 
 		// ---------- Constantes ----------
 
-		private const string Version = "4.18";
+		private const string Version = "4.19";
 
 		private const string TikTokName = "TikTok";
 
@@ -530,6 +530,10 @@ namespace StreamDelay
 				}
 			}
 			ResumeLayout();
+			if (p == PageOverlays)
+			{
+				ApplyOverlayPick();
+			}
 			if (p == PageClips)
 			{
 				RefreshClipList();
