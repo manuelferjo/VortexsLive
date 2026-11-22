@@ -23,6 +23,9 @@ namespace StreamDelay
 
 		private void BuildSettings(int y0)
 		{
+			// Arriba, las secciones; debajo, el recuadro de la elegida.
+			BuildSettingsPicker(y0);
+			y0 += 38;
 			BuildDestinations(y0);
 
 			// Recuadro OBS: servidor para copiar en OBS, puerto y modo de 2 PCs.
@@ -30,7 +33,7 @@ namespace StreamDelay
 			{
 				Title = "OBS"
 			};
-			Place(this, obsCard, 20f, y0 + 238, 420f, 166f, PageSettings);
+			Place(this, obsCard, 20f, y0, 420f, 166f, PageSettings);
 			VButton howTo = new VButton
 			{
 				Kind = ButtonKind.Link,
@@ -92,7 +95,8 @@ namespace StreamDelay
 
 			// Recuadro de opciones.
 			Card optionsCard = new Card();
-			Place(this, optionsCard, 20f, y0 + 414, 420f, 104f, PageSettings);
+			Place(this, optionsCard, 20f, y0, 420f, 104f, PageSettings);
+			setCards = new Card[3] { destCard, obsCard, optionsCard };
 			tgReplay = new Toggle
 			{
 				Text = "Al subir el delay, repetir lo último (si no, se congela)"
@@ -180,6 +184,8 @@ namespace StreamDelay
 		}
 
 		// Recuadro "Destinos": un interruptor y un botón Editar por destino.
+		private Card destCard;
+
 		private void BuildDestinations(int y0)
 		{
 			InitDestinations();
@@ -188,6 +194,7 @@ namespace StreamDelay
 				Title = "Destinos"
 			};
 			Place(this, card, 20f, y0, 420f, 228f, PageSettings);
+			destCard = card;
 			Box(card, 160f, 14f, 240f, 24f, delegate(Graphics g, Rectangle r)
 			{
 				Theme.DrawText(g, "Se emite a la vez en los activados", Theme.Body(7.75f), Theme.Muted, r, StringAlignment.Far, StringAlignment.Center);

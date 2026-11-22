@@ -408,7 +408,7 @@ namespace StreamDelay
 			base.FormBorderStyle = FormBorderStyle.FixedSingle;
 			base.MaximizeBox = false;
 			base.AutoScaleMode = AutoScaleMode.None;
-			base.ClientSize = new Size(S(460f), S(646f));
+			base.ClientSize = new Size(S(460f), S(654f));
 			base.StartPosition = FormStartPosition.CenterScreen;
 			DoubleBuffered = true;
 			try
@@ -430,13 +430,14 @@ namespace StreamDelay
 			{
 			}
 			int formWidth = 460;
-			int pageTop = 118;
+			int pageTop = 126;
 			header = Box(this, 0f, 0f, formWidth, 70f, PaintHeader);
 			tabs = new Tabs
 			{
-				Items = new string[8] { "Directo", "Chat", "Overlays", "Mando", "Clips", "Título", "Ajustes", "Registro" }
+				Items = new string[8] { "Directo", "Chat", "Overlays", "Mando", "Clips", "Título", "Ajustes", "Registro" },
+				IconNames = new string[8] { "live", "chat", "layers", "remote", "film", "text", "gear", "list" }
 			};
-			Place(this, tabs, 20f, 72f, 420f, 36f);
+			Place(this, tabs, 20f, 72f, 420f, 46f);
 			tabs.SelectedChanged += delegate
 			{
 				ShowPage(TabPages[tabs.Selected]);
@@ -479,6 +480,7 @@ namespace StreamDelay
 			BuildClips(pageTop);
 			RefreshPresetButtons();
 			fldObs.Box.Text = ObsServer;
+			UiInit();
 			ShowPage(PageLive);
 			timer = new System.Windows.Forms.Timer
 			{
@@ -491,6 +493,7 @@ namespace StreamDelay
 				CheckHealth();
 				LicenseTick();
 				SummaryTick();
+				UiSlowTick();
 			};
 			timer.Start();
 			RefreshStatus();
@@ -510,6 +513,9 @@ namespace StreamDelay
 			tabs.Selected = PageTab(page);
 		}
 
+		// Página que se ve ahora (para la transición).
+		private int curPage = -1;
+
 		private void ShowPage(int p)
 		{
 			// Chat, Overlays y Mando sin el plan Completo: se enseña el aviso en su lugar.
@@ -522,6 +528,7 @@ namespace StreamDelay
 					lockBox.Invalidate();
 				}
 			}
+			System.Drawing.Bitmap trOld = TransitionBegin(curPage, p);
 			SuspendLayout();
 			for (int i = 0; i < pages.Length; i++)
 			{
@@ -531,9 +538,22 @@ namespace StreamDelay
 				}
 			}
 			ResumeLayout();
+			curPage = p;
+			if (p == PageSettings)
+			{
+				ApplySettingsPick();
+			}
+			if (side != null && side.Visible)
+			{
+				side.Invalidate();
+			}
 			if (p == PageOverlays)
 			{
 				ApplyOverlayPick();
+			}
+			if (trOld != null)
+			{
+				TransitionEnd(p);
 			}
 			if (p == PageClips)
 			{
@@ -912,7 +932,8 @@ namespace StreamDelay
 			{
 				Kind = ButtonKind.Ghost,
 				Text = "Copiar",
-				FontSize = 9.5f
+				FontSize = 9.5f,
+				Icon = "copy"
 			};
 			// Cuatro botones: copiar, resúmenes de los directos, guía y buscar actualizaciones.
 			Place(this, copy, 20f, y0 + 452, 99f, 40f, PageLog);
@@ -924,14 +945,16 @@ namespace StreamDelay
 			{
 				Kind = ButtonKind.Ghost,
 				Text = "Guía",
-				FontSize = 9.5f
+				FontSize = 9.5f,
+				Icon = "book"
 			};
 			Place(this, guide, 234f, y0 + 452, 99f, 40f, PageLog);
 			VButton sums = new VButton
 			{
 				Kind = ButtonKind.Ghost,
 				Text = "Resúmenes",
-				FontSize = 9.5f
+				FontSize = 9.5f,
+				Icon = "chart"
 			};
 			Place(this, sums, 127f, y0 + 452, 99f, 40f, PageLog);
 			sums.Click += delegate
@@ -946,7 +969,8 @@ namespace StreamDelay
 			{
 				Kind = ButtonKind.Ghost,
 				Text = "Versión",
-				FontSize = 9.5f
+				FontSize = 9.5f,
+				Icon = "download"
 			};
 			Place(this, upd, 341f, y0 + 452, 99f, 40f, PageLog);
 			upd.Click += delegate

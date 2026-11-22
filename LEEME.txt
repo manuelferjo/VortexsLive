@@ -15,6 +15,20 @@ Novedades de la 4.21
 - Chat: al guardar un clip (con !guardar, Ctrl+Alt+C, el botón Clip o
   el Mando) sale un aviso en el chat conjunto y en el chat en pantalla:
   "🎬 Pepe ha guardado un clip de 60 s".
+- Interfaz renovada:
+  · Avisos propios abajo de la ventana (clip guardado, encuesta
+    terminada, resumen guardado, problemas de conexión…).
+  · Al cambiar de pestaña, la nueva entra con un fundido suave.
+  · La cifra del delay cuenta hasta el valor nuevo.
+  · Iconos en las pestañas y en los botones principales.
+  · La ventana se puede ensanchar: a la derecha sale la actividad del
+    chat (mensajes y eventos de todas las plataformas) y, en Overlays,
+    la vista previa del overlay elegido con tus colores y ajustes.
+  · Si el chat conjunto está apagado, la app lo dice y deja activarlo
+    con un clic (panel de actividad y pestaña Overlays).
+  · Ventana mini (botón junto a "Activado" en Directo): siempre encima,
+    con el estado del directo, el delay, ±5 s y el botón de clip.
+  · Ajustes por secciones: Destinos · OBS · Opciones.
 
 Novedades de la 4.20
 - Alertas: un sonido propio para cada tipo (follows, subs, raids, bits,

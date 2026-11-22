@@ -157,6 +157,8 @@ namespace StreamDelay
 				ovPickBtns[i].Selected = i == ovPick;
 				ovPickBtns[i].Invalidate();
 			}
+			if (ovHint != null) ovHint.Invalidate();
+			if (side != null && side.Visible) side.Invalidate();
 		}
 
 		private string OverlayUrl(string path)
@@ -197,7 +199,7 @@ namespace StreamDelay
 
 		private void UrlButtons(Card card, string path, string what, float y)
 		{
-			VButton copy = new VButton { Kind = ButtonKind.Primary, Text = "Copiar URL", FontSize = 9f };
+			VButton copy = new VButton { Kind = ButtonKind.Primary, Text = "Copiar URL", FontSize = 9f, Icon = "copy" };
 			Place(card, copy, 20f, y, 186f, 34f);
 			copy.Click += delegate
 			{
@@ -208,7 +210,7 @@ namespace StreamDelay
 					AppendLog("Overlay de " + what + ": " + u + " (en OBS: fuente Navegador).");
 				}
 			};
-			VButton see = new VButton { Kind = ButtonKind.Ghost, Text = "Vista previa", FontSize = 9f };
+			VButton see = new VButton { Kind = ButtonKind.Ghost, Text = "Vista previa", FontSize = 9f, Icon = "external" };
 			Place(card, see, 214f, y, 186f, 34f);
 			see.Click += delegate
 			{
@@ -303,10 +305,26 @@ namespace StreamDelay
 			Card[] more = BuildWidgetCards(y0);
 			ovCards = new Card[8] { c1, c2, c3, more[0], more[1], more[2], more[3], more[4] };
 
-			Box(this, 22f, 620f, 416f, 18f, delegate(Graphics g, Rectangle r)
+			ovHint = Box(this, 22f, 628f, 416f, 18f, delegate(Graphics g, Rectangle r)
 			{
-				Theme.DrawText(g, "En OBS: + → Navegador → pega la URL · 1920x1080 (chat: 500x700).", Theme.Body(7.25f), Theme.Muted, r, StringAlignment.Near, StringAlignment.Center);
+				// Sin el chat conjunto, los overlays (menos el de delay) no reciben nada: se avisa.
+				if (ovPick != 0 && !ChatOn)
+				{
+					float isz = S(13f);
+					Icons.Draw(g, "warning", new RectangleF(r.X, r.Y + (r.Height - isz) / 2f, isz, isz), Theme.Yellow);
+					Theme.DrawText(g, "Chat conjunto apagado: este overlay no recibe nada. Pulsa para activarlo.", Theme.BodySemi(7.25f), Theme.Yellow, new RectangleF(r.X + isz + S(5f), r.Y, r.Width - isz - S(5f), r.Height), StringAlignment.Near, StringAlignment.Center);
+					return;
+				}
+				Theme.DrawText(g, "En OBS: + → Navegador → pega la URL · 1920x1080 (chat: 500x700). Ensancha la ventana para ver la vista previa.", Theme.Body(7.25f), Theme.Muted, r, StringAlignment.Near, StringAlignment.Center);
 			}, 5);
+			ovHint.Click += delegate
+			{
+				if (ovPick != 0 && !ChatOn)
+				{
+					TurnChatOn();
+					ovHint.Invalidate();
+				}
+			};
 			ApplyOverlayPick();
 		}
 

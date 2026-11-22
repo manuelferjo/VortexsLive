@@ -108,6 +108,7 @@ namespace StreamDelay
 				}
 				clipBusy = false;
 				LogLater(message + " (" + who + ")");
+				Toast(ok ? I18n.Tr("Clip guardado") + " · " + who : message, ok ? "clip" : "error");
 				// La pestaña Clips enseña el nuevo.
 				try
 				{

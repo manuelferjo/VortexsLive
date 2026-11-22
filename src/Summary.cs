@@ -232,6 +232,7 @@ namespace StreamDelay
 				AppendHistory(s);
 				lastSummaryFile = file;
 				LogLater("Resumen del directo guardado: " + file);
+				Toast("Resumen del directo guardado. Lo tienes en Registro → Resúmenes.", "ok");
 				if (open)
 				{
 					try

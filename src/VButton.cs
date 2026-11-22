@@ -18,6 +18,9 @@ namespace StreamDelay
 
 		public float FontSize = 9.5f;
 
+		// Icono de línea (Icons.cs) a la izquierda del texto; null = sin icono.
+		public string Icon;
+
 		public VButton()
 		{
 			Cursor = Cursors.Hand;
@@ -173,6 +176,23 @@ namespace StreamDelay
 						}
 					}
 				}
+			}
+			// Con icono: icono + texto, centrados juntos.
+			if (!string.IsNullOrEmpty(Icon) && Kind != ButtonKind.Link)
+			{
+				string label = I18n.Tr(Text ?? "");
+				float isz = f.GetHeight(graphics) * 1.05f;
+				float gap = label.Length > 0 ? isz * 0.42f : 0f;
+				float tw = label.Length > 0 ? Theme.Measure(graphics, label, f).Width : 0f;
+				float x0 = rect.X + (rect.Width - (isz + gap + tw)) / 2f;
+				Icons.Draw(graphics, Icon, new RectangleF(x0, rect.Y + (rect.Height - isz) / 2f, isz, isz), c);
+				if (label.Length > 0)
+				{
+					// Hasta el borde del botón: la medida puede quedarse algo corta y no se debe cortar.
+					float tx = x0 + isz + gap;
+					Theme.DrawText(graphics, label, f, c, new RectangleF(tx, rect.Y, Math.Max(tw + 4f, rect.Right - tx - 2f), rect.Height), StringAlignment.Near, StringAlignment.Center);
+				}
+				return;
 			}
 			// Los enlaces van alineados a la derecha; el resto, centrados.
 			Theme.DrawText(graphics, Text, f, c, rect, (Kind != ButtonKind.Link) ? StringAlignment.Center : StringAlignment.Far, StringAlignment.Center);
