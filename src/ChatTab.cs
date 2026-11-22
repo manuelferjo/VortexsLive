@@ -468,6 +468,7 @@ namespace StreamDelay
 				chatServer.Send(it);
 				OnChatItem(it);
 				WidgetsOnItem(it);
+				SummaryOnItem(it);
 			};
 			chatHub.Start();
 			if (tk.Length > 0 && tkKey.Length == 0)

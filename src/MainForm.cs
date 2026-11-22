@@ -128,7 +128,7 @@ namespace StreamDelay
 
 		// ---------- Constantes ----------
 
-		private const string Version = "4.20";
+		private const string Version = "4.21";
 
 		private const string TikTokName = "TikTok";
 
@@ -490,6 +490,7 @@ namespace StreamDelay
 				RefreshStatus();
 				CheckHealth();
 				LicenseTick();
+				SummaryTick();
 			};
 			timer.Start();
 			RefreshStatus();
@@ -913,8 +914,8 @@ namespace StreamDelay
 				Text = "Copiar",
 				FontSize = 9.5f
 			};
-			// Tres botones: copiar, guía y buscar actualizaciones (los clips tienen su pestaña).
-			Place(this, copy, 20f, y0 + 452, 133f, 40f, PageLog);
+			// Cuatro botones: copiar, resúmenes de los directos, guía y buscar actualizaciones.
+			Place(this, copy, 20f, y0 + 452, 99f, 40f, PageLog);
 			copy.Click += delegate
 			{
 				CopyText((tbLog.Text.Length > 0) ? tbLog.Text : " ", copy, "Copiar");
@@ -925,7 +926,18 @@ namespace StreamDelay
 				Text = "Guía",
 				FontSize = 9.5f
 			};
-			Place(this, guide, 163.5f, y0 + 452, 133f, 40f, PageLog);
+			Place(this, guide, 234f, y0 + 452, 99f, 40f, PageLog);
+			VButton sums = new VButton
+			{
+				Kind = ButtonKind.Ghost,
+				Text = "Resúmenes",
+				FontSize = 9.5f
+			};
+			Place(this, sums, 127f, y0 + 452, 99f, 40f, PageLog);
+			sums.Click += delegate
+			{
+				OpenSummary();
+			};
 			guide.Click += delegate
 			{
 				OpenGuide();
@@ -936,7 +948,7 @@ namespace StreamDelay
 				Text = "Versión",
 				FontSize = 9.5f
 			};
-			Place(this, upd, 307f, y0 + 452, 133f, 40f, PageLog);
+			Place(this, upd, 341f, y0 + 452, 99f, 40f, PageLog);
 			upd.Click += delegate
 			{
 				upd.Enabled = false;
@@ -1070,6 +1082,7 @@ namespace StreamDelay
 				UnregisterHotKey(base.Handle, i);
 			}
 			SaveConfig();
+			SummaryOnClose();
 			engine.Stop();
 			StopVertical();
 			base.OnFormClosing(e);

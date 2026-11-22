@@ -1,7 +1,20 @@
-VORTEXS LIVE 4.20 - delay dinámico y multistream para OBS (by Vortexs)
+VORTEXS LIVE 4.21 - delay dinámico y multistream para OBS (by Vortexs)
 =====================================================================
 
 Abre GUIA.html (doble clic) para ver la guía completa.
+
+Novedades de la 4.21
+- Resumen del directo: al terminar cada directo (de 3 minutos o más)
+  se guarda una página en la carpeta "resumenes" y se abre en el
+  navegador: duración, pico de espectadores (total y por plataforma),
+  follows, subs, bits, donaciones, raids, canjes, mensajes, quién ha
+  escrito más, quién ha regalado subs y clips guardados, comparado con
+  el directo anterior. Pestaña Registro → "Resúmenes" para verlo
+  (en pleno directo enseña el de ahora). Los espectadores y los
+  eventos se cuentan con el chat conjunto activado.
+- Chat: al guardar un clip (con !guardar, Ctrl+Alt+C, el botón Clip o
+  el Mando) sale un aviso en el chat conjunto y en el chat en pantalla:
+  "🎬 Pepe ha guardado un clip de 60 s".
 
 Novedades de la 4.20
 - Alertas: un sonido propio para cada tipo (follows, subs, raids, bits,
