@@ -138,6 +138,18 @@
   /* Moderación: pulsa un mensaje para borrarlo o expulsar a quien lo escribió */
   body:not(.overlay):not(.nomod) .msg[data-mod] { cursor: pointer; }
   .msg.modsel { background: rgba(192,154,253,.08); }
+  /* Timeout arrastrando el nombre hacia la derecha: la barrita sale a la izquierda del mensaje. */
+  .msg { position: relative; }
+  body:not(.overlay):not(.nomod) .msg[data-mod] .name { touch-action: pan-y; }
+  .msg.swiping { background: rgba(255,120,60,.07); transition: none; }
+  .msg.swipe-back { transition: transform .18s ease-out; }
+  .tswipe { position: absolute; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 6px; padding: 2px 8px 2px 7px; border-radius: 999px;
+    background: var(--elev); border: 1px solid var(--border); font-size: .74em; font-weight: 700; white-space: nowrap; z-index: 3; pointer-events: none; font-variant-numeric: tabular-nums; }
+  .tswipe .tb { width: 44px; height: 4px; border-radius: 2px; background: rgba(255,255,255,.12); overflow: hidden; }
+  .tswipe .tb i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #ffb020, #ff4655); }
+  .tswipe.ok { color: var(--green); border-color: rgba(64,255,128,.35); } .tswipe.bad { color: #ff8a95; border-color: rgba(255,70,85,.45); }
+  .tswipe button { pointer-events: auto; font: inherit; border: 0; background: none; color: var(--yellow); cursor: pointer; padding: 0 0 0 4px; }
+  .tswipe.fade { opacity: 0; transition: opacity .4s; }
   /* Enlaces del chat: se abren en una pestaña nueva (en pantalla, como texto normal). */
   a.lnk { color: var(--violet); text-decoration: underline; text-decoration-color: rgba(192,154,253,.45); text-underline-offset: 2px; word-break: break-all; }
   a.lnk:hover { text-decoration-color: var(--violet); }
@@ -285,7 +297,8 @@
     'Un momento…': 'One moment…',
     '↩ Responder': '↩ Reply', '📋 Copiar': '📋 Copy', '👤 Ficha': '👤 Profile', '🧹 Borrar todos': '🧹 Delete all',
     '💎 Dar VIP': '💎 Give VIP', '💎 Quitar VIP': '💎 Remove VIP', '⚔ Hacer mod': '⚔ Make mod', '⚔ Quitar mod': '⚔ Remove mod',
-    '⏱ Timeout: arrastra →': '⏱ Timeout: drag →', '← suelta aquí para cancelar': '← release here to cancel', 'máximo': 'maximum',
+    '⏱ Timeout: arrastra →': '⏱ Timeout: drag →', 'cancelar': 'cancel', 'Deshacer': 'Undo',
+    'Pulsa para moderar · arrastra hacia la derecha para un timeout': 'Click to moderate · drag to the right for a timeout', '← suelta aquí para cancelar': '← release here to cancel', 'máximo': 'maximum',
     'Mantén pulsado y arrastra hacia la derecha: cuanto más lejos, más tiempo (de 10 s a 24 h). Suelta para aplicarlo; vuelve al principio o pulsa Esc para cancelar.': 'Hold and drag to the right: the further, the longer (10 s to 24 h). Release to apply it; go back to the start or press Esc to cancel.',
     'Copiado': 'Copied', 'No se pudo copiar': 'Could not copy', 'Respondiendo a ': 'Replying to ', 'Quitar la respuesta': 'Cancel reply',
     '¿Seguro? Borrar ': 'Sure? Delete ', ' mensajes': ' messages', ' mensaje': ' message', '¿Seguro?': 'Sure?',
@@ -476,6 +489,7 @@
     // TikTok no deja moderar desde otros programas: sus mensajes solo se pueden ocultar.
     if (m.id || m.uid || m.user) { el.dataset.mod = '1'; el._m = { p: m.p, id: m.id || '', uid: m.uid || '', user: m.user || '', text: plain(m.parts), roles: (m.roles || []).slice(), at: Date.now() }; }
     el.innerHTML = ICONS[m.p] + rolesHtml(m.roles, m.bd) + '<span class="name" style="color:' + nameColor(m.color, m.user) + '">' + esc(m.user) + '</span>: ' + partsHtml(m.parts);
+    if (m.uid && m.p !== 'tiktok') el.querySelector('.name').title = T('Pulsa para moderar · arrastra hacia la derecha para un timeout');
     add(el);
   }
 
@@ -877,7 +891,87 @@
       })
       .catch(function () { res.className = 'mres bad'; res.textContent = T('✗ No se pudo contactar con Vortexs Live'); });
   }
+  // ---- Timeout rápido: mantener pulsado el NOMBRE y arrastrar hacia la derecha ----
+  // Sale una barrita a la izquierda con el tiempo (10 s … 24 h). Al soltar se aplica, con ↩ para deshacer.
+  // Volver al principio o Esc lo cancela. Sin arrastrar, pulsar el nombre abre la barra de siempre.
+  var swipe = null, swallowClick = false;
+  function swipeChip(el) {
+    var c = el.querySelector('.tswipe');
+    if (!c) { c = document.createElement('div'); c.className = 'tswipe'; el.appendChild(c); }
+    c.className = 'tswipe'; return c;
+  }
+  function swipeShow(dx) {
+    var s = swipe, n = TSTEPS.length, f = Math.max(0, Math.min(1, dx / s.span));
+    var i = dx < 14 ? -1 : Math.min(n - 1, Math.floor(f * n));
+    s.val = i < 0 ? 0 : TSTEPS[i];
+    var shift = Math.max(0, Math.min(dx, 118));
+    s.el.style.transform = 'translateX(' + shift + 'px)';
+    s.chip.style.left = (2 - shift) + 'px';   // la barrita se queda quieta a la izquierda
+    s.chip.innerHTML = '<span>' + (s.val ? '⏱ ' + tLabel(s.val) : '✕ ' + esc(T('cancelar'))) + '</span><span class="tb"><i style="width:' + (i < 0 ? 0 : (i + 1) / n * 100) + '%"></i></span>';
+  }
+  function swipeEnd(apply) {
+    var s = swipe; if (!s) return;
+    swipe = null;
+    document.removeEventListener('keydown', swipeKey);
+    document.body.classList.remove('tdragging');
+    s.el.classList.remove('swiping'); s.el.classList.add('swipe-back'); s.el.style.transform = '';
+    setTimeout(function () { s.el.classList.remove('swipe-back'); }, 200);
+    if (!s.moved) { if (s.chip.parentNode) s.chip.remove(); return; }
+    swallowClick = true; setTimeout(function () { swallowClick = false; }, 0);
+    s.chip.style.left = '2px';
+    if (!apply || !s.val) { s.chip.remove(); return; }
+    quickTimeout(s.el, s.chip, s.val);
+  }
+  function swipeKey(e) { if (e.key === 'Escape') { e.preventDefault(); swipeEnd(false); } }
+  function chipDone(chip, ms) { setTimeout(function () { chip.classList.add('fade'); setTimeout(function () { chip.remove(); }, 450); }, ms); }
+  function quickTimeout(el, chip, secs) {
+    var m = el._m;
+    chip.innerHTML = '<span>' + esc(T('Un momento…')) + '</span>';
+    fetch('/api/mod', { method: 'POST', headers: { 'X-SD-Secret': SECRET, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p: m.p, a: 't' + secs, id: m.id, uid: m.uid, user: m.user, text: m.text }) })
+      .then(function (r) { return r.json(); })
+      .then(function (r) {
+        if (!r || !r.ok) { chip.className = 'tswipe bad'; chip.innerHTML = '<span>✗ ' + esc((r && r.error) || 'error') + '</span>'; chipDone(chip, 4000); return; }
+        chip.className = 'tswipe ok';
+        chip.innerHTML = '<span>✓ ⏱ ' + tLabel(secs) + '</span><button type="button" title="' + esc(T('Deshacer')) + '">↩</button>';
+        var undo = chip.querySelector('button');
+        undo.onclick = function (e) {
+          e.stopPropagation(); undo.remove(); chip.className = 'tswipe'; chip.innerHTML = '<span>' + esc(T('Un momento…')) + '</span>';
+          fetch('/api/mod', { method: 'POST', headers: { 'X-SD-Secret': SECRET, 'Content-Type': 'application/json' }, body: JSON.stringify({ p: m.p, a: 'unban', uid: m.uid, user: m.user }) })
+            .then(function (r) { return r.json(); })
+            .then(function (r) { chip.className = 'tswipe ' + (r && r.ok ? 'ok' : 'bad'); chip.innerHTML = '<span>' + (r && r.ok ? '✓ ' + esc(T('Hecho')) : '✗ ' + esc((r && r.error) || 'error')) + '</span>'; chipDone(chip, 2500); })
+            .catch(function () { chip.className = 'tswipe bad'; chip.innerHTML = '<span>✗</span>'; chipDone(chip, 2500); });
+        };
+        chipDone(chip, 10000);
+      })
+      .catch(function () { chip.className = 'tswipe bad'; chip.innerHTML = '<span>' + esc(T('✗ No se pudo contactar con Vortexs Live')) + '</span>'; chipDone(chip, 4000); });
+  }
+  list.addEventListener('pointerdown', function (e) {
+    if (e.button !== 0 || swipe) return;
+    if (document.body.classList.contains('overlay') || document.body.classList.contains('nomod')) return;
+    var name = e.target.closest('.name'), el = name && name.closest('.msg[data-mod]');
+    if (!el || !el._m || !el._m.uid || el._m.p === 'tiktok' || el.querySelector('.modbar')) return;
+    e.preventDefault();   // que no empiece a seleccionar texto
+    swipe = { el: el, x0: e.clientX, val: 0, moved: false, id: e.pointerId, span: Math.max(120, Math.min(360, window.innerWidth - e.clientX - 16)) };
+    try { name.setPointerCapture(e.pointerId); } catch (x) {}
+  });
+  list.addEventListener('pointermove', function (e) {
+    var s = swipe; if (!s || e.pointerId !== s.id) return;
+    var dx = e.clientX - s.x0;
+    if (!s.moved) {
+      if (dx < 8) return;
+      s.moved = true; s.chip = swipeChip(s.el);
+      s.el.classList.add('swiping'); document.body.classList.add('tdragging');
+      document.addEventListener('keydown', swipeKey);
+    }
+    swipeShow(dx);
+  });
+  list.addEventListener('pointerup', function (e) { if (swipe && e.pointerId === swipe.id) swipeEnd(true); });
+  list.addEventListener('pointercancel', function () { swipeEnd(false); });
+  list.addEventListener('lostpointercapture', function (e) { if (swipe && e.pointerId === swipe.id) swipeEnd(false); });
+
   list.addEventListener('click', function (e) {
+    if (swallowClick) { swallowClick = false; return; }   // acababa de arrastrar el nombre
     if (document.body.classList.contains('overlay') || document.body.classList.contains('nomod')) return;
     if (e.target.closest('.modbar')) return;
     if (e.target.closest('a.lnk')) return;   // un enlace: se abre, sin la barra de moderar
