@@ -382,7 +382,13 @@ namespace StreamDelay
 			}
 
 			// ---- Una persona o un mensaje, en la plataforma ----
-			int secs = (a == "t60") ? 60 : ((a == "t600") ? 600 : ((a == "t3600") ? 3600 : ((a == "t86400") ? 86400 : 0)));
+			// Expulsión temporal: "t" + segundos (el control de arrastrar va de 10 s a 24 h).
+			int secs = 0;
+			if (a.Length > 1 && a[0] == 't')
+			{
+				int.TryParse(a.Substring(1), out secs);
+				secs = Math.Max(0, Math.Min(86400, secs));
+			}
 			bool del = a == "del";
 			bool unban = a == "unban";
 			if (!del && !unban && a != "ban" && secs == 0)
@@ -483,6 +489,10 @@ namespace StreamDelay
 			if (secs >= 3600)
 			{
 				return secs / 3600 + " h";
+			}
+			if (secs < 60)
+			{
+				return secs + " s";
 			}
 			return secs / 60 + " min";
 		}
