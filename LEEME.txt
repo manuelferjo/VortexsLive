@@ -13,8 +13,8 @@ Novedades de la 4.23
   creador llevan delante su foto y su nombre (en el chat conjunto, el
   chat en pantalla y el panel de la derecha). Sus bits y subs no cuentan
   como tuyos y sus espectadores no pueden usar tus comandos.
-- El delay llega hasta 3 minutos (antes 10). Menos memoria y menos
-  riesgo en directos largos; los atajos y el Mando van de 0 a 180 s.
+- El delay llega hasta 5 minutos (antes 10). Menos memoria y menos
+  riesgo en directos largos; los atajos y el Mando van de 0 a 300 s.
 - Cada versión pasa una prueba automática con vídeo de verdad: delay
   exacto, subirlo y bajarlo en directo sin cortes ni reconexiones,
   clips y vídeo recibido sin errores.

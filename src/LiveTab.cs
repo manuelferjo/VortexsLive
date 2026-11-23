@@ -522,7 +522,7 @@ namespace StreamDelay
 			}
 		}
 
-		// Cambia el delay (0–180 s). En directo, al subirlo se repite o congela lo último y al bajarlo se salta.
+		// Cambia el delay (0–300 s). En directo, al subirlo se repite o congela lo último y al bajarlo se salta.
 		private void ApplyDelay(int seconds)
 		{
 			seconds = Math.Max(0, Math.Min(MaxDelay, seconds));

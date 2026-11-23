@@ -138,7 +138,7 @@ namespace StreamDelay
 		private const int ChatPort = 8935;
 
 		// Delay máximo en segundos.
-		private const int MaxDelay = 180;
+		private const int MaxDelay = 300;
 
 		// Páginas de la ventana (cada control se apunta a una con Place/Box). Las pestañas las
 		// muestran en otro orden: ver TabPages.
