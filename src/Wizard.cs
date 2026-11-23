@@ -43,7 +43,7 @@ namespace StreamDelay
 
 		private VButton[] wizDestKey;
 
-		private static readonly int[] WizDelays = new int[6] { 10, 15, 30, 60, 120, 180 };
+		private static readonly int[] WizDelays = new int[6] { 15, 30, 60, 120, 180, 300 };
 
 		private static readonly string[] WizTitles = new string[WizSteps] { "Conecta OBS", "¿Dónde emites?", "Elige el delay", "Comprueba que funciona" };
 

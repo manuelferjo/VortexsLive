@@ -1047,7 +1047,7 @@ namespace StreamDelay
 			{
 				Kind = ButtonKind.Ghost,
 				Text = "Resúmenes",
-				FontSize = 9.5f,
+				FontSize = 8.5f,
 				Icon = "chart"
 			};
 			Place(this, sums, 127f, y0 + 452, 99f, 40f, PageLog);

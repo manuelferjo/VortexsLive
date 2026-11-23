@@ -632,6 +632,11 @@ namespace StreamDelay
 				System.Windows.Forms.Timer once = new System.Windows.Forms.Timer { Interval = 2500 };
 				once.Tick += delegate
 				{
+					// Con el asistente de inicio abierto se espera a que se cierre.
+					if (wiz != null && wiz.Visible)
+					{
+						return;
+					}
 					once.Stop();
 					once.Dispose();
 					if (!panelTipShown && side != null && !side.Visible)
