@@ -65,6 +65,9 @@ namespace StreamDelay
 		// Sonido elegido para un tipo de alerta (/sonido/follow…): ruta del archivo o null.
 		public Func<string, string> OnSound = (string kind) => null;
 
+		// Imagen o GIF elegido para un tipo de alerta (/imagen/follow…): ruta del archivo o null.
+		public Func<string, string> OnImage = (string kind) => null;
+
 		// Mando a distancia (móvil, Stream Deck, panel de OBS): acción + parámetros -> JSON de estado.
 		// Exige la clave del mando (?k=...) en cada petición.
 		public Func<string, Dictionary<string, string>, string> OnRemote = (string a, Dictionary<string, string> q) => "{}";
@@ -404,6 +407,20 @@ namespace StreamDelay
 				if (route.StartsWith("/sonido/") && request.Method == "GET")
 				{
 					Sound(stream, route.Substring(8));
+					c.Close();
+					return;
+				}
+				if (route.StartsWith("/imagen/") && request.Method == "GET")
+				{
+					string img = null;
+					try
+					{
+						img = OnImage(route.Substring(8));
+					}
+					catch
+					{
+					}
+					SendFile(stream, img);
 					c.Close();
 					return;
 				}
@@ -852,13 +869,20 @@ namespace StreamDelay
 			catch
 			{
 			}
+			SendFile(s, file);
+		}
+
+		// Un archivo de la carpeta de Vortexs Live (sonido o imagen de una alerta).
+		private void SendFile(Stream s, string file)
+		{
 			if (file == null || !File.Exists(file))
 			{
 				Respond(s, "404 Not Found", "text/plain", "");
 				return;
 			}
 			string ext = Path.GetExtension(file).ToLowerInvariant();
-			string type = ext == ".mp3" ? "audio/mpeg" : ext == ".wav" ? "audio/wav" : ext == ".ogg" ? "audio/ogg" : ext == ".m4a" ? "audio/mp4" : "application/octet-stream";
+			string type = ext == ".mp3" ? "audio/mpeg" : ext == ".wav" ? "audio/wav" : ext == ".ogg" ? "audio/ogg" : ext == ".m4a" ? "audio/mp4"
+				: ext == ".gif" ? "image/gif" : ext == ".png" ? "image/png" : (ext == ".jpg" || ext == ".jpeg") ? "image/jpeg" : ext == ".webp" ? "image/webp" : "application/octet-stream";
 			byte[] bytes = File.ReadAllBytes(file);
 			Write(s, "HTTP/1.1 200 OK\r\nContent-Type: " + type + "\r\nCache-Control: no-cache\r\nContent-Length: " + bytes.Length + "\r\nConnection: close\r\n\r\n");
 			s.Write(bytes, 0, bytes.Length);

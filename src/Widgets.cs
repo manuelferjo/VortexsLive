@@ -117,7 +117,9 @@ namespace StreamDelay
 						sounds[k] = "/sonido/" + k + "?v=" + File.GetLastWriteTimeUtc(f).Ticks;
 					}
 				}
-				d["alerts"] = new Dictionary<string, object> { { "kinds", kinds }, { "dur", alertDur }, { "sound", alertSound }, { "pos", alertPos }, { "sounds", sounds }, { "vol", alertVolume } };
+				Dictionary<string, object> alerts = new Dictionary<string, object> { { "kinds", kinds }, { "dur", alertDur }, { "sound", alertSound }, { "pos", alertPos }, { "sounds", sounds }, { "vol", alertVolume } };
+				AlertCustomJson(alerts);
+				d["alerts"] = alerts;
 				d["feature"] = new Dictionary<string, object> { { "pos", featPos }, { "item", featItem } };
 				d["goal"] = GoalState();
 				d["ticker"] = new Dictionary<string, object> { { "n", tickN }, { "speed", tickSpeed }, { "pos", tickPos } };
@@ -668,13 +670,13 @@ namespace StreamDelay
 			Choice(a, new string[3] { "Arriba", "Centro", "Abajo" }, Math.Max(0, Array.IndexOf(apos, alertPos)), 20f, 210f, 90f, delegate(int i) { lock (wgLock) { alertPos = apos[i]; } });
 			VButton test = new VButton { Kind = ButtonKind.Ghost, Text = "Probar una alerta", FontSize = 9f, Icon = "play" };
 			Place(a, test, 20f, 250f, 186f, 34f);
-			VButton snd = new VButton { Kind = ButtonKind.Ghost, Text = "Elegir sonidos", FontSize = 9f, Icon = "sound" };
+			VButton snd = new VButton { Kind = ButtonKind.Ghost, Text = "Personalizar", FontSize = 9f, Icon = "gear" };
 			Place(a, snd, 214f, 250f, 186f, 34f);
-			snd.Click += delegate { AlertSoundsDialog(); };
+			snd.Click += delegate { AlertCustomDialog(); };
 			test.Click += delegate { SendTestAlert(); };
 			Box(a, 20f, 288f, 380f, 30f, delegate(Graphics g, Rectangle r)
 			{
-				Theme.DrawWrapped(g, "Cada pulsación manda un tipo distinto. Solo se ve en los overlays abiertos, no en el chat.", Theme.Body(7.25f), Theme.Muted, r);
+				Theme.DrawWrapped(g, "Personalizar: texto, imagen o GIF, sonido y mínimo de cada tipo. «Probar» manda un tipo distinto cada vez.", Theme.Body(7.25f), Theme.Muted, r);
 			});
 			UrlButtons(a, "alertas", "alertas", 324f);
 			StyleLink(a);
@@ -862,121 +864,6 @@ namespace StreamDelay
 			}
 		}
 
-		private void AlertSoundsDialog()
-		{
-			Form f = DarkForm("Sonidos de las alertas", 460, 486);
-			Card c = new Card { Title = "Un sonido para cada alerta", Subtitle = "MP3, WAV u OGG de hasta 5 MB. Sin elegir, suena el de siempre." };
-			Place(f, c, 20f, 18f, 420f, 384f);
-			string[] names = new string[6] { "Follows", "Subs y regalos", "Raids", "Bits", "Canjes", "Donaciones" };
-			for (int i = 0; i < AlertKinds.Length; i++)
-			{
-				string kind = AlertKinds[i];
-				float y = 58f + (float)i * 40f;
-				PaintBox row = Box(c, 20f, y, 206f, 34f, delegate(Graphics g, Rectangle r)
-				{
-					string file = AlertSoundFile(kind);
-					Rectangle top = new Rectangle(r.X, r.Y, r.Width, r.Height / 2 + 1);
-					Rectangle bottom = new Rectangle(r.X, r.Y + r.Height / 2, r.Width, r.Height / 2);
-					Theme.DrawText(g, names[Array.IndexOf(AlertKinds, kind)], Theme.BodyBold(9f), Theme.Text, top, StringAlignment.Near, StringAlignment.Far);
-					Theme.DrawText(g, file == null ? "Sonido de siempre" : Path.GetFileName(file), Theme.Body(7.5f), file == null ? Theme.Muted : Theme.Violet, bottom, StringAlignment.Near, StringAlignment.Near);
-				});
-				VButton pick = new VButton { Kind = ButtonKind.Ghost, Text = "Elegir…", FontSize = 8.5f };
-				Place(c, pick, 232f, y + 2f, 84f, 30f);
-				VButton play = new VButton { Kind = ButtonKind.Ghost, Text = "▶", FontSize = 9f };
-				Place(c, play, 322f, y + 2f, 36f, 30f);
-				VButton clear = new VButton { Kind = ButtonKind.Ghost, Text = "✕", FontSize = 9f };
-				Place(c, clear, 364f, y + 2f, 36f, 30f);
-				pick.Click += delegate
-				{
-					using (OpenFileDialog dlg = new OpenFileDialog())
-					{
-						dlg.Title = I18n.Tr("Sonido para ") + I18n.Tr(names[Array.IndexOf(AlertKinds, kind)]);
-						dlg.Filter = I18n.Tr("Sonidos") + " (*.mp3;*.wav;*.ogg;*.m4a)|*.mp3;*.wav;*.ogg;*.m4a";
-						if (dlg.ShowDialog(f) != DialogResult.OK)
-						{
-							return;
-						}
-						try
-						{
-							FileInfo info = new FileInfo(dlg.FileName);
-							if (info.Length > 5 * 1024 * 1024)
-							{
-								I18n.Show(f, "Ese archivo pesa más de 5 MB. Elige un sonido más corto.", "Sonidos");
-								return;
-							}
-							string ext = info.Extension.ToLowerInvariant();
-							if (Array.IndexOf(SoundExts, ext) < 0)
-							{
-								return;
-							}
-							PlaySoundPreview(null, 0);
-							Directory.CreateDirectory(SoundDir);
-							foreach (string e2 in SoundExts)
-							{
-								string old = Path.Combine(SoundDir, kind + e2);
-								if (File.Exists(old))
-								{
-									File.Delete(old);
-								}
-							}
-							string dest = Path.Combine(SoundDir, kind + ext);
-							File.Copy(dlg.FileName, dest, true);
-							File.SetLastWriteTimeUtc(dest, DateTime.UtcNow);
-							AppendLog("Alertas: sonido de " + names[Array.IndexOf(AlertKinds, kind)] + " → " + info.Name);
-						}
-						catch (Exception ex)
-						{
-							I18n.Show(f, "No se pudo copiar el sonido: " + ex.Message, "Sonidos");
-						}
-						row.Invalidate();
-					}
-				};
-				play.Click += delegate { PlaySoundPreview(AlertSoundFile(kind), alertVolume); };
-				clear.Click += delegate
-				{
-					PlaySoundPreview(null, 0);
-					foreach (string e2 in SoundExts)
-					{
-						try
-						{
-							string old = Path.Combine(SoundDir, kind + e2);
-							if (File.Exists(old))
-							{
-								File.Delete(old);
-							}
-						}
-						catch
-						{
-						}
-					}
-					row.Invalidate();
-				};
-			}
-			Label(c, "VOLUMEN EN OBS", 20f, 304f, 380f);
-			int[] vols = new int[5] { 20, 40, 60, 80, 100 };
-			int vk = 0;
-			for (int i = 0; i < vols.Length; i++)
-			{
-				if (Math.Abs(vols[i] - alertVolume) < Math.Abs(vols[vk] - alertVolume))
-				{
-					vk = i;
-				}
-			}
-			Choice(c, new string[5] { "20 %", "40 %", "60 %", "80 %", "100 %" }, vk, 20f, 322f, 70f, delegate(int i) { lock (wgLock) { alertVolume = vols[i]; } });
-			Box(c, 20f, 352f, 380f, 26f, delegate(Graphics g, Rectangle r)
-			{
-				Theme.DrawWrapped(g, "Para oírlas en el directo, en OBS marca «Controlar audio mediante OBS» en la fuente Navegador.", Theme.Body(7.25f), Theme.Muted, r);
-			});
-			VButton test = new VButton { Kind = ButtonKind.Ghost, Text = "Probar una alerta", FontSize = 9.5f };
-			VButton ok = new VButton { Kind = ButtonKind.Primary, Text = "Listo", FontSize = 10f };
-			Place(f, test, 20f, 420f, 190f, 44f);
-			Place(f, ok, 218f, 420f, 222f, 44f);
-			test.Click += delegate { SendTestAlert(); };
-			ok.Click += delegate { f.Close(); };
-			f.FormClosing += delegate { PlaySoundPreview(null, 0); SaveConfig(); };
-			f.ShowDialog(this);
-		}
-
 		// ---------- Configuración ----------
 
 		private void LoadWidgetsConfig(Dictionary<string, string> raw)
@@ -1004,6 +891,8 @@ namespace StreamDelay
 			if (raw.TryGetValue("wide_w", out v) && int.TryParse(v, out n) && n >= 760 && n <= 1180) wideWidth = n;
 			if (raw.TryGetValue("panel_tip", out v)) panelTipShown = v == "1";
 			if (raw.TryGetValue("wizard", out v)) wizardDone = v == "1";
+			if (raw.TryGetValue("ov_format", out v)) ovVertical = v == "vertical";
+			LoadAlertCustom(raw);
 		}
 
 		private void SaveWidgetsConfig(List<string> lines)
@@ -1031,7 +920,9 @@ namespace StreamDelay
 				lines.Add("wg_tick_speed=" + tickSpeed);
 				lines.Add("wg_tick_pos=" + tickPos);
 				lines.Add("wg_poll_pos=" + pollPos);
+				SaveAlertCustom(lines);
 			}
+			lines.Add("ov_format=" + (ovVertical ? "vertical" : "horizontal"));
 			lines.Add("ov_pick=" + ovPick);
 			lines.Add("win_w=" + winWidth);
 			lines.Add("wide_w=" + wideWidth);

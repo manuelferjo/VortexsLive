@@ -17,6 +17,11 @@ Novedades de la 4.23
     (el primer clic pide confirmación en el mismo botón).
   · Atajos a la vista: cada botón dice el suyo y ? o F1 abre la
     lista completa.
+- Alertas a tu gusto (Overlays → Alertas → Personalizar): texto propio
+  con {usuario} y {cantidad}, imagen o GIF y sonido para cada tipo,
+  mínimo para bits y donaciones y el mensaje del espectador.
+- Overlays en vertical (TikTok, Shorts): abajo en Overlays elige
+  "Vertical 9:16" y copia las URL para una fuente de 1080x1920.
 - Destinos en directo: pulsa la franja de destinos de la pestaña
   Directo mientras emites y verás, por cada plataforma, la velocidad
   de subida, el retraso de envío, el tiempo en directo y las

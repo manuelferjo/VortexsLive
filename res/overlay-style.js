@@ -8,6 +8,8 @@
 // Clases en <body>: sd-circle (forma círculo), sd-noicon, sd-bubbles (fondo en el chat), sd-noborder.
 // Si la página define window.onStyle(st), se llama después de aplicarlo.
 (function () {
+  // ?formato=vertical: lienzo de 1080x1920 (TikTok, Shorts, Aitum Vertical). Cada página lo ajusta con body.fv.
+  if (/[?&]formato=vertical(&|$)/.test(location.search)) document.body.classList.add('fv');
   // Fuentes de Google Fonts y sus grosores (las de un solo grosor van sin nada).
   var FONTS = {
     'Outfit': 'wght@700;800', 'Montserrat': 'wght@600;700;800', 'Poppins': 'wght@600;700;800', 'Inter': 'wght@600;700;800',
