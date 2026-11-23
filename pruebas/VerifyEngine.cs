@@ -199,7 +199,7 @@ static class VerifyEngine
         Say("motor en marcha, delay 5 s");
 
         // El "OBS": 45 s de imagen y tono de prueba, en tiempo real, un fotograma clave cada 2 s.
-        Process sender = Run("-hide_banner -re -f lavfi -i testsrc=size=640x360:rate=30 -f lavfi -i sine=frequency=440:sample_rate=48000 -t 45 " +
+        Process sender = Run("-hide_banner -re -f lavfi -i testsrc=size=640x360:rate=30 -re -f lavfi -i sine=frequency=440:sample_rate=48000 -t 45 " +
             "-c:v libx264 -preset ultrafast -tune zerolatency -g 60 -pix_fmt yuv420p -b:v 1500k -c:a aac -b:a 128k -f flv rtmp://127.0.0.1:" + PortIn + "/live/clave", "obs");
 
         int fallos = 0;
