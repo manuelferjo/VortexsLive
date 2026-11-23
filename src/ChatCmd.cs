@@ -68,7 +68,8 @@ namespace StreamDelay
 		// Cada mensaje del chat pasa por aquí (hilo del chat).
 		private void OnChatItem(ChatItem it)
 		{
-			if (!cmdOn || it == null || it.t != "msg" || it.p == null)
+			// Los mensajes de otros canales del chat compartido no ejecutan tus comandos.
+			if (!cmdOn || it == null || it.t != "msg" || it.p == null || it.src != null)
 			{
 				return;
 			}

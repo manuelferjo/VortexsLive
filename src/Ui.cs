@@ -929,7 +929,7 @@ namespace StreamDelay
 					{
 						g.FillRectangle(b, row.X, row.Y + Theme.S(6f), Theme.S(3f), h - Theme.S(12f));
 					}
-					Theme.DrawText(g, it.text ?? "", Theme.BodySemi(8.5f), Theme.Text, new RectangleF(row.X + Theme.S(12f), row.Y, row.Width - Theme.S(16f), h), StringAlignment.Near, StringAlignment.Center);
+					Theme.DrawText(g, (it.src != null ? "[" + it.src + "] " : "") + (it.text ?? ""), Theme.BodySemi(8.5f), Theme.Text, new RectangleF(row.X + Theme.S(12f), row.Y, row.Width - Theme.S(16f), h), StringAlignment.Near, StringAlignment.Center);
 					continue;
 				}
 				string text = PlainItem(it);
@@ -942,10 +942,25 @@ namespace StreamDelay
 				{
 					g.FillEllipse(b, list.X, y + lh / 2f - Theme.S(3f), Theme.S(6f), Theme.S(6f));
 				}
+				// Chat compartido de Twitch: el canal desde el que escribe, en una pastilla antes del nombre.
+				float sx = list.X + Theme.S(12f);
+				if (it.src != null)
+				{
+					Font srcFont = Theme.BodyBold(7f);
+					float sw = Math.Min(Theme.S(110f), Theme.Measure(g, it.src, srcFont).Width * 1.12f + Theme.S(12f));
+					RectangleF pill = new RectangleF(sx, y + Theme.S(3f), sw, lh - Theme.S(6f));
+					using (GraphicsPath pp = Theme.Round(pill, pill.Height / 2f))
+					using (SolidBrush pb = new SolidBrush(Color.FromArgb(50, 145, 71, 255)))
+					{
+						g.FillPath(pb, pp);
+					}
+					Theme.DrawText(g, it.src, srcFont, Color.FromArgb(212, 194, 255), pill, StringAlignment.Center, StringAlignment.Center);
+					sx += sw + Theme.S(5f);
+				}
 				Color nc = Hex(it.color, PfColor(it.p));
 				if (nc.GetBrightness() < 0.35f) nc = Theme.Mix(nc, Color.White, 0.45f);
-				Theme.DrawText(g, name + ":", nameFont, nc, new RectangleF(list.X + Theme.S(12f), y, nameW, lh), StringAlignment.Near, StringAlignment.Center);
-				Theme.DrawText(g, text, textFont, Theme.Text, new RectangleF(list.X + Theme.S(12f) + nameW, y, list.Width - Theme.S(12f) - nameW, lh), StringAlignment.Near, StringAlignment.Center);
+				Theme.DrawText(g, name + ":", nameFont, nc, new RectangleF(sx, y, nameW, lh), StringAlignment.Near, StringAlignment.Center);
+				Theme.DrawText(g, text, textFont, Theme.Text, new RectangleF(sx + nameW, y, list.Right - sx - nameW, lh), StringAlignment.Near, StringAlignment.Center);
 			}
 			g.Restore(st);
 		}

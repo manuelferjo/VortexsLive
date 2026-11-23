@@ -9,6 +9,10 @@ Novedades de la 4.23
   de subida, el retraso de envío, el tiempo en directo y las
   reconexiones. La franja ya enseña la velocidad (EN DIRECTO · 6,2 MB/S),
   avisa en amarillo si un destino va lento y marca las reconexiones (↻).
+- Chat compartido de Twitch: los mensajes escritos en el canal de otro
+  creador llevan delante su foto y su nombre (en el chat conjunto, el
+  chat en pantalla y el panel de la derecha). Sus bits y subs no cuentan
+  como tuyos y sus espectadores no pueden usar tus comandos.
 - El delay llega hasta 3 minutos (antes 10). Menos memoria y menos
   riesgo en directos largos; los atajos y el Mando van de 0 a 180 s.
 - Cada versión pasa una prueba automática con vídeo de verdad: delay

@@ -80,6 +80,11 @@
   .r-broadcaster { background: #e91916; } .r-mod { background: #00ad03; } .r-vip { background: #e005b9; }
   .r-sub { background: #8205b4; } .r-member { background: #0f9d58; } .r-founder { background: #d4a017; } .r-verified { background: #9147ff; } .r-og { background: #ff8a00; }
   .name { font-weight: 700; }
+  /* Chat compartido de Twitch: canal desde el que escribe (si no es el tuyo). */
+  .src { display: inline-flex; align-items: center; gap: .3em; height: 1.75em; max-width: 12em; padding: 0 .55em 0 .2em; margin-right: 4px; border-radius: 99px; background: rgba(145,71,255,.2); box-shadow: inset 0 0 0 1px rgba(145,71,255,.35); color: #d4c2ff; font-size: .74em; font-weight: 700; vertical-align: .12em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .src.noimg { padding-left: .55em; }
+  .src img { width: 1.35em; height: 1.35em; border-radius: 50%; flex: none; }
+  .src span { overflow: hidden; text-overflow: ellipsis; }
   .emote { height: 1.75em; vertical-align: middle; margin: -2px 1px; }
   .announce { border-left: 3px solid var(--violet); background: rgba(192,154,253,.08); padding-left: 8px; }
 
@@ -297,6 +302,7 @@
   var EN_TXT = {
     'Chat conjunto · Vortexs Live': 'Combined chat · Vortexs Live',
     'Esperando mensajes…': 'Waiting for messages…',
+    'Escrito en el canal de ': 'Written in the channel of ',
     'Activa el chat en Vortexs Live → pestaña Chat.': 'Turn on the chat in Vortexs Live → Chat tab.',
     'Enviar a:': 'Send to:',
     'Escribe en el chat de todas tus plataformas…': 'Write in the chat of all your platforms…',
@@ -515,6 +521,12 @@
     }).join('');
   }
 
+  // Chat compartido de Twitch: etiqueta con el canal desde el que se escribe.
+  function srcHtml(m) {
+    if (!m.src) return '';
+    return '<span class="src' + (m.srci ? '' : ' noimg') + '" title="' + esc(T('Escrito en el canal de ') + m.src) + '">' + (m.srci ? '<img draggable="false" src="' + esc(m.srci) + '" alt="">' : '') + '<span>' + esc(m.src) + '</span></span>';
+  }
+
   function plain(parts) { return (parts || []).map(function (p) { return p.e ? p.n : p.x; }).join('').trim(); }
 
   function rolesHtml(roles, imgs) {
@@ -547,7 +559,7 @@
     // TikTok no deja moderar desde otros programas: sus mensajes solo se pueden ocultar.
     el._raw = m;
     if (m.id || m.uid || m.user) { el.dataset.mod = '1'; el._m = { p: m.p, id: m.id || '', uid: m.uid || '', user: m.user || '', text: plain(m.parts), roles: (m.roles || []).slice(), at: Date.now() }; }
-    el.innerHTML = ICONS[m.p] + rolesHtml(m.roles, m.bd) + '<span class="name" style="color:' + nameColor(m.color, m.user) + '">' + esc(m.user) + '</span>: ' + partsHtml(m.parts);
+    el.innerHTML = ICONS[m.p] + srcHtml(m) + rolesHtml(m.roles, m.bd) + '<span class="name" style="color:' + nameColor(m.color, m.user) + '">' + esc(m.user) + '</span>: ' + partsHtml(m.parts);
     if (m.uid && m.p !== 'tiktok') el.querySelector('.name').title = T('Pulsa para moderar · arrastra hacia la derecha para un timeout');
     add(el);
   }
@@ -558,7 +570,7 @@
     el.className = 'ev k-' + (m.kind || 'other');
     if (m.kind === 'superchat' && m.color) el.style.setProperty('--c', m.color);
     if (m.id) el.dataset.id = m.p + ':' + m.id;
-    el.innerHTML = '<div class="head">' + (ICONS[m.p] || '') + '<span class="ico">' + (EV_ICON[m.kind] || '📣') + '</span><span>' + esc(m.text) + '</span>' +
+    el.innerHTML = '<div class="head">' + (ICONS[m.p] || '') + srcHtml(m) + '<span class="ico">' + (EV_ICON[m.kind] || '📣') + '</span><span>' + esc(m.text) + '</span>' +
       (m.amount && m.kind !== 'raid' && m.kind !== 'giftbomb' ? '<span class="amt">' + esc(m.amount) + '</span>' : '') + '</div>' +
       (m.parts && m.parts.length ? '<div class="body">' + partsHtml(m.parts) + '</div>' : '');
     add(el);
@@ -1266,6 +1278,7 @@
       { t: 'msg', p: 'tiktok', user: 'Marta 🌸', roles: [], parts: [{ x: 'holaaa desde TikTok' }] },
       { t: 'ev', p: 'twitch', user: 'Ana', kind: 'resub', text: 'Ana lleva 6 meses suscrita', parts: [{ x: '¡a por el directo!' }] },
       { t: 'msg', p: 'twitch', user: 'Pepe', color: '#1E90FF', roles: ['vip'], parts: [{ x: 'GG, qué nivel' }] },
+      { t: 'msg', p: 'twitch', user: 'Rafa', color: '#00B894', roles: ['sub'], src: 'CanalAmigo', parts: [{ x: 'saludos desde el otro canal del chat compartido' }] },
       { t: 'msg', p: 'twitch', user: 'Laura', color: '#FF4500', roles: ['mod'], parts: [{ x: 'el horario está en vortexs.es/horario y los clips en https://www.twitch.tv/vortexs_mc/clips' }] },
       { t: 'ev', p: 'twitch', user: 'Pepe', kind: 'reward', text: 'Pepe ha canjeado Hidrátate', amount: '500 pts' },
       { t: 'ev', p: 'tiktok', user: 'Racha', kind: 'tiktokgift', text: 'Racha ha enviado 5 × Rosa', amount: '💎 5' },

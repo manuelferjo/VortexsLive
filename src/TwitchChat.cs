@@ -248,6 +248,41 @@ namespace StreamDelay
             return parts;
         }
 
+        // Chat compartido de Twitch (varios canales con el chat unido): los mensajes de los otros
+        // canales traen source-room-id distinto de room-id. Nombre e imagen de cada canal, una vez.
+        readonly Dictionary<string, string[]> sources = new Dictionary<string, string[]>();
+
+        string[] SourceChannel(string id)
+        {
+            string[] s;
+            lock (sources) { if (sources.TryGetValue(id, out s)) return s; }
+            s = new string[] { "", "" };
+            try
+            {
+                string body = "{\"query\":\"query{user(id:\\\"" + id + "\\\"){login displayName profileImageURL(width:50)}}\"}";
+                var h = new Dictionary<string, string> { { "Client-Id", "kimne78kx3ncx6brgo4mv6wki5h1ko" } };
+                var o = Web.PostJson("https://gql.twitch.tv/gql", body, h, null);
+                string name = J.S(o, "data", "user", "displayName");
+                if (name.Length == 0) name = J.S(o, "data", "user", "login");
+                s = new string[] { name, J.S(o, "data", "user", "profileImageURL") };
+            }
+            catch (Exception e) { hub.Log("Chat compartido: no se pudo saber el nombre del canal " + id + " (" + e.Message + ")."); }
+            lock (sources) sources[id] = s;
+            return s;
+        }
+
+        // Marca el mensaje si viene de otro canal del chat compartido. Devuelve true en ese caso.
+        bool MarkSource(Irc m, ChatItem it)
+        {
+            string sid = Tag(m, "source-room-id"), rid = Tag(m, "room-id");
+            if (sid.Length == 0 || sid == rid || sid.Length > 20) return false;
+            foreach (char c in sid) if (c < '0' || c > '9') return false;
+            var s = SourceChannel(sid);
+            it.src = s[0].Length > 0 ? s[0] : "otro canal";
+            it.srci = s[1].Length > 0 ? s[1] : null;
+            return true;
+        }
+
         ChatItem Base(Irc m, string t)
         {
             return new ChatItem
@@ -264,6 +299,8 @@ namespace StreamDelay
             if (text.StartsWith("\u0001ACTION ") && text.EndsWith("\u0001")) text = text.Substring(8, text.Length - 9);
             var it = Base(m, "msg");
             it.parts = Parts(text, Tag(m, "emotes"));
+            // Los bits enviados en otro canal del chat compartido son para ese canal, no para ti.
+            if (MarkSource(m, it)) { hub.Emit(it); return; }
             string bits = Tag(m, "bits");
             if (bits.Length > 0 && bits != "0")
             {
@@ -279,6 +316,17 @@ namespace StreamDelay
             var it = Base(m, "ev");
             string user = it.user;
             if (Tag(m, "login") == "ananonymousgifter") user = it.user = "Anónimo";
+            // Avisos de otro canal del chat compartido (subs, raids… de ese canal): se enseñan con su
+            // texto, pero no cuentan como tuyos (alertas, objetivo, resumen).
+            if (MarkSource(m, it) && id != "announcement")
+            {
+                string sys = Tag(m, "system-msg");
+                if (sys.Length == 0) return;
+                it.kind = "other"; it.text = sys;
+                if (!string.IsNullOrEmpty(m.Trailing)) it.parts = Parts(m.Trailing, Tag(m, "emotes"));
+                hub.Emit(it);
+                return;
+            }
             string plan = Tag(m, "msg-param-sub-plan");
             string tier = plan == "Prime" ? " con Prime" : plan == "2000" ? " de nivel 2" : plan == "3000" ? " de nivel 3" : "";
             switch (id)
