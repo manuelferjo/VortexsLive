@@ -1,4 +1,4 @@
-// Barra del delay (0–180 s). Va en escala de raíz cuadrada: los primeros segundos ocupan más
+// Barra del delay (0–300 s). Va en escala de raíz cuadrada: los primeros segundos ocupan más
 // sitio y se ajustan con más precisión que los minutos. Con marcas en 30 s, 1 y 2 min.
 // Se mueve con el ratón, la rueda y las flechas (RePág/AvPág: ±10 s).
 using System;
@@ -12,7 +12,7 @@ namespace StreamDelay
 	{
 		private int value;
 
-		private int max = 180;
+		private int max = 300;
 
 		private bool dragging;
 
@@ -166,8 +166,8 @@ namespace StreamDelay
 				}
 			}
 			float knobX = Pad + PosOf(value) * ((float)base.Width - 2f * Pad);
-			// Marcas en 30 s, 1 min, 2 min y 5 min.
-			foreach (int v in new int[3] { 30, 60, 120 })
+			// Marcas en 30 s, 1 min, 2 min y 3 min.
+			foreach (int v in new int[4] { 30, 60, 120, 180 })
 			{
 				float markX = Pad + PosOf(v) * ((float)base.Width - 2f * Pad);
 				using (SolidBrush brush2 = new SolidBrush(Color.FromArgb(70, 255, 255, 255)))

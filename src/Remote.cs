@@ -22,7 +22,7 @@ namespace StreamDelay
 
 		private readonly string[] presetName = new string[6] { "Sin delay", "", "", "", "", "" };
 
-		private readonly int[] presetSec = new int[6] { 0, 15, 30, 60, 120, 180 };
+		private readonly int[] presetSec = new int[6] { 0, 30, 60, 120, 180, 300 };
 
 		private string PresetLabel(int i)
 		{
