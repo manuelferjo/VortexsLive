@@ -607,12 +607,22 @@ namespace StreamDelay
 			}
 			System.Drawing.Bitmap trOld = TransitionBegin(curPage, p);
 			SuspendLayout();
+			// Primero se ocultan las demás y luego se enseña esta: hay controles en dos páginas
+			// (las subpestañas de Directo/Título y Ajustes/Registro).
 			for (int i = 0; i < pages.Length; i++)
 			{
+				if (i == p)
+				{
+					continue;
+				}
 				foreach (Control c in pages[i])
 				{
-					c.Visible = i == p;
+					c.Visible = false;
 				}
+			}
+			foreach (Control c in pages[p])
+			{
+				c.Visible = true;
 			}
 			ResumeLayout();
 			curPage = p;
