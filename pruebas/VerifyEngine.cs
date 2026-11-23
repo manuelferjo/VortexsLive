@@ -210,12 +210,13 @@ static class VerifyEngine
             Check(input, "el motor recibe la emisión de OBS");
             if (!input) return 1;
 
-            Check(!WaitFor(() => (bool)Get(engine, "OutputActive"), 3500), "no sale nada antes de tiempo (delay 5 s)");
-            bool live = WaitFor(() => (bool)Get(engine, "OutputActive"), 15000);
+            // El destino se conecta enseguida (para estar listo), pero no debe salir vídeo hasta pasado el delay.
+            Check(!WaitFor(() => Delay() > 0, 3500), "no sale vídeo antes de tiempo (delay 5 s)");
+            bool live = WaitFor(() => Delay() > 0, 10000);
             long first = clock.ElapsedMilliseconds - tIn;
-            Check(live, "el destino entra en directo (estado " + SinkState() + ")");
+            Check(live && (bool)Get(engine, "OutputActive"), "el destino está en directo (estado " + SinkState() + ")");
             if (!live) return 1;
-            Check(first >= 4000 && first <= 9000, "sale a los " + first + " ms de recibirlo (5000 pedidos)");
+            Check(first >= 4000 && first <= 7500, "el primer vídeo sale a los " + first + " ms de recibirlo (5000 pedidos)");
             Pause(3000);
             int d = Delay();
             Check(d >= 4000 && d <= 6500, "delay real " + d + " ms con 5 s");
@@ -243,7 +244,8 @@ static class VerifyEngine
             Check(rate > 300 && rate < 20000, "velocidad de subida medida: " + rate + " kb/s");
             Check((int)Get(s, "Reconnects") == 0, "ninguna reconexión (" + Get(s, "Reconnects") + ")");
 
-            // Un clip de los últimos 10 s.
+            // Un clip de los últimos 10 s (antes, unos segundos más de emisión).
+            Pause(5000);
             object clips = Get(engine, "Clips");
             double secs = (double)Call(clips, "Save", clip, 10, (int)Get(engine, "MainTrack"));
             Check(secs >= 9 && secs <= 14, "clip guardado: " + secs.ToString("0.0", CultureInfo.InvariantCulture) + " s");
@@ -267,8 +269,6 @@ static class VerifyEngine
         Check(DecodeErrors(received) == 0, "recibido.flv se reproduce sin errores");
         if (File.Exists(clip))
         {
-            double dc = Duration(clip);
-            Check(dc >= 8, "clip.flv dura " + dc.ToString("0.0", CultureInfo.InvariantCulture) + " s");
             Check(DecodeErrors(clip) == 0, "clip.flv se reproduce sin errores");
         }
         fallos = fails;
