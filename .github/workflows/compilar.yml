@@ -5,6 +5,8 @@ name: Compilar
 on:
   push:
     branches: [main]
+    # Subir una etiqueta (git push origin v4.23) crea la Release con sus notas y le adjunta los ZIP.
+    tags: ['v*']
   pull_request:
   release:
     types: [published]
@@ -91,10 +93,10 @@ jobs:
           path: capturas/*.png
 
       - name: Comprobar que la versión coincide con la etiqueta
-        if: github.event_name == 'release' || inputs.etiqueta != ''
+        if: github.event_name == 'release' || inputs.etiqueta != '' || startsWith(github.ref, 'refs/tags/v')
         shell: pwsh
         env:
-          ETIQUETA: ${{ github.event.release.tag_name || inputs.etiqueta }}
+          ETIQUETA: ${{ github.event.release.tag_name || inputs.etiqueta || github.ref_name }}
         run: |
           $v = (Select-String -Path src\MainForm.cs -Pattern 'const string Version = "([^"]+)"').Matches[0].Groups[1].Value
           if ("v$v" -ne $env:ETIQUETA) { throw "La etiqueta es $env:ETIQUETA pero src\MainForm.cs dice Version = $v. Cámbialo para que coincidan." }
@@ -103,7 +105,7 @@ jobs:
       # Firma digital: Windows (SmartScreen) muestra "Vortexs" como editor en vez de "desconocido".
       # Solo al publicar una versión (cada firma cuenta en el plan de eSigner) y si hay secretos.
       - name: Firmar VortexsLive.exe
-        if: (github.event_name == 'release' || inputs.etiqueta != '') && env.ES_USERNAME != ''
+        if: (github.event_name == 'release' || inputs.etiqueta != '' || startsWith(github.ref, 'refs/tags/v')) && env.ES_USERNAME != ''
         uses: sslcom/esigner-codesign@develop
         with:
           command: sign
@@ -116,7 +118,7 @@ jobs:
           environment_name: PROD
 
       - name: Usar el programa firmado
-        if: (github.event_name == 'release' || inputs.etiqueta != '') && env.ES_USERNAME != ''
+        if: (github.event_name == 'release' || inputs.etiqueta != '' || startsWith(github.ref, 'refs/tags/v')) && env.ES_USERNAME != ''
         shell: pwsh
         run: |
           if (-not (Test-Path firmado\VortexsLive.exe)) { throw "eSigner no ha devuelto el programa firmado" }
@@ -135,12 +137,33 @@ jobs:
           name: VortexsLive
           path: dist/*.zip
 
-      - name: Adjuntar el ZIP a la Release
-        if: github.event_name == 'release' || inputs.etiqueta != ''
+      - name: Crear la Release (al subir una etiqueta)
+        if: startsWith(github.ref, 'refs/tags/v')
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
-          ETIQUETA: ${{ github.event.release.tag_name || inputs.etiqueta }}
+          ETIQUETA: ${{ github.ref_name }}
+        run: |
+          gh release view $env:ETIQUETA --repo $env:GITHUB_REPOSITORY *> $null
+          if ($LASTEXITCODE -eq 0) { "La Release $env:ETIQUETA ya existe"; exit 0 }
+          $v = $env:ETIQUETA.TrimStart('v')
+          # Notas: .github/notas/vX.md si existe; si no, el apartado "Novedades de la X" del LEEME.
+          $notas = ".github\notas\$($env:ETIQUETA).md"
+          if (-not (Test-Path $notas)) {
+            $leeme = Get-Content LEEME.txt -Raw -Encoding utf8
+            $m = [regex]::Match($leeme, "(?s)Novedades de la $([regex]::Escape($v))\r?\n(.*?)(\r?\nNovedades de la|$)")
+            $notas = "notas.md"
+            Set-Content $notas ("## Novedades de la $v`n`n" + $m.Groups[1].Value) -Encoding utf8
+          }
+          gh release create $env:ETIQUETA --repo $env:GITHUB_REPOSITORY --title "Vortexs Live $v" --notes-file $notas --verify-tag
+          if ($LASTEXITCODE -ne 0) { throw "No se pudo crear la Release $env:ETIQUETA" }
+
+      - name: Adjuntar el ZIP a la Release
+        if: github.event_name == 'release' || inputs.etiqueta != '' || startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ETIQUETA: ${{ github.event.release.tag_name || inputs.etiqueta || github.ref_name }}
         run: |
           foreach ($zip in (Get-Item dist\*.zip)) {
             gh release upload $env:ETIQUETA $zip.FullName --clobber --repo $env:GITHUB_REPOSITORY
