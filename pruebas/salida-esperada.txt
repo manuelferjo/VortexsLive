@@ -357,3 +357,12 @@
   PlanName 0 Sin plan
   PlanName 1 Básico
   PlanName 2 Completo
+== TwitchChat compartido
+ > @badges=;display-name=Propio;emotes=;id=s1;room-id=100;sourc
+  item {amount=null bd=null color="" data=null id="s1" kind=null p="twitch" parts=[{e=null n=null x="del canal propio"}] roles=[] src=null srci=null t="msg" text=null uid="30" user="Propio"}
+ > @badges=subscriber/6;bits=100;display-name=Visita;emotes=;id
+  item {amount=null bd=null color="" data=null id="s2" kind=null p="twitch" parts=[{e=null n=null x="Cheer100 hola"}] roles=["sub"] src="CanalAmigo" srci="https://static-cdn.jtvnw.net/x.png" t="msg" text=null uid="31" user="Visita"}
+ > @badges=;display-name=SinNombre;emotes=;id=s3;room-id=100;so
+  item {amount=null bd=null color="" data=null id="s3" kind=null p="twitch" parts=[{e=null n=null x="canal desconocido"}] roles=[] src="otro canal" srci=null t="msg" text=null uid="33" user="SinNombre"}
+ > @badges=;display-name=Fan;emotes=;id=s4;login=fan;msg-id=sha
+  item {amount=null bd=null color="" data=null id="s4" kind="other" p="twitch" parts=null roles=[] src="CanalAmigo" srci="https://static-cdn.jtvnw.net/x.png" t="ev" text="Fan subscribed." uid="32" user="Fan"}
