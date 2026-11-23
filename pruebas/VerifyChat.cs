@@ -321,6 +321,21 @@ static class VerifyChat
         Out.AppendLine("  PlanForBenefit '' " + Call(lic, "PlanForBenefit", "") + " · PolarReady " + lic.GetProperty("PolarReady", F).GetValue(null, null));
         foreach (var p in new[] { 0, 1, 2 }) Out.AppendLine("  PlanName " + p + " " + Call(lic, "PlanName", Enum.ToObject(T("Plan"), p)));
 
+        // Chat compartido de Twitch: los mensajes de otros canales llevan su nombre e imagen (caché
+        // rellenada aquí para no depender de internet) y no cuentan como bits ni avisos propios.
+        Section("TwitchChat compartido");
+        var srcCache = (IDictionary)T("TwitchChat").GetField("sources", F).GetValue(tw);
+        srcCache["200"] = new[] { "CanalAmigo", "https://static-cdn.jtvnw.net/x.png" };
+        srcCache["300"] = new[] { "", "" };
+        string[] shared =
+        {
+            "@badges=;display-name=Propio;emotes=;id=s1;room-id=100;source-room-id=100;user-id=30 :propio!p@p PRIVMSG #canal :del canal propio",
+            "@badges=subscriber/6;bits=100;display-name=Visita;emotes=;id=s2;room-id=100;source-room-id=200;user-id=31 :visita!v@v PRIVMSG #canal :Cheer100 hola",
+            "@badges=;display-name=SinNombre;emotes=;id=s3;room-id=100;source-room-id=300;user-id=33 :sn!s@s PRIVMSG #canal :canal desconocido",
+            "@badges=;display-name=Fan;emotes=;id=s4;login=fan;msg-id=sharedchatnotice;room-id=100;source-room-id=200;source-msg-id=sub;system-msg=Fan\\ssubscribed.;user-id=32 :tmi.twitch.tv USERNOTICE #canal",
+        };
+        foreach (var l in shared) { Out.AppendLine(" > " + (l.Length > 60 ? l.Substring(0, 60) : l)); Call(tw, "Handle", l, wr); }
+
         // Con un segundo argumento se guarda en ese archivo (UTF-8), sin depender de la consola.
         if (a.Length > 1) File.WriteAllText(a[1], Out.ToString(), new UTF8Encoding(false));
         else { Console.OutputEncoding = Encoding.UTF8; Console.Write(Out.ToString()); }

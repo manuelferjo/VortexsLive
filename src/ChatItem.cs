@@ -12,6 +12,7 @@ namespace StreamDelay
         public string kind;       // eventos: sub, resub, gift, giftbomb, raid, bits, follow, superchat, sticker, member, giftmember, kicks, announce
         public string text, amount;
         public string[] roles;    // broadcaster, mod, vip, sub, founder, member, verified, og
+        public string src, srci;  // chat compartido de Twitch: canal del que viene (nombre e imagen); null si es del tuyo
         public List<string[]> bd; // Twitch: imágenes de los emblemas { url, título } (si se pudieron pedir)
         public List<ChatPart> parts;
         public Dictionary<string, object> data;

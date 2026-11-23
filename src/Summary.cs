@@ -144,6 +144,11 @@ namespace StreamDelay
 				}
 				string p = it.p ?? "";
 				string user = it.user ?? "";
+				// Lo que se escribe en otros canales del chat compartido no es de tu directo.
+				if (it.src != null)
+				{
+					return;
+				}
 				if (it.t == "msg")
 				{
 					stats.Msgs++;
