@@ -523,9 +523,32 @@ namespace StreamDelay
 					switch (sink.State)
 					{
 					case SinkState.Live:
-						state = (engine.Replaying ? "REPITIENDO" : ((sink.Tracks > 1) ? ("EN DIRECTO · " + sink.Tracks + " CAL.") : ((sink.Quality.Length > 0) ? ("EN DIRECTO · " + sink.Quality.ToUpperInvariant()) : "EN DIRECTO")));
-						color = Theme.Red;
+					{
+						// En directo: velocidad de subida; si se queda atrás, cuánto (en amarillo).
+						long lag = sink.QueueAgeMs;
+						bool narrow = width < (float)S(118f);
+						if (engine.Replaying)
+						{
+							state = "REPITIENDO";
+							color = Theme.Red;
+						}
+						else if (lag > 1500L)
+						{
+							state = (narrow ? "" : (I18n.Tr("LENTO") + " · ")) + SecText(lag).ToUpperInvariant();
+							color = Theme.Yellow;
+						}
+						else if (sink.RateKbps > 0)
+						{
+							state = (narrow ? "" : (I18n.Tr("EN DIRECTO") + " · ")) + RateText(sink.RateKbps).ToUpperInvariant();
+							color = Theme.Red;
+						}
+						else
+						{
+							state = "EN DIRECTO";
+							color = Theme.Red;
+						}
 						break;
+					}
 					case SinkState.Connecting:
 						state = "CONECTANDO";
 						color = Theme.Yellow;
@@ -582,6 +605,11 @@ namespace StreamDelay
 					}
 				}
 				Theme.DrawText(g, item.Name, Theme.BodyBold(9f), Theme.Text, new RectangleF(dotRect.Right + (float)S(6f), cell.Y + (float)S(2f), cell.Width - (float)S(28f), S(20f)), StringAlignment.Near, StringAlignment.Center);
+				// Reconexiones de este destino desde que se inició (↻2).
+				if (sink != null && sink.Reconnects > 0)
+				{
+					Theme.DrawText(g, "↻" + sink.Reconnects, Theme.Mono(6.5f), Color.FromArgb(255, 150, 60), new RectangleF(cell.X, cell.Y + (float)S(2f), cell.Width - (float)S(8f), S(20f)), StringAlignment.Far, StringAlignment.Center);
+				}
 				Theme.DrawText(g, state, Theme.Mono(6.5f), filledDot ? Theme.Mix(color, Color.White, 0.25f) : Theme.Muted, new RectangleF(cell.X + (float)S(10f), cell.Y + (float)S(21f), cell.Width - (float)S(14f), S(14f)), StringAlignment.Near, StringAlignment.Center);
 				x += width + gap;
 			}

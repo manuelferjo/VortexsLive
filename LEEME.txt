@@ -1,7 +1,19 @@
-VORTEXS LIVE 4.22 - delay dinámico y multistream para OBS (by Vortexs)
+VORTEXS LIVE 4.23 - delay dinámico y multistream para OBS (by Vortexs)
 =====================================================================
 
 Abre GUIA.html (doble clic) para ver la guía completa.
+
+Novedades de la 4.23
+- Destinos en directo: pulsa la franja de destinos de la pestaña
+  Directo mientras emites y verás, por cada plataforma, la velocidad
+  de subida, el retraso de envío, el tiempo en directo y las
+  reconexiones. La franja ya enseña la velocidad (EN DIRECTO · 6,2 MB/S),
+  avisa en amarillo si un destino va lento y marca las reconexiones (↻).
+- El delay llega hasta 3 minutos (antes 10). Menos memoria y menos
+  riesgo en directos largos; los atajos y el Mando van de 0 a 180 s.
+- Cada versión pasa una prueba automática con vídeo de verdad: delay
+  exacto, subirlo y bajarlo en directo sin cortes ni reconexiones,
+  clips y vídeo recibido sin errores.
 
 Novedades de la 4.22
 - Panel de la derecha más fácil de encontrar: una pestaña en el borde

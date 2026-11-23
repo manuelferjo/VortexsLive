@@ -22,7 +22,7 @@ namespace StreamDelay
 
 		private readonly string[] presetName = new string[6] { "Sin delay", "", "", "", "", "" };
 
-		private readonly int[] presetSec = new int[6] { 0, 15, 30, 60, 120, 300 };
+		private readonly int[] presetSec = new int[6] { 0, 15, 30, 60, 120, 180 };
 
 		private string PresetLabel(int i)
 		{
@@ -125,7 +125,7 @@ namespace StreamDelay
 					int v;
 					if (int.TryParse(fs[i].Box.Text.Trim(), out v))
 					{
-						presetSec[i] = Math.Max(0, Math.Min(600, v));
+						presetSec[i] = Math.Max(0, Math.Min(MaxDelay, v));
 					}
 				}
 				SaveConfig();
@@ -1087,7 +1087,7 @@ namespace StreamDelay
 					if (c >= 0 && int.TryParse(parts[i].Substring(c + 1), out s))
 					{
 						presetName[i] = parts[i].Substring(0, c);
-						presetSec[i] = Math.Max(0, Math.Min(600, s));
+						presetSec[i] = Math.Max(0, Math.Min(MaxDelay, s));
 					}
 				}
 			}

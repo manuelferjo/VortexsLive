@@ -128,7 +128,7 @@ namespace StreamDelay
 
 		// ---------- Constantes ----------
 
-		private const string Version = "4.22";
+		private const string Version = "4.23";
 
 		private const string TikTokName = "TikTok";
 
@@ -138,7 +138,7 @@ namespace StreamDelay
 		private const int ChatPort = 8935;
 
 		// Delay máximo en segundos.
-		private const int MaxDelay = 600;
+		private const int MaxDelay = 180;
 
 		// Páginas de la ventana (cada control se apunta a una con Place/Box). Las pestañas las
 		// muestran en otro orden: ver TabPages.
@@ -489,6 +489,7 @@ namespace StreamDelay
 			timer.Tick += delegate
 			{
 				pulse = !pulse;
+				SampleSinkRates();
 				RefreshStatus();
 				CheckHealth();
 				LicenseTick();
