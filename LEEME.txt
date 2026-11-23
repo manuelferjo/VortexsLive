@@ -1,7 +1,14 @@
-VORTEXS LIVE 4.23 - delay dinámico y multistream para OBS (by Vortexs)
+VORTEXS LIVE 4.24 - delay dinámico y multistream para OBS (by Vortexs)
 =====================================================================
 
 Abre GUIA.html (doble clic) para ver la guía completa.
+
+Novedades de la 4.24
+- Registro del delay para Vortexs Clips: Vortexs Live apunta el delay
+  real de cada momento en %APPDATA%\VortexsLive\delay_log.csv (una
+  línea cada vez que cambia). Vortexs Clips lo usa para saber en qué
+  segundo del VOD de Twitch cae cada jugada, aunque cambies el delay
+  en pleno directo. Ocupa muy poco y no afecta al stream.
 
 Novedades de la 4.23
 - Interfaz más clara:
