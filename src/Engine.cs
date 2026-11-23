@@ -1126,6 +1126,8 @@ namespace StreamDelay
 				}
 			}
 			currentDelayMs = (int)(clock.ElapsedMilliseconds - p.Arrival);
+			// Para Vortexs Clips: delay real en cada momento (ver DelayLog.cs).
+			DelayLog.Record(currentDelayMs);
 		}
 
 		private void Fanout(FlvPacket p, long outTs)
