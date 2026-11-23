@@ -27,7 +27,7 @@ La licencia se activa en el programa: botón del plan, arriba (debajo de «Engli
 
 ## Funciones
 
-- **Delay dinámico**: elige los segundos y cámbialos en directo. Al subirlo se repiten los últimos segundos emitidos; al bajarlo, el stream salta hacia delante. Atajos de teclado globales.
+- **Delay dinámico**: elige los segundos y cámbialos en directo. Al subirlo se repiten los últimos segundos emitidos; al bajarlo, el stream salta hacia delante. Atajos de teclado globales. Guarda el delay real de cada momento en `%APPDATA%\VortexsLive\delay_log.csv` para que [Vortexs Clips](https://github.com/manuelferjo/VortexsClips) sincronice tus VODs al segundo.
 - **Multistream**: Twitch, Kick, YouTube y otro destino a la vez, con el mismo delay. OBS codifica una sola vez.
 - **Clips**: guarda los últimos 60 s que ha visto el público con el botón Clip, `Ctrl+Alt+C`, el Mando o `!guardar` en el chat (tú y, si quieres, tus moderadores o personas concretas como tu editor), en la carpeta que elijas (también una de Google Drive, OneDrive o Dropbox para compartirlos).
 - **Varias calidades en Twitch** (Transmisión mejorada de OBS).
