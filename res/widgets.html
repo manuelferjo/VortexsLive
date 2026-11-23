@@ -37,6 +37,7 @@
   .alert .abody { font-size: 24px; color: var(--lbl); margin-top: 8px; max-width: 900px; }
   .alert .aamt { margin-left: auto; font: 800 34px var(--font); padding: 10px 20px; border-radius: 999px; background: rgba(255,255,255,.08); white-space: nowrap; }
   .alert .abar { position: absolute; left: 0; bottom: 0; height: 5px; width: 100%; background: linear-gradient(90deg, var(--a1), var(--a2)); transform-origin: left; }
+  .alert .aimg { width: 150px; height: 150px; object-fit: contain; flex: none; filter: drop-shadow(0 6px 18px var(--glow)); }
   .alert.in { animation: popin .55s cubic-bezier(.2,1.4,.4,1) both; }
   .alert.out { animation: popout .45s ease both; }
   @keyframes popin { from { opacity: 0; transform: translateY(-30px) scale(.85); } to { opacity: 1; transform: none; } }
@@ -96,6 +97,24 @@
   #poll .po.win { box-shadow: inset 0 0 0 2px var(--a2); } #poll .po.win .pfill { opacity: .55; }
   #poll .pfoot { display: flex; gap: 12px; margin-top: 14px; font: 600 17px var(--lfont); color: var(--lbl); }
   #poll .pfoot b { color: var(--tx); margin-left: auto; font-variant-numeric: tabular-nums; }
+
+  /* ---- Formato vertical (?formato=vertical): fuente Navegador de 1080x1920 para TikTok, Shorts o Aitum
+     Vertical. Todo se aparta de los bordes, donde TikTok pone su barra de arriba, sus botones y los
+     comentarios. ---- */
+  body.fv { width: 1080px; height: 1920px; }
+  body.fv #alerts.top { top: 300px; } body.fv #alerts.bottom { bottom: 560px; }
+  body.fv .alert { flex-direction: column; text-align: center; gap: 14px; min-width: 0; width: 880px; max-width: 880px; padding: 34px 40px 40px; }
+  body.fv .alert .ahead { justify-content: center; }
+  body.fv .alert .aamt { margin-left: 0; }
+  body.fv .alert .aimg { width: 280px; height: 280px; }
+  body.fv .alert .aname { font-size: 56px; }
+  body.fv #feature { max-width: 880px; font-size: 30px; }
+  body.fv #feature.bl, body.fv #feature.bc { left: 100px; bottom: 600px; transform: translateY(20px); } body.fv #feature.bl.show, body.fv #feature.bc.show { transform: none; }
+  body.fv #feature.tl { left: 100px; top: 300px; }
+  body.fv #goal { width: 880px; margin-left: -440px; }
+  body.fv #goal.top { top: 230px; } body.fv #goal.bottom { bottom: 520px; }
+  body.fv #ticker.top { top: 200px; } body.fv #ticker.bottom { bottom: 460px; }
+  body.fv #poll { top: 520px; width: 760px; } body.fv #poll.left { left: 100px; } body.fv #poll.right { right: 160px; }
 </style>
 </head>
 <body>
@@ -165,11 +184,29 @@
       var pr = au.play(); if (pr && pr.catch) pr.catch(function () { chime(vol); });
     } catch (x) { chime(vol); }
   }
+  // Número de una cantidad: "500 bits" → 500, "5,00 €" → 5, "$12.50" → 12.5, "1.500 pts" → 1500.
+  function amountNum(s) {
+    var mt = String(s || '').match(/\d+(?:[.,]\d+)*/);
+    if (!mt) return 0;
+    var t = mt[0], dec = t.match(/[.,](\d{1,2})$/);
+    if (dec) t = t.slice(0, -dec[0].length).replace(/[.,]/g, '') + '.' + dec[1];
+    else t = t.replace(/[.,]/g, '');
+    return parseFloat(t) || 0;
+  }
   function alertWanted(m) {
     var g = GROUP[m.kind];
     if (!g) return false;
-    var kinds = cfg && cfg.alerts && cfg.alerts.kinds;
-    return !kinds || kinds.indexOf(g) >= 0;
+    var a = (cfg && cfg.alerts) || {}, kinds = a.kinds;
+    if (kinds && kinds.indexOf(g) < 0) return false;
+    // Mínimo para bits y donaciones (pestaña Overlays → Alertas → Personalizar).
+    var min = a.min && a.min[g];
+    if (min > 0 && (g === 'bits' || g === 'tip') && !m.test && amountNum(m.amount) < min) return false;
+    return true;
+  }
+  function plainParts(parts) { return (parts || []).map(function (p) { return p.e ? p.n : p.x; }).join('').trim(); }
+  // Texto propio del tipo: {usuario} y {cantidad} (también {user} y {amount}).
+  function alertHeadline(tpl, name, m) {
+    return String(tpl).replace(/\{(usuario|user|nombre|name)\}/gi, name).replace(/\{(cantidad|amount)\}/gi, m.amount || '').replace(/\{(mensaje|message)\}/gi, plainParts(m.parts));
   }
   function nextAlert() {
     if (busy || !queue.length) return;
@@ -177,12 +214,18 @@
     var m = queue.shift(), a = (cfg && cfg.alerts) || {}, dur = Math.max(2, a.dur || 6) * 1000;
     var name = m.user || '', text = m.text || '';
     var rest = text.indexOf(name) === 0 ? text.slice(name.length).trim() : text;
+    var g = GROUP[m.kind], tpl = a.texts && a.texts[g], img = a.images && a.images[g];
+    var head = tpl ? alertHeadline(tpl, name, m) : null;
+    // Con texto propio que ya dice la cantidad, no se repite a la derecha.
+    var showAmt = m.amount && m.kind !== 'raid' && m.kind !== 'giftbomb' && !(tpl && /\{(cantidad|amount)\}/i.test(tpl));
+    var showMsg = a.msg !== false && m.parts && m.parts.length;
     var card = el('<div class="alert frame in">' +
-      '<div class="aico">' + (EV_ICON[m.kind] || '📣') + '</div>' +
+      (img ? '<img class="aimg" src="' + esc(img) + '" alt="">' : '<div class="aico">' + (EV_ICON[m.kind] || '📣') + '</div>') +
       '<div class="atx"><div class="ahead">' + (ICONS[m.p] || '') + '<span class="lbl">' + esc(T(KIND_LABEL[m.kind] || '')) + '</span></div>' +
-      '<div class="aname">' + esc(name || text) + '</div>' + (name && rest ? '<div class="amsg">' + esc(rest) + '</div>' : '') +
-      (m.parts && m.parts.length ? '<div class="abody">' + partsHtml(m.parts) + '</div>' : '') + '</div>' +
-      (m.amount && m.kind !== 'raid' && m.kind !== 'giftbomb' ? '<div class="aamt">' + esc(m.amount) + '</div>' : '') +
+      (head ? '<div class="aname">' + esc(head) + '</div>'
+            : '<div class="aname">' + esc(name || text) + '</div>' + (name && rest ? '<div class="amsg">' + esc(rest) + '</div>' : '')) +
+      (showMsg ? '<div class="abody">' + partsHtml(m.parts) + '</div>' : '') + '</div>' +
+      (showAmt ? '<div class="aamt">' + esc(m.amount) + '</div>' : '') +
       '<div class="abar"></div></div>');
     alertBox.innerHTML = ''; alertBox.appendChild(card);
     var bar = card.querySelector('.abar');

@@ -245,6 +245,7 @@ namespace StreamDelay
 					chatServer.OnSendReply = ChatSendAll;
 					chatServer.OnWidgets = WidgetsJson;
 					chatServer.OnSound = AlertSoundFile;
+					chatServer.OnImage = AlertImageFile;
 					chatServer.OnDelayState = DelayStateJson;
 					chatServer.OnViewersState = ViewersStateJson;
 					WireServer();
@@ -277,6 +278,7 @@ namespace StreamDelay
 					chatServer.OnSendReply = ChatSendAll;
 					chatServer.OnWidgets = WidgetsJson;
 					chatServer.OnSound = AlertSoundFile;
+					chatServer.OnImage = AlertImageFile;
 					chatServer.OnDelayState = DelayStateJson;
 					chatServer.OnViewersState = ViewersStateJson;
 					WireServer();

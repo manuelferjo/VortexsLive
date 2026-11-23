@@ -50,6 +50,7 @@ namespace StreamDelay
 			shots.Add(new KeyValuePair<string, Action>("07-overlays", delegate { GoPage(PageOverlays); }));
 			shots.Add(new KeyValuePair<string, Action>("08-mando", delegate { GoPage(PageMando); }));
 			shots.Add(new KeyValuePair<string, Action>("09-clips", delegate { GoPage(PageClips); }));
+			shots.Add(new KeyValuePair<string, Action>("09b-overlays-alertas", delegate { ovPick = 3; ApplyOverlayPick(); GoPage(PageOverlays); }));
 			for (int i = 0; i < 3; i++)
 			{
 				int pick = i;

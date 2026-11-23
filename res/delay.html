@@ -49,6 +49,9 @@
   body.sd-circle .dot { margin:0; }
   body.sd-circle .off .val, body.sd-circle .val { font-size:30px; }
   body.sd-circle .bar { left:36px; right:36px; bottom:24px; }
+  /* Formato vertical (?formato=vertical): 1080x1920, por debajo de la barra de arriba de TikTok. */
+  body.fv { width:1080px; height:1920px; }
+  body.fv #box { top:calc(220px * var(--k)); right:calc(150px * var(--k)); }
   @keyframes flip { 0%, 80% { transform:rotate(0); } 90%, 100% { transform:rotate(180deg); } }
 </style>
 </head>

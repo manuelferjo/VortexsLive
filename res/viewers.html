@@ -33,6 +33,10 @@
   .bump { animation:bump .5s ease; }
   @keyframes bump { 40% { transform:scale(1.12); } }
   body.sd-noborder .pill::before { display:none; }
+  /* Formato vertical (?formato=vertical): 1080x1920, lejos de los bordes que tapa TikTok. */
+  body.fv { width:1080px; height:1920px; }
+  body.fv #box.tr { right:150px; } body.fv #box.tl { top:220px; left:60px; }
+  body.fv #box.br { bottom:560px; right:150px; } body.fv #box.bl { bottom:560px; left:60px; }
 </style>
 </head>
 <body>
@@ -59,7 +63,8 @@
     document.documentElement.style.setProperty('--k', k);
     // Arriba a la derecha se coloca justo debajo del overlay de delay (que puede ser más grande).
     var dk = s && s.dk > 0.2 && s.dk < 4 ? s.dk : 1;
-    box.style.top = pos === 'tr' ? Math.round(108 * dk + 20) + 'px' : '';
+    var under = document.body.classList.contains('fv') ? 292 : 108;   // en vertical el delay está más abajo
+    box.style.top = pos === 'tr' ? Math.round(under * dk + 20) + 'px' : '';
   }
   applyOpts(null);
   // Estilo: el borde y el brillo usan los colores elegidos.

@@ -21,7 +21,7 @@ namespace StreamDelay
 
 		public void OpenPickedOverlay()
 		{
-			string u = OverlayUrl(OvPaths[Math.Max(0, Math.Min(7, ovPick))]);
+			string u = OverlayLink(OvPaths[Math.Max(0, Math.Min(7, ovPick))]);
 			if (u != null)
 			{
 				Http.OpenBrowser(u);

@@ -166,6 +166,20 @@ namespace StreamDelay
 			return EnsureChatServer() ? ("http://127.0.0.1:" + chatServer.Port + "/" + path) : null;
 		}
 
+		// Formato de la escena para la que se copian los overlays: horizontal (1920x1080) o vertical
+		// (1080x1920: TikTok, Shorts, Aitum Vertical). En vertical la URL lleva ?formato=vertical.
+		private bool ovVertical;
+
+		private string OverlayLink(string path)
+		{
+			string u = OverlayUrl(path);
+			if (u == null || !ovVertical || path.StartsWith("?overlay"))
+			{
+				return u;
+			}
+			return u + (path.Contains("?") ? "&" : "?") + "formato=vertical";
+		}
+
 		// Grupo de píldoras de las que solo una está elegida.
 		private VButton[] Choice(Control parent, string[] labels, int selected, float x, float y, float w, Action<int> pick)
 		{
@@ -203,7 +217,7 @@ namespace StreamDelay
 			Place(card, copy, 20f, y, 186f, 34f);
 			copy.Click += delegate
 			{
-				string u = OverlayUrl(path);
+				string u = OverlayLink(path);
 				if (u != null)
 				{
 					CopyText(u, copy, "Copiar URL");
@@ -214,7 +228,7 @@ namespace StreamDelay
 			Place(card, see, 214f, y, 186f, 34f);
 			see.Click += delegate
 			{
-				string u = OverlayUrl(path);
+				string u = OverlayLink(path);
 				if (u != null)
 				{
 					Http.OpenBrowser(u);
@@ -315,8 +329,22 @@ namespace StreamDelay
 					Theme.DrawText(g, "Chat conjunto apagado: este overlay no recibe nada. Pulsa para activarlo.", Theme.BodySemi(7.25f), Theme.Yellow, new RectangleF(r.X + isz + S(5f), r.Y, r.Width - isz - S(5f), r.Height), StringAlignment.Near, StringAlignment.Center);
 					return;
 				}
-				Theme.DrawText(g, "En OBS: + → Navegador → pega la URL · 1920x1080 (chat: 500x700). Vista previa: pestaña › del borde.", Theme.Body(7.25f), Theme.Muted, r, StringAlignment.Near, StringAlignment.Center);
+				Theme.DrawText(g, ovVertical ? "En OBS: + → Navegador → pega la URL · 1080x1920 (chat: 1000x800)." : "En OBS: + → Navegador → pega la URL · 1920x1080 (chat: 500x700). Vista previa: pestaña › del borde.", Theme.Body(7.25f), Theme.Muted, r, StringAlignment.Near, StringAlignment.Center);
 			}, 5);
+			// Formato de la escena: cambia las URL que se copian (y su vista previa en el navegador).
+			Box(this, 20f, 654f, 96f, 28f, delegate(Graphics g, Rectangle r)
+			{
+				Theme.DrawText(g, "ESCENA", Theme.Mono(7.5f), Theme.Muted, r, StringAlignment.Near, StringAlignment.Center);
+			}, 5);
+			VButton[] fmt = Choice(this, new string[2] { "Horizontal 16:9", "Vertical 9:16 · TikTok" }, ovVertical ? 1 : 0, 96f, 655f, 166f, delegate(int i)
+			{
+				ovVertical = i == 1;
+				ovHint.Invalidate();
+			});
+			foreach (VButton b in fmt)
+			{
+				pages[5].Add(b);
+			}
 			ovHint.Click += delegate
 			{
 				if (ovPick != 0 && !ChatOn)
