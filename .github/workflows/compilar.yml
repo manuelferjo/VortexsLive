@@ -71,6 +71,25 @@ jobs:
           .\verifyengine.exe VortexsLive.exe $ff prueba-motor
           if ($LASTEXITCODE -ne 0) { throw "La prueba del motor ha fallado (mira las líneas FALLO)" }
 
+      # Capturas de cada pantalla (asistente, atajos, pestañas…) para revisar la interfaz sin abrir el
+      # programa: se descargan desde la página de esta ejecución (artefacto "capturas").
+      - name: Capturas de la interfaz
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force capturas-app | Out-Null
+          Copy-Item VortexsLive.exe capturas-app\
+          $p = Start-Process capturas-app\VortexsLive.exe -ArgumentList "--capturas=$PWD\capturas" -PassThru
+          if (-not $p.WaitForExit(120000)) { $p.Kill(); throw "Las capturas no terminaron en 2 minutos" }
+          Get-ChildItem capturas | ForEach-Object { "$($_.Name): $([math]::Round($_.Length / 1KB)) KB" }
+
+      - name: Guardar las capturas
+        continue-on-error: true
+        uses: actions/upload-artifact@v7
+        with:
+          name: capturas
+          path: capturas/*.png
+
       - name: Comprobar que la versión coincide con la etiqueta
         if: github.event_name == 'release' || inputs.etiqueta != ''
         shell: pwsh

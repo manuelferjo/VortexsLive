@@ -100,7 +100,7 @@
     <p style="margin-top:0">Al abrir Vortexs Live por primera vez tienes <b>3 días de prueba gratis con todo</b>, sin tarjeta, y una ventana de bienvenida te lo explica. La prueba es una por PC y se apunta en vortexs.es, así que la primera vez hace falta internet para empezarla. Te avisa también cuando queda menos de 1 día y cuando la prueba termina (nunca en pleno directo). Después hay dos planes, que se pagan <b>mes a mes</b> y se cancelan cuando quieras:</p>
     <table>
       <tr><th>Plan</th><th>Precio</th><th>Qué incluye</th></tr>
-      <tr><td><b>Básico</b></td><td>5 €/mes</td><td>Delay dinámico, multistream y título: pestañas <b>Directo</b>, <b>Ajustes</b>, <b>Título</b> y <b>Registro</b>, atajos de teclado del delay y avisos del delay en el chat.</td></tr>
+      <tr><td><b>Básico</b></td><td>5 €/mes</td><td>Delay dinámico, multistream y título: pestañas <b>Directo</b> (con <b>Título y categoría</b>) y <b>Ajustes</b> (con <b>Registro</b>), atajos de teclado del delay y avisos del delay en el chat.</td></tr>
       <tr><td><b>Completo</b></td><td>8 €/mes</td><td>Todo: además <b>clips</b> de los últimos 60 s (botón Clip, <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>C</kbd>, <code>!guardar</code>), <b>Chat</b> conjunto con moderación y comandos, <b>Overlays</b> y <b>Mando</b> (móvil, Stream Deck, panel de OBS).</td></tr>
     </table>
     <ol>
@@ -140,6 +140,7 @@
 
   <section>
     <h2><span class="n">3</span>Configurar Vortexs Live</h2>
+    <p class="note"><b>Asistente de inicio:</b> la primera vez que abres Vortexs Live te guía en 4 pasos (OBS, destinos, delay y comprobar que llega). Para volver a abrirlo pulsa <kbd>?</kbd> (o el botón <b>?</b> de arriba) → <b>Abrir el asistente de inicio</b>.</p>
     <ol>
       <li>Pestaña <b>Ajustes → Destinos</b>: activa Twitch (y las demás plataformas donde quieras emitir) y pulsa <b>Editar</b> para revisar servidor y clave.</li>
       <li><b>Clave de transmisión:</b> opcional si la pones en OBS como en el paso 2. Rellénala solo si en OBS usas “Personalizado” con la clave <code>stream</code>. Se guarda cifrada con tu usuario de Windows en <code>VortexsLive.ini</code>. <b>No compartas ese archivo.</b></li>
@@ -217,6 +218,9 @@
       <tr><td>Guardar un clip <small>(plan Completo)</small></td><td>Botón <b>Clip</b> de Directo, <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>C</kbd>, el Mando o <code>!guardar</code> en el chat (tú y quien permitas). Guarda los <b>últimos 60 s que ha visto el público</b> (con el delay ya aplicado) en <b>Vídeos\Vortexs Live</b> o en la carpeta que elijas, en MP4 si tienes ffmpeg y si no en FLV (se abre con VLC). La pestaña <b>Clips</b> te recuerda las formas de guardarlos, cuánto dura cada uno y en qué carpeta están (con «Cambiar» para elegir otra), y los enseña todos: verlos, renombrarlos y mandarlos a la papelera.</td></tr>
       <tr><td>Ventana encima del juego</td><td>Ajustes → “Ventana siempre visible”</td></tr>
       <tr><td>Desde el móvil o el Stream Deck</td><td>Pestaña <b>Mando</b> (apartado 11)</td></tr>
+      <tr><td>Delays guardados con teclado</td><td><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>1</kbd>…<kbd>6</kbd> · activar <kbd>A</kbd> · quitar <kbd>Q</kbd> · cortar ya <kbd>X</kbd> (siempre con <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Mayús</kbd>)</td></tr>
+      <tr><td>Ver todos los atajos</td><td>Pulsa <kbd>?</kbd> o <kbd>F1</kbd> en Vortexs Live. Cada botón dice también su atajo al pasar el ratón.</td></tr>
+      <tr><td>Cortar ya / Detener en directo</td><td>Se pulsan <b>dos veces</b>: el primer clic pone el botón en rojo («¿Seguro?») durante 3 s y el segundo lo hace. Así no sale ninguna ventana en pleno directo.</td></tr>
     </table>
     <p class="note"><b>Clips para tu editor:</b> en la pestaña Clips → <b>Carpeta</b> → «Elegir dónde se guardan los clips…» elige una carpeta de Google Drive, OneDrive o Dropbox compartida con él: cada clip le llega solo, esté donde esté. Si además quieres que él mismo los guarde, añádelo en la pestaña Clips, en «Quién puede usar !guardar» (su nombre de Twitch o Kick → <b>Añadir</b>) y que escriba <code>!guardar</code> en tu chat. Hace falta tener activado «Contestar a los comandos» (Chat → Avisos y comandos).</p>
     <p class="note">Los atajos funcionan aunque estés dentro del juego. Comprueba que no coincidan con tus atajos de OBS (por ejemplo, el de guardar clips).</p>
@@ -240,7 +244,7 @@
 
   <section id="titulo">
     <h2><span class="n">7</span>Cambiar título y categoría <span class="tag">NUEVO</span></h2>
-    <p style="margin-top:0">En la pestaña <b>Título</b> escribes un título y una categoría (por ejemplo <code>Valorant</code>), pulsas <b>Buscar</b> y luego <b>Actualizar</b>: se cambian a la vez en Twitch, YouTube y Kick.</p>
+    <p style="margin-top:0">En <b>Directo → Título y categoría</b> escribes un título y una categoría (por ejemplo <code>Valorant</code>), pulsas <b>Buscar</b> y luego <b>Actualizar</b>: se cambian a la vez en Twitch, YouTube y Kick.</p>
     <ul>
       <li>Las píldoras muestran la categoría elegida en cada plataforma. Si no es la buena, pulsa la píldora y elige otra de la lista.</li>
       <li><b>YouTube</b> solo deja elegir su categoría general (Videojuegos, Gente y blogs…). El juego concreto lo detecta YouTube solo.</li>
@@ -299,23 +303,23 @@
     <p style="margin-top:0">Pulsa <b>Follows y donaciones</b> en la pestaña Chat:</p>
     <table>
       <tr><th>Qué</th><th>Cómo activarlo</th></tr>
-      <tr><td><b>Follows de Twitch</b></td><td>Usa la cuenta de Twitch de la pestaña <b>Título</b> (tienes que ser el dueño del canal o moderador). Si la conectaste antes de la 2.5, pulsa <b>Volver a conectar Twitch</b> una vez para dar el permiso de follows. Los follows de Kick salen sin hacer nada.</td></tr>
+      <tr><td><b>Follows de Twitch</b></td><td>Usa la cuenta de Twitch de <b>Directo → Título y categoría</b> (tienes que ser el dueño del canal o moderador). Si la conectaste antes de la 2.5, pulsa <b>Volver a conectar Twitch</b> una vez para dar el permiso de follows. Los follows de Kick salen sin hacer nada.</td></tr>
       <tr><td><b>StreamElements</b></td><td>En StreamElements: tu cuenta → <b>Canales</b> → “Mostrar secretos” → copia el <b>JWT Token</b> y pégalo.</td></tr>
       <tr><td><b>Streamlabs</b></td><td>En Streamlabs: Ajustes → <b>API Settings</b> → API Tokens → copia el <b>Your Socket API Token</b> y pégalo.</td></tr>
     </table>
     <ul style="margin-top:12px">
       <li>Las donaciones salen en el chat con su importe y su mensaje.</li>
       <li>Si no conectas Twitch pero usas StreamElements o Streamlabs, sus avisos de follow de Twitch se usan en su lugar.</li>
-      <li>El botón muestra cuántos avisos están funcionando. Si pone <b>revisar</b>, mira la pestaña <b>Registro</b>: dice qué falla (token incorrecto, falta permiso…).</li>
+      <li>El botón muestra cuántos avisos están funcionando. Si pone <b>revisar</b>, mira <b>Ajustes → Registro</b>: dice qué falla (token incorrecto, falta permiso…).</li>
       <li>Los tokens se guardan cifrados en <code>VortexsLive.ini</code>. Son como contraseñas: <b>no los compartas</b>.</li>
     </ul>
     <h3 style="margin:18px 0 8px">Escribir en todas las plataformas a la vez</h3>
     <p style="margin-top:0">Abajo de la página del chat (en el navegador o en el panel de OBS) hay una caja para escribir. Lo que escribas se envía <b>con tu cuenta</b> al chat de cada plataforma marcada.</p>
     <ul>
-      <li>Usa las cuentas conectadas en la pestaña <b>Título</b>. Solo aparecen las plataformas conectadas; pulsa cada una para incluirla o quitarla (se recuerda).</li>
-      <li><b>Twitch y Kick</b> piden un permiso nuevo para escribir: si las conectaste antes de la 2.6, vuelve a conectarlas una vez en <b>Título</b>. En tu app de Kick marca también el permiso de escribir en el chat (<code>chat:write</code>).</li>
+      <li>Usa las cuentas conectadas en <b>Directo → Título y categoría</b>. Solo aparecen las plataformas conectadas; pulsa cada una para incluirla o quitarla (se recuerda).</li>
+      <li><b>Twitch y Kick</b> piden un permiso nuevo para escribir: si las conectaste antes de la 2.6, vuelve a conectarlas una vez en <b>Directo → Título y categoría</b>. En tu app de Kick marca también el permiso de escribir en el chat (<code>chat:write</code>).</li>
       <li><b>YouTube</b> escribe en tu directo en curso. Cada mensaje gasta 50 de las 10.000 unidades diarias de la API (unos 200 mensajes al día) y admite como máximo 200 caracteres.</li>
-      <li><b>Emotes:</b> el botón 😊 junto a la caja abre tus emotes: los de <b>tu canal de Twitch</b> (también los personalizados), los de <b>tus suscripciones</b> a otros canales, los globales de Twitch y los de 7TV, BTTV y FFZ. Pulsa uno para ponerlo donde esté el cursor; arriba hay un buscador y los últimos que usaste. Los de Twitch se ven como emote en Twitch; en Kick y YouTube llegan como texto. Los de 7TV/BTTV/FFZ los ve quien tenga esas extensiones (y el chat conjunto). Para ver los de tus suscripciones, vuelve a conectar Twitch una vez en <b>Título</b> (permiso nuevo en la 4.7).</li>
+      <li><b>Emotes:</b> el botón 😊 junto a la caja abre tus emotes: los de <b>tu canal de Twitch</b> (también los personalizados), los de <b>tus suscripciones</b> a otros canales, los globales de Twitch y los de 7TV, BTTV y FFZ. Pulsa uno para ponerlo donde esté el cursor; arriba hay un buscador y los últimos que usaste. Los de Twitch se ven como emote en Twitch; en Kick y YouTube llegan como texto. Los de 7TV/BTTV/FFZ los ve quien tenga esas extensiones (y el chat conjunto). Para ver los de tus suscripciones, vuelve a conectar Twitch una vez en <b>Directo → Título y categoría</b> (permiso nuevo en la 4.7).</li>
       <li><b>Enlaces:</b> los enlaces que se escriben en el chat (https://…, www.… o algo como vortexs.es) se pueden pulsar y se abren en una pestaña nueva. Pulsar el resto del mensaje sigue abriendo las opciones de moderar.</li>
       <li>Debajo de la caja ves el resultado de cada plataforma (✓ enviado o ✗ y el motivo). Tu mensaje aparece en el chat conjunto como el de cualquiera.</li>
       <li>La caja no sale en la versión “en pantalla” (overlay). Para quitarla también del panel, añade <code>?escribir=0</code> a la URL.</li>
@@ -379,7 +383,7 @@
       <li>Pulsa <b>Probar aviso ahora</b> para comprobarlo y luego <b>Guardar</b>.</li>
     </ol>
     <ul style="margin-top:12px">
-      <li>Para escribir hace falta tener la cuenta de esa plataforma conectada en la pestaña <b>Título</b> (con permiso de chat). Las no conectadas salen como “(sin conectar)”.</li>
+      <li>Para escribir hace falta tener la cuenta de esa plataforma conectada en <b>Directo → Título y categoría</b> (con permiso de chat). Las no conectadas salen como “(sin conectar)”.</li>
       <li>Con <b>Solo si estoy en directo</b> no se manda nada mientras no estés emitiendo. Si cambias el delay varias veces seguidas, espera 3 s y manda un único aviso con el valor final. También avisa si cambias los segundos con el delay ya activado.</li>
     </ul>
     <h3 style="margin:18px 0 8px">Comandos (!delay, !web…)</h3>
@@ -391,7 +395,7 @@
       <li><code>{delay}</code> se cambia por “El directo va con 30 s de delay.” o “Ahora mismo no hay delay…”; <code>{s}</code> por los segundos; <code>{user}</code> por quien lo pregunta; <code>{plataforma}</code> por Twitch, Kick o YouTube.</li>
       <li><code>!guardar</code> viene incluido y funciona si lo escribes tú (el dueño del canal) o quien permitas en la pestaña <b>Clips</b> → <b>Quién puede usar !guardar</b> (ahí ves la lista y quitas a alguien con ✕): tus moderadores y/o personas concretas de Twitch o Kick, por ejemplo tu editor desde su casa. Guarda los últimos 60 s en tu PC sin escribir nada en el chat (sale en el Registro). Si lo escribe otro espectador, no pasa nada. Con la carpeta de clips en Google Drive, OneDrive o Dropbox compartida con tu editor, le llega solo. <code>!clip</code> no es de Vortexs Live: déjaselo a tu bot de clips de Twitch (StreamElements, Nightbot…).</li>
       <li>Cada comando contesta como mucho una vez cada 20 s por plataforma (así no se llena el chat). Los mensajes antiguos que llegan al conectar el chat no se contestan.</li>
-      <li>Hace falta el chat activado y la cuenta de esa plataforma conectada en <b>Título</b>. En YouTube cada respuesta gasta cupo de la API (50 de 10.000 diarias).</li>
+      <li>Hace falta el chat activado y la cuenta de esa plataforma conectada en <b>Directo → Título y categoría</b>. En YouTube cada respuesta gasta cupo de la API (50 de 10.000 diarias).</li>
     </ul>
     <h3 style="margin:18px 0 8px">Moderar desde el chat conjunto <span class="tag">NUEVO</span></h3>
     <p style="margin-top:0">En la página del chat (navegador o panel de OBS), <b>pulsa un mensaje</b> y elige:</p>
@@ -422,9 +426,9 @@
     </ul>
     <h3 style="margin:18px 0 8px">Lo que hace falta para moderar en la plataforma</h3>
     <ul>
-      <li>Tu cuenta conectada en <b>Título</b>; tienes que ser el dueño del canal o moderador.</li>
-      <li><b>Twitch:</b> desde la 3.5 hay un permiso nuevo para los modos del chat. Vuelve a conectar Twitch una vez en <b>Título</b> (desconectar y conectar).</li>
-      <li><b>Kick:</b> en tu app de Kick (kick.com → Ajustes → Desarrollador) marca también <code>moderation:ban</code> y <code>moderation:chat_message:manage</code>, guarda y vuelve a conectar Kick en <b>Título</b>. Kick no deja cambiar el modo lento ni los modos del chat desde otros programas.</li>
+      <li>Tu cuenta conectada en <b>Directo → Título y categoría</b>; tienes que ser el dueño del canal o moderador.</li>
+      <li><b>Twitch:</b> desde la 3.5 hay un permiso nuevo para los modos del chat. Vuelve a conectar Twitch una vez en <b>Directo → Título y categoría</b> (desconectar y conectar).</li>
+      <li><b>Kick:</b> en tu app de Kick (kick.com → Ajustes → Desarrollador) marca también <code>moderation:ban</code> y <code>moderation:chat_message:manage</code>, guarda y vuelve a conectar Kick en <b>Directo → Título y categoría</b>. Kick no deja cambiar el modo lento ni los modos del chat desde otros programas.</li>
       <li><b>YouTube:</b> funciona con la conexión que ya tienes. Para borrar, Vortexs Live busca el mensaje entre los últimos del chat; cada acción gasta algo de cupo de la API. Solo se pueden deshacer los bans puestos desde Vortexs Live mientras está abierto.</li>
       <li>Los botones no salen en el chat en pantalla. Para quitarlos también del panel, añade <code>?moderar=0</code> a la URL.</li>
     </ul>
@@ -467,11 +471,11 @@
       <tr><td>No sale 1080p (Kick, Twitch…)</td><td>Vortexs Live te avisa al conectar OBS, antes de que acabe el delay. En OBS → Ajustes → Vídeo pon <b>Resolución de salida (escalada)</b> en <code>1920x1080</code>. Con Transmisión mejorada, pon además <b>Ancho de banda máximo</b> en Auto (Twitch decide las calidades según tu PC y ese límite).</td></tr>
       <tr><td>Chat de Kick: “Kick ha bloqueado la consulta del canal”</td><td>Kick tiene una protección anti-bots que a veces rechaza programas que no son un navegador. Vortexs Live reintenta solo; si dura más de unos minutos, cierra y abre Vortexs Live. El resto de chats siguen funcionando.</td></tr>
       <tr><td>El móvil no abre el mando</td><td>Activa “Permitir desde el móvil”, que el móvil esté en la misma wifi (no con datos) y que Windows tenga la red como <b>privada</b> y Vortexs Live permitido en el firewall. Vuelve a escanear el QR.</td></tr>
-      <tr><td>Moderar da “falta permiso”</td><td>Twitch: vuelve a conectar en Título. Kick: marca moderation:ban y moderation:chat_message:manage en tu app de Kick y vuelve a conectar. Tienes que ser el dueño o moderador del canal.</td></tr>
+      <tr><td>Moderar da “falta permiso”</td><td>Twitch: vuelve a conectar en Directo → Título y categoría. Kick: marca moderation:ban y moderation:chat_message:manage en tu app de Kick y vuelve a conectar. Tienes que ser el dueño o moderador del canal.</td></tr>
       <tr><td>El overlay de espectadores no sale</td><td>Activa el chat (pestaña Chat) con los nombres de tus canales y marca al menos una opción en Overlays → Espectadores. Una plataforma solo aparece mientras está en directo.</td></tr>
-      <tr><td>El aviso de delay no llega al chat</td><td>Conecta esa cuenta en la pestaña Título (con permiso de chat) y mira el Registro: dice en qué chat se mandó y el motivo si falló. Con “Solo si estoy en directo” no se manda fuera de directo.</td></tr>
+      <tr><td>El aviso de delay no llega al chat</td><td>Conecta esa cuenta en Directo → Título y categoría (con permiso de chat) y mira Ajustes → Registro: dice en qué chat se mandó y el motivo si falló. Con “Solo si estoy en directo” no se manda fuera de directo.</td></tr>
       <tr><td>El overlay de delay no se ve</td><td>Comprueba que Vortexs Live está abierto, que la fuente Navegador mide 1920x1080 y está encima de las demás. Copia de nuevo la URL desde la pestaña Overlays (si el puerto 8935 estaba ocupado, la URL usa otro).</td></tr>
-      <tr><td>“sesión caducada: vuelve a conectar”</td><td>En la pestaña Título pulsa Desconectar y Conectar otra vez en esa plataforma.</td></tr>
+      <tr><td>“sesión caducada: vuelve a conectar”</td><td>En Directo → Título y categoría pulsa Desconectar y Conectar otra vez en esa plataforma.</td></tr>
       <tr><td>YouTube: “no hay ningún directo en curso ni programado”</td><td>Empieza el directo (o prográmalo en YouTube Studio) y vuelve a pulsar Actualizar.</td></tr>
       <tr><td>“Solo 1080p · Transmisión mejorada off” en Twitch</td><td>OBS no está usando la Transmisión mejorada: revisa el paso 2 (servicio <b>Twitch</b>, servidor personalizado y la casilla activada).</td></tr>
       <tr><td>“Falta la clave”</td><td>Pon tu clave de Twitch en OBS (paso 2) o escríbela en Vortexs Live → Ajustes.</td></tr>
@@ -481,7 +485,7 @@
       <tr><td>Algo no va con el emisor nuevo</td><td>Activa <b>Modo clásico con ffmpeg</b> en Ajustes: envía como la versión anterior (una sola calidad, necesita ffmpeg).</td></tr>
       <tr><td>“Control inteligente de aplicaciones bloqueó…”</td><td>Windows 11 bloquea algunos programas nuevos sin firma digital. Puedes desactivarlo en <i>Seguridad de Windows → Control de aplicaciones y navegador</i>, pero es una decisión de seguridad tuya: en muchas versiones no se puede volver a activar sin reinstalar Windows.</td></tr>
           <tr><td>El chat de TikTok no sale</td><td>Mira la pestaña Chat, columna TIKTOK: “Sin directo” = aún no estás en directo en TikTok (se vuelve a mirar cada 2 min). “Falta la clave” o “la clave no es válida” = pega de nuevo tu API Key de eulerstream.com en <b>Clave Euler Stream</b>. Escribe el @usuario sin espacios.</td></tr>
-      <tr><td>Los modos del chat dicen “vuelve a conectar Twitch”</td><td>Es un permiso nuevo de la 3.5: pestaña Título → desconecta Twitch y vuelve a conectarlo.</td></tr>
+      <tr><td>Los modos del chat dicen “vuelve a conectar Twitch”</td><td>Es un permiso nuevo de la 3.5: Directo → Título y categoría → desconecta Twitch y vuelve a conectarlo.</td></tr>
       <tr><td>Un mensaje no sale en el chat</td><td>Puede que lo haya filtrado la moderación automática o que esa persona esté en “No salen en el chat”: mira el Registro y Chat → Moderación.</td></tr>
       <tr><td>“No hay ningún plan activo” al pulsar Iniciar</td><td>La prueba de 3 días ha terminado o la clave ya no vale. Pulsa el botón del plan (arriba) y suscríbete o pega tu clave.</td></tr>
       <tr><td>La prueba no empieza</td><td>La primera vez hace falta internet para empezarla (se apunta en vortexs.es, una por PC). Conéctate y espera un minuto: se vuelve a intentar sola. Después ya no hace falta.</td></tr>
@@ -490,7 +494,7 @@
       <tr><td>“Tu licencia ya no está activa”</td><td>Si has <b>cambiado de plan</b> (de Completo a Básico o al revés), Polar te da una clave nueva y anula la vieja: está en el correo de Polar y en tu cuenta de cliente; pégala en Licencia. Si no se pudo cobrar el mes, en cuanto se cobre tu misma clave vuelve a funcionar sola. La renovación normal de cada mes no cambia la clave.</td></tr>
       <tr><td>Chat, Overlays o Mando salen bloqueados, o el botón Clip no guarda</td><td>Son del plan Completo. Con el Básico tienes el delay, el multistream, el título y los avisos del delay en el chat.</td></tr>
 </table>
-    <p>La pestaña <b>Registro</b> muestra lo que va pasando. <b>Si pides ayuda, copia ese texto</b>: no contiene tu clave.</p>
+    <p><b>Ajustes → Registro</b> muestra lo que va pasando. <b>Si pides ayuda, copia ese texto</b>: no contiene tu clave.</p>
     <p class="note ok">Antes del primer directo de verdad, haz una prueba corta: en OBS añade <code>?bandwidthtest=true</code> al final de tu clave de Twitch y la prueba no se emitirá en público.</p>
   </section>
 </main>

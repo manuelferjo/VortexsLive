@@ -68,7 +68,7 @@ namespace StreamDelay
 					}
 					else
 					{
-						AppendLog("Aviso de delay: " + plats[i].Name + " no está conectado en la pestaña Título.");
+						AppendLog("Aviso de delay: " + plats[i].Name + " no está conectado en Directo → Título y categoría.");
 					}
 				}
 			}

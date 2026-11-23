@@ -150,13 +150,12 @@ namespace StreamDelay
 				Icon = "film"
 			};
 			Place(this, clip, 260f, buttonsTop, 62f, 46f, PageLive);
-			tip.SetToolTip(clip, I18n.Tr("Guardar un clip (últimos 60 s)"));
+			tip.SetToolTip(clip, I18n.Tr("Guardar un clip (últimos 60 s)") + " · Ctrl+Alt+C");
 			clip.Click += delegate
 			{
 				if (!ClipsAllowed())
 				{
-					I18n.Show(this, "Los clips (últimos 60 s) son del plan Completo.", "Licencia", MessageBoxButtons.OK, MessageBoxIcon.Information);
-					LicenseDialog();
+					Toast("Los clips (últimos 60 s) son del plan Completo.", "info", "Ver planes", LicenseDialog);
 					return;
 				}
 				if (SaveClip("botón Clip", null))
@@ -189,11 +188,12 @@ namespace StreamDelay
 			Place(this, btnCut, 330f, buttonsTop, 110f, 46f, PageLive);
 			btnCut.Click += delegate
 			{
-				if (I18n.Show(this, "Esto vacía el búfer y corta la transmisión en la plataforma ahora mismo. ¿Seguir?", "Cortar ya", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) == DialogResult.Yes)
+				// Dos clics seguidos (el primero pide confirmación en el mismo botón durante 3 s).
+				ConfirmClick(btnCut, "¿Seguro?", delegate
 				{
 					engine.CutNow();
 					CutVertical();
-				}
+				});
 			};
 
 			// Pie: último evento del registro, o el aviso si algo falla. Pulsarlo abre el Registro.
@@ -404,12 +404,21 @@ namespace StreamDelay
 		{
 			if (engine.Running)
 			{
-				if (!engine.OutputActive || I18n.Show(this, "Se está transmitiendo. Detener corta la transmisión. ¿Seguir?", "Detener", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) == DialogResult.Yes)
+				Action stop = delegate
 				{
 					engine.Stop();
 					StopVertical();
 					AppendLog("Servicio detenido.");
 					RefreshStatus();
+				};
+				// En directo, detener corta la emisión: hay que pulsar dos veces (sin ventana de "¿Seguro?").
+				if (engine.OutputActive)
+				{
+					ConfirmClick(btnStart, "Pulsa otra vez para detener", stop);
+				}
+				else
+				{
+					stop();
 				}
 				return;
 			}
@@ -485,7 +494,12 @@ namespace StreamDelay
 			{
 				engine.Stop();
 				StopVertical();
-				I18n.Show(this, ex.Message + "\n\nPuede que otro programa use ese puerto (otro servidor RTMP u otra copia de Vortexs Live).\nCambia el puerto en Ajustes → OBS (por ejemplo a 1936) y copia de nuevo el servidor en OBS.", "No se puede iniciar", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+				AppendLog("No se puede iniciar: " + ex.Message);
+				Toast("No se puede iniciar: puede que otro programa use ese puerto. Cámbialo en Ajustes → OBS (por ejemplo a 1936) y copia de nuevo el servidor en OBS.", "error", "Abrir OBS", delegate
+				{
+					setPick = 1;
+					GoPage(PageSettings);
+				});
 				return;
 			}
 			SaveConfig();
@@ -584,7 +598,7 @@ namespace StreamDelay
 			{
 				// OBS no manda 1080p: se avisa una vez, mientras aún está en el delay.
 				engine.LowQualityAlert = false;
-				tabs.Selected = 0;
+				GoPage(PageLive);
 				timer.Stop();
 				I18n.Show(this, "OBS está enviando como máximo " + engine.TopHeight + "p: tu público no tendrá 1080p.\n\nAún no ha salido nada en directo (está en el delay). Para arreglarlo:\n1. Detén la transmisión en OBS.\n2. OBS → Ajustes → Vídeo → Resolución de salida (escalada): 1920x1080.\n3. Si usas Transmisión mejorada: Ajustes → Emisión → Ancho de banda máximo: Auto.\n4. Vuelve a iniciar la transmisión.", "Sin calidad 1080p", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 				timer.Start();
@@ -599,8 +613,12 @@ namespace StreamDelay
 			UpdateApply();
 			bool running = engine.Running;
 			int count = EnabledDestinations().Count;
-			btnStart.Text = (running ? "■  Detener servicio" : ((count == 0) ? "▶  Iniciar servicio" : ((count == 1) ? ("▶  Iniciar · " + DestSummary()) : ("▶  Iniciar en " + count + " destinos"))));
-			btnStart.Kind = (running ? ButtonKind.Ghost : ButtonKind.Primary);
+			// Si está pidiendo "Pulsa otra vez…" (Confirm.cs) se deja como está.
+			if (!IsArmed(btnStart))
+			{
+				btnStart.Text = (running ? "■  Detener servicio" : ((count == 0) ? "▶  Iniciar servicio" : ((count == 1) ? ("▶  Iniciar · " + DestSummary()) : ("▶  Iniciar en " + count + " destinos"))));
+				btnStart.Kind = (running ? ButtonKind.Ghost : ButtonKind.Primary);
+			}
 			btnStart.Invalidate();
 			btnCut.Enabled = running;
 			// Con el servicio en marcha no se puede cambiar el puerto ni el modo.

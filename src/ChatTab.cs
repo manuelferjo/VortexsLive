@@ -287,13 +287,13 @@ namespace StreamDelay
 				{
 				}
 			}
-			I18n.Show(this, "No se pudo abrir la página del chat: los puertos " + ChatPort + "–" + (ChatPort + 9) + " están ocupados.", "Chat");
+			Toast("No se pudo abrir la página del chat: los puertos " + ChatPort + "–" + (ChatPort + 9) + " están ocupados.", "error");
 			return false;
 		}
 
 		// ---------- Escribir en los chats ----------
 
-		// En qué plataformas se puede escribir (las conectadas en la pestaña Título).
+		// En qué plataformas se puede escribir (las conectadas en Directo → Título y categoría).
 		private Dictionary<string, object> ChatSendInfo()
 		{
 			Dictionary<string, object> send = new Dictionary<string, object>
@@ -347,7 +347,7 @@ namespace StreamDelay
 					string value;
 					if (!plat.Connected)
 					{
-						value = "no está conectado (pestaña Título)";
+						value = "no está conectado (Directo → Título y categoría)";
 					}
 					else
 					{
@@ -426,7 +426,7 @@ namespace StreamDelay
 				loading = false;
 				if (userAction)
 				{
-					I18n.Show(this, "Escribe al menos un canal (Twitch, Kick, YouTube o TikTok) para activar el chat.", "Chat");
+					Toast("Escribe al menos un canal (Twitch, Kick, YouTube o TikTok) para activar el chat.", "warn");
 				}
 				return;
 			}
@@ -649,7 +649,7 @@ namespace StreamDelay
 			Card twitchCard = new Card
 			{
 				Title = "Follows de Twitch",
-				Subtitle = "Con tu cuenta de Twitch de la pestaña Título."
+				Subtitle = "Con tu cuenta de Twitch de la Directo → Título y categoría."
 			};
 			Place(f, twitchCard, 20f, 18f, 420f, 176f);
 			PaintBox info = new PaintBox
@@ -845,7 +845,7 @@ namespace StreamDelay
 			{
 				tkKeyButton.Text = (tkKey.Length > 0) ? "Clave puesta ✓" : "Clave Euler Stream";
 			}
-			// Primera vez: los canales salen de las cuentas conectadas en la pestaña Título.
+			// Primera vez: los canales salen de las cuentas conectadas en Directo → Título y categoría.
 			if (!raw.ContainsKey("chat_tw") && twitch.Account.Length > 0)
 			{
 				fldChatTw.Box.Text = twitch.Account.ToLowerInvariant();

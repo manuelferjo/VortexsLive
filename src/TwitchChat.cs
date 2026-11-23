@@ -21,7 +21,7 @@ namespace StreamDelay
 
         public TwitchChat(ChatHub h, string ch) { hub = h; channel = ch; }
 
-        // Imágenes de los emblemas (con Twitch conectado en la pestaña Título; si no, se dibujan los
+        // Imágenes de los emblemas (con Twitch conectado en Directo → Título y categoría; si no, se dibujan los
         // de la página). Se piden una vez por canal y se renuevan cada hora.
         static readonly object badgesLock = new object();
         static Dictionary<string, string[]> badges;

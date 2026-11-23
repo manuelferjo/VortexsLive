@@ -208,7 +208,7 @@ namespace StreamDelay
 			// La primera vez que se abre la pestaña, lee el título que hay ahora en la plataforma.
 			tabs.SelectedChanged += delegate
 			{
-				if (TabPages[tabs.Selected] == PageTitle)
+				if (PageOfTab(tabs.Selected) == PageTitle)
 				{
 					RefreshTitleUi();
 					ReadCurrentOnce();
@@ -528,7 +528,7 @@ namespace StreamDelay
 				{
 					if (!p.Connected)
 					{
-						AppendLog(p.Name + ": sin conectar (pulsa Conectar en la pestaña Título).");
+						AppendLog(p.Name + ": sin conectar (pulsa Conectar en Directo → Título y categoría).");
 					}
 					else
 					{
@@ -538,7 +538,7 @@ namespace StreamDelay
 			}
 			if (title.Length == 0 && targets.Exists((Platform p) => p.Chosen == null))
 			{
-				I18n.Show(this, "Escribe un título (o elige una categoría) antes de actualizar.", "Título vacío");
+				Toast("Escribe un título (o elige una categoría) antes de actualizar.", "warn");
 				fldTitle.Box.Focus();
 				return;
 			}

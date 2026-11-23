@@ -861,13 +861,15 @@ namespace StreamDelay
 			Place(c1, newKey, 280f, 13f, 120f, 24f);
 			newKey.Click += delegate
 			{
-				if (I18n.Show(this, "Se crea una clave nueva: las URL que tengas copiadas (móvil, panel de OBS, Stream Deck) dejarán de funcionar y tendrás que copiarlas otra vez. ¿Seguir?", "Nueva clave", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+				// Las URL copiadas dejan de valer: dos clics (el primero lo avisa en el botón).
+				ConfirmClick(newKey, "¿Seguro? Otra vez", delegate
 				{
 					remoteKey = NewRemoteKey();
 					SaveConfig();
 					UpdateMandoUrl();
 					AppendLog("Mando: clave nueva creada. Copia de nuevo las URL del mando.");
-				}
+					Toast("Clave nueva del Mando: copia otra vez las URL (móvil, panel de OBS, Stream Deck).", "ok");
+				});
 			};
 			Toggle tLan = new Toggle { Text = "Permitir desde el móvil (misma wifi)", Checked = remoteLan };
 			Place(c1, tLan, 18f, 54f, 384f, 28f);

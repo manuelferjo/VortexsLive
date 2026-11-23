@@ -13,6 +13,9 @@ namespace StreamDelay
 		// Versión a la que se acaba de actualizar (la pasa el actualizador al reiniciar); vacío si no.
 		internal static string UpdatedTo = "";
 
+		// --capturas=carpeta: guarda capturas de la interfaz y se cierra (ver Capture.cs).
+		internal static string CaptureDir;
+
 		[STAThread]
 		private static void Main(string[] args)
 		{
@@ -30,6 +33,10 @@ namespace StreamDelay
 					// Las versiones de antes de la 4.12 pasaban sus puertos a la nueva: se sueltan
 					// para que el chat, los overlays y el Mando sigan en el 8935.
 					Sockets.CloseInherited();
+				}
+				else if (a.StartsWith("--capturas="))
+				{
+					CaptureDir = a.Substring(11);
 				}
 				else if (a.StartsWith("--actualizado="))
 				{

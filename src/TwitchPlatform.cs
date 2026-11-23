@@ -206,7 +206,7 @@ namespace StreamDelay
 		{
 			if (ex.Status == 401 || ex.Status == 403)
 			{
-				return new ApiException(ex.Status, "falta permiso de moderación: vuelve a conectar Twitch en la pestaña Título (o no eres moderador de ese canal)");
+				return new ApiException(ex.Status, "falta permiso de moderación: vuelve a conectar Twitch en Directo → Título y categoría (o no eres moderador de ese canal)");
 			}
 			return ex;
 		}
@@ -267,7 +267,7 @@ namespace StreamDelay
 			{
 				if (ex.Status == 401 || ex.Status == 403)
 				{
-					throw new ApiException(ex.Status, "falta permiso: vuelve a conectar Twitch en la pestaña Título");
+					throw new ApiException(ex.Status, "falta permiso: vuelve a conectar Twitch en Directo → Título y categoría");
 				}
 				throw;
 			}
@@ -385,7 +385,7 @@ namespace StreamDelay
 			{
 				if (ex.Status == 401 || ex.Status == 403)
 				{
-					throw new ApiException(ex.Status, "para cambiar los modos del chat vuelve a conectar Twitch en la pestaña Título (permiso nuevo)");
+					throw new ApiException(ex.Status, "para cambiar los modos del chat vuelve a conectar Twitch en Directo → Título y categoría (permiso nuevo)");
 				}
 				throw;
 			}

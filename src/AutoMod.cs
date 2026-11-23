@@ -195,7 +195,7 @@ namespace StreamDelay
 			Place(c2, fUsers, 20f, 100f, 380f, 48f);
 			Box(f, 22f, 536f, 416f, 32f, delegate(Graphics g, Rectangle r)
 			{
-				Theme.DrawWrapped(g, "Tú y tus moderadores nunca se moderan. Borrar, expulsar y banear usan tu cuenta conectada en la pestaña Título.", Theme.Body(7.75f), Theme.Muted, r);
+				Theme.DrawWrapped(g, "Tú y tus moderadores nunca se moderan. Borrar, expulsar y banear usan tu cuenta conectada en Directo → Título y categoría.", Theme.Body(7.75f), Theme.Muted, r);
 			});
 			VButton cancel = new VButton { Kind = ButtonKind.Ghost, Text = "Cancelar", FontSize = 10f };
 			VButton save = new VButton { Kind = ButtonKind.Primary, Text = "Guardar", FontSize = 10f };

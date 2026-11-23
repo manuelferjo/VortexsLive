@@ -341,7 +341,7 @@ namespace StreamDelay
 			}
 			if (tabs != null)
 			{
-				ShowPage(TabPages[tabs.Selected]);
+				ShowPage(PageOfTab(tabs.Selected));
 			}
 		}
 
@@ -362,6 +362,10 @@ namespace StreamDelay
 		// se acaba sola) y cada 6 horas se vuelve a comprobar la suscripción de Polar.
 		private void LicenseTick()
 		{
+			if (Program.CaptureDir != null)
+			{
+				return;
+			}
 			DateTime now = DateTime.UtcNow;
 			if (trialOk == DateTime.MinValue && !trialAsking && now >= trialNextAsk)
 			{

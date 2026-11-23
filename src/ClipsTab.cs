@@ -322,7 +322,7 @@ namespace StreamDelay
 					foreach (FileInfo f in dir.GetFiles())
 					{
 						string ext = f.Extension.ToLowerInvariant();
-						if (ext == ".mp4" || ext == ".flv")
+						if ((ext == ".mp4" || ext == ".flv") && !clipsToDelete.Contains(f.FullName))
 						{
 							files.Add(f);
 						}
@@ -444,14 +444,40 @@ namespace StreamDelay
 			}
 		}
 
-		// A la papelera de reciclaje (se puede recuperar), preguntando antes.
+		// Clips que se van a mandar a la papelera cuando acabe el aviso con "Deshacer".
+		private readonly List<string> clipsToDelete = new List<string>();
+
+		// A la papelera de reciclaje (se puede recuperar). Sin preguntar: desaparece de la lista y sale
+		// un aviso con "Deshacer"; si no se pulsa en unos segundos, se manda a la papelera de verdad.
 		private void DeleteClip(string path)
 		{
-			if (path == null)
+			if (path == null || clipsToDelete.Contains(path))
 			{
 				return;
 			}
-			if (I18n.Show(this, I18n.Tr("¿Mandar este clip a la papelera de reciclaje?") + "\n\n" + Path.GetFileName(path), "Borrar clip", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+			clipsToDelete.Add(path);
+			RefreshClipList();
+			Toast(I18n.Tr("Clip a la papelera: ") + Path.GetFileName(path), "info", "Deshacer", delegate
+			{
+				clipsToDelete.Remove(path);
+				RefreshClipList();
+			});
+			System.Windows.Forms.Timer later = new System.Windows.Forms.Timer
+			{
+				Interval = 8000
+			};
+			later.Tick += delegate
+			{
+				later.Stop();
+				later.Dispose();
+				FlushClipDelete(path);
+			};
+			later.Start();
+		}
+
+		private void FlushClipDelete(string path)
+		{
+			if (!clipsToDelete.Remove(path))
 			{
 				return;
 			}
@@ -465,6 +491,15 @@ namespace StreamDelay
 				AppendLog("No se pudo borrar el clip (" + ex.Message + ").");
 			}
 			RefreshClipList();
+		}
+
+		// Al cerrar el programa, lo que estaba esperando su "Deshacer" se manda ya a la papelera.
+		private void FlushAllClipDeletes()
+		{
+			foreach (string path in clipsToDelete.ToArray())
+			{
+				FlushClipDelete(path);
+			}
 		}
 	}
 

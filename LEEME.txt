@@ -4,6 +4,19 @@ VORTEXS LIVE 4.23 - delay dinámico y multistream para OBS (by Vortexs)
 Abre GUIA.html (doble clic) para ver la guía completa.
 
 Novedades de la 4.23
+- Interfaz más clara:
+  · Asistente de inicio la primera vez (OBS, destinos, delay y
+    comprobar que llega). Se vuelve a abrir con ? → "Abrir el
+    asistente de inicio".
+  · 6 pestañas en vez de 8: Título y categoría está dentro de Directo
+    y el Registro dentro de Ajustes (botones de arriba).
+  · Letra más grande (mínimo 8 pt) y grises más claros.
+  · Menos ventanas: los avisos salen abajo, algunos con un botón
+    ("Deshacer", "Ponerla"…). Borrar un clip se puede deshacer unos
+    segundos. "Cortar ya" y "Detener" en directo se pulsan dos veces
+    (el primer clic pide confirmación en el mismo botón).
+  · Atajos a la vista: cada botón dice el suyo y ? o F1 abre la
+    lista completa.
 - Destinos en directo: pulsa la franja de destinos de la pestaña
   Directo mientras emites y verás, por cada plataforma, la velocidad
   de subida, el retraso de envío, el tiempo en directo y las

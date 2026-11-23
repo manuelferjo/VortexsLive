@@ -1,6 +1,6 @@
 // Botón 😊 de la página del chat: la lista de emotes que se pueden poner al escribir.
 // - Twitch: los de tu canal, los de otros canales que puedes usar (tus suscripciones) y los globales
-//   (hace falta Twitch conectado en la pestaña Título). Al enviarlos, Twitch los enseña como emotes.
+//   (hace falta Twitch conectado en Directo → Título y categoría). Al enviarlos, Twitch los enseña como emotes.
 // - 7TV, BetterTTV y FrankerFaceZ: los del canal y los globales. Se ven en el chat de Vortexs Live y
 //   para quien tenga esas extensiones.
 // Se guarda la lista 3 minutos para no preguntar a Twitch cada vez que se abre el panel.
@@ -46,7 +46,7 @@ namespace StreamDelay
 						AddEmoteGroup(groups, "Twitch", globals);
 						if (!all)
 						{
-							hint = "Para ver también los emotes de tus suscripciones, vuelve a conectar Twitch en la pestaña Título.";
+							hint = "Para ver también los emotes de tus suscripciones, vuelve a conectar Twitch en Directo → Título y categoría.";
 						}
 					}
 					catch (Exception ex)
@@ -56,7 +56,7 @@ namespace StreamDelay
 				}
 				else
 				{
-					hint = "Conecta Twitch en la pestaña Título para ver los emotes de tu canal.";
+					hint = "Conecta Twitch en Directo → Título y categoría para ver los emotes de tu canal.";
 				}
 				ChatHub hub = chatHub;
 				if (hub != null)

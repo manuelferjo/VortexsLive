@@ -1,4 +1,4 @@
-// Base de las conexiones con Twitch, YouTube y Kick (pestaña Título, chat y moderación).
+// Base de las conexiones con Twitch, YouTube y Kick (Directo → Título y categoría, chat y moderación).
 // Guarda la app (ID y secreto de cliente) y los tokens de acceso, los renueva cuando caducan y
 // hace las llamadas a la API. Cada plataforma pone su forma de iniciar sesión y sus llamadas.
 using System;

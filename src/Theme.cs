@@ -29,9 +29,9 @@ namespace StreamDelay
 
 		public static readonly Color Text = Color.FromArgb(244, 244, 245);
 
-		public static readonly Color Muted = Color.FromArgb(161, 161, 170);
+		public static readonly Color Muted = Color.FromArgb(178, 178, 188);
 
-		public static readonly Color Dim = Color.FromArgb(113, 113, 122);
+		public static readonly Color Dim = Color.FromArgb(134, 134, 146);
 
 		public static readonly Color Violet = Color.FromArgb(192, 154, 253);
 
@@ -165,25 +165,45 @@ namespace StreamDelay
 			return Make("Outfit", size, FontStyle.Bold, "Segoe UI Semibold");
 		}
 
+		// Tamaños mínimos para que todo se lea bien: 8 pt el texto y 7,5 pt las etiquetas en mayúsculas
+		// (en mayúsculas se ven más grandes). Lo que se pida más pequeño sale con el mínimo.
+		public const float MinBody = 8f;
+
+		public const float MinMono = 7.5f;
+
 		public static Font Body(float size)
 		{
-			return Make("Plus Jakarta Sans", size, FontStyle.Regular, "Segoe UI");
+			return Make("Plus Jakarta Sans", Math.Max(MinBody, size), FontStyle.Regular, "Segoe UI");
 		}
 
 		public static Font BodySemi(float size)
 		{
-			return Make("Plus Jakarta Sans SemiBold", size, FontStyle.Regular, "Segoe UI Semibold");
+			return Make("Plus Jakarta Sans SemiBold", Math.Max(MinBody, size), FontStyle.Regular, "Segoe UI Semibold");
 		}
 
 		public static Font BodyBold(float size)
 		{
-			return Make("Plus Jakarta Sans", size, FontStyle.Bold, "Segoe UI Semibold");
+			return Make("Plus Jakarta Sans", Math.Max(MinBody, size), FontStyle.Bold, "Segoe UI Semibold");
 		}
 
 		// Etiquetas en mayúsculas ("DELAY EN DIRECTO").
 		public static Font Mono(float size)
 		{
-			return Make("JetBrains Mono Medium", size, FontStyle.Regular, "Consolas");
+			return Make("JetBrains Mono Medium", Math.Max(MinMono, size), FontStyle.Regular, "Consolas");
+		}
+
+		// La misma fuente un poco más pequeña (para textos largos que no caben en su recuadro).
+		private static Font Smaller(Font f, float factor)
+		{
+			string key = "~" + f.FontFamily.Name + "|" + f.Size * factor + "|" + (int)f.Style;
+			Font value;
+			if (cache.TryGetValue(key, out value))
+			{
+				return value;
+			}
+			value = new Font(f.FontFamily, f.Size * factor, f.Style, f.Unit);
+			cache[key] = value;
+			return value;
 		}
 
 		public static Font Native(float size)
@@ -272,6 +292,17 @@ namespace StreamDelay
 		public static void DrawWrapped(Graphics g, string s, Font f, Color c, RectangleF r)
 		{
 			s = I18n.Tr(s);
+			// Con la letra mínima más grande, algún texto largo puede no caber: se encoge un poco
+			// (como mucho hasta el tamaño de antes) en vez de cortarse.
+			for (int i = 0; i < 2; i++)
+			{
+				SizeF need = g.MeasureString(s, f, (int)Math.Max(1f, r.Width));
+				if (need.Height <= r.Height + 1f)
+				{
+					break;
+				}
+				f = Smaller(f, 0.95f);
+			}
 			using (StringFormat format = new StringFormat())
 			{
 				using (SolidBrush brush = new SolidBrush(c))
