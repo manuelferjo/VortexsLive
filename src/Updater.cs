@@ -42,6 +42,7 @@ namespace StreamDelay
         // Al abrir: borrar el .exe viejo de una actualización anterior y mirar si hay versión nueva.
         void StartUpdateCheck()
         {
+            if (Program.CaptureDir != null) return;
             if (Program.UpdatedTo.Length > 0) AppendLog("Vortexs Live actualizado a la versión " + Program.UpdatedTo + ". Tu configuración se ha conservado.");
             ThreadPool.QueueUserWorkItem(delegate
             {
