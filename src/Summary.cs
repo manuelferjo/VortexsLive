@@ -237,7 +237,7 @@ namespace StreamDelay
 				AppendHistory(s);
 				lastSummaryFile = file;
 				LogLater("Resumen del directo guardado: " + file);
-				Toast("Resumen del directo guardado. Lo tienes en Registro → Resúmenes.", "ok");
+				Toast("Resumen del directo guardado. Lo tienes en Ajustes → Registro → Resúmenes.", "ok");
 				if (open)
 				{
 					try
@@ -285,7 +285,7 @@ namespace StreamDelay
 				}
 				if (last == null)
 				{
-					I18n.Show(this, "Todavía no hay ningún resumen. Se crea solo al terminar cada directo (de 3 minutos o más) y se abre en el navegador.", "Resúmenes");
+					Toast("Todavía no hay ningún resumen. Se crea solo al terminar cada directo (de 3 minutos o más) y se abre en el navegador.", "info");
 					return;
 				}
 				Http.OpenBrowser(last);

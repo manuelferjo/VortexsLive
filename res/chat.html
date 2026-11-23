@@ -312,7 +312,7 @@
     'Cargando emotes…': 'Loading emotes…',
     'No hay emotes que coincidan.': 'No matching emotes.',
     'No se pudieron cargar los emotes.': 'Couldn\'t load the emotes.',
-    'Aún no hay emotes: activa el chat y conecta Twitch en la pestaña Título.': 'No emotes yet: turn on the chat and connect Twitch in the Title tab.',
+    'Aún no hay emotes: activa el chat y conecta Twitch en Directo → Título y categoría.': 'No emotes yet: turn on the chat and connect Twitch in Live → Title and category.',
     '↓ Nuevos mensajes': '↓ New messages',
     'Sin conexión con Vortexs Live…': 'No connection to Vortexs Live…',
     'no configurado': 'not set up',
@@ -327,7 +327,7 @@
     'Pulsa para ocultar los espectadores': 'Click to hide the viewers',
     ' (* sin contar las plataformas ocultas)': ' (* not counting hidden platforms)',
     'Pulsa para incluir o quitar ': 'Click to include or remove ',
-    'conecta tus cuentas en Vortexs Live → pestaña Título para poder escribir': 'connect your accounts in Vortexs Live → Title tab to be able to write',
+    'conecta tus cuentas en Vortexs Live → Directo → Título y categoría para poder escribir': 'connect your accounts in Vortexs Live → Live → Title and category to be able to write',
     'Enviando…': 'Sending…',
     'No se pudo contactar con Vortexs Live.': "Couldn't reach Vortexs Live.",
     '✗ No se pudo contactar con Vortexs Live': "✗ Couldn't reach Vortexs Live",
@@ -655,7 +655,7 @@
       b.onclick = function () { chosen[p] = chosen[p] === false; try { localStorage.setItem('sd-enviar-a', JSON.stringify(chosen)); } catch (x) {} renderTargets(); };
       tgts.appendChild(b);
     });
-    if (!any) tgts.innerHTML = '<span>' + T('conecta tus cuentas en Vortexs Live → pestaña Título para poder escribir') + '</span>';
+    if (!any) tgts.innerHTML = '<span>' + T('conecta tus cuentas en Vortexs Live → Directo → Título y categoría para poder escribir') + '</span>';
     input.disabled = !any;
     updateCount();
   }
@@ -730,7 +730,7 @@
       groups = hits.length ? [{ name: '', items: hits }] : [];
     }
     if (!groups.length) {
-      emoGrid.innerHTML = '<div class="emo-msg">' + T(q ? 'No hay emotes que coincidan.' : 'Aún no hay emotes: activa el chat y conecta Twitch en la pestaña Título.') + '</div>';
+      emoGrid.innerHTML = '<div class="emo-msg">' + T(q ? 'No hay emotes que coincidan.' : 'Aún no hay emotes: activa el chat y conecta Twitch en Directo → Título y categoría.') + '</div>';
     }
     groups.forEach(function (gr, i) {
       var h = document.createElement('div');

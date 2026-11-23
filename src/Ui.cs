@@ -26,6 +26,47 @@ namespace StreamDelay
 		public float Life = 4.2f;  // segundos visible
 		public float Y;            // posición actual (pantalla)
 		public bool Placed;
+		// Botón opcional a la derecha ("Deshacer", "Abrir Ajustes"…).
+		public string ActionText;
+		public Action OnAction;
+
+		private RectangleF ActionRect
+		{
+			get
+			{
+				if (string.IsNullOrEmpty(ActionText))
+				{
+					return RectangleF.Empty;
+				}
+				float w;
+				using (Graphics g = CreateGraphics())
+				{
+					w = Theme.Measure(g, I18n.Tr(ActionText), Theme.BodyBold(8.5f)).Width + Theme.S(22f);
+				}
+				float h = Theme.S(28f);
+				return new RectangleF(Width - w - Theme.S(12f), (Height - h) / 2f, w, h);
+			}
+		}
+
+		protected override void OnMouseMove(MouseEventArgs e)
+		{
+			base.OnMouseMove(e);
+			Cursor = ActionRect.Contains(e.Location) ? Cursors.Hand : Cursors.Default;
+		}
+
+		protected override void OnMouseUp(MouseEventArgs e)
+		{
+			base.OnMouseUp(e);
+			if (OnAction != null && ActionRect.Contains(e.Location))
+			{
+				Action a = OnAction;
+				OnAction = null;
+				ActionText = null;
+				Age = Math.Max(Age, Life);
+				Invalidate();
+				a();
+			}
+		}
 
 		public ToastForm()
 		{
@@ -85,8 +126,25 @@ namespace StreamDelay
 				g.FillEllipse(b, ic);
 			}
 			Icons.Draw(g, IconName, RectangleF.Inflate(ic, -Theme.S(5f), -Theme.S(5f)), Accent);
-			RectangleF tr = new RectangleF(ic.Right + Theme.S(10f), Theme.S(6f), Width - ic.Right - Theme.S(24f), Height - Theme.S(12f));
+			RectangleF act = ActionRect;
+			float textRight = act.IsEmpty ? Width - Theme.S(14f) : act.X - Theme.S(8f);
+			RectangleF tr = new RectangleF(ic.Right + Theme.S(10f), Theme.S(6f), textRight - ic.Right - Theme.S(10f), Height - Theme.S(12f));
 			Theme.DrawWrapped(g, Msg, Theme.BodySemi(8.75f), Theme.Text, tr);
+			if (!act.IsEmpty)
+			{
+				using (GraphicsPath ap = Theme.Round(act, act.Height / 2f))
+				{
+					using (SolidBrush ab = new SolidBrush(Color.FromArgb(46, Accent)))
+					{
+						g.FillPath(ab, ap);
+					}
+					using (Pen apen = new Pen(Color.FromArgb(140, Accent)))
+					{
+						g.DrawPath(apen, ap);
+					}
+				}
+				Theme.DrawText(g, ActionText, Theme.BodyBold(8.5f), Theme.Mix(Accent, Color.White, 0.45f), act, StringAlignment.Center, StringAlignment.Center);
+			}
 			// Barra fina del tiempo que le queda.
 			float left = Math.Max(0f, 1f - Age / Life);
 			using (SolidBrush b = new SolidBrush(Color.FromArgb(120, Accent)))
@@ -186,6 +244,12 @@ namespace StreamDelay
 		// kind: ok · info · warn · error · clip
 		public void Toast(string text, string kind)
 		{
+			Toast(text, kind, null, null);
+		}
+
+		// Aviso abajo de la ventana con un botón a la derecha (por ejemplo "Deshacer"). Dura más.
+		public void Toast(string text, string kind, string actionText, Action onAction)
+		{
 			if (string.IsNullOrEmpty(text))
 			{
 				return;
@@ -194,7 +258,7 @@ namespace StreamDelay
 			{
 				try
 				{
-					BeginInvoke((Action)delegate { Toast(text, kind); });
+					BeginInvoke((Action)delegate { Toast(text, kind, actionText, onAction); });
 				}
 				catch
 				{
@@ -207,6 +271,12 @@ namespace StreamDelay
 				return;
 			}
 			ToastForm t = new ToastForm { Msg = text };
+			bool withAction = onAction != null && !string.IsNullOrEmpty(actionText);
+			if (withAction)
+			{
+				t.ActionText = actionText;
+				t.OnAction = onAction;
+			}
 			switch (kind)
 			{
 			case "ok": t.IconName = "check"; t.Accent = Theme.Green; break;
@@ -216,8 +286,13 @@ namespace StreamDelay
 			default: t.IconName = "info"; t.Accent = Theme.Violet; break;
 			}
 			int w = Math.Min(S(380f), anchor.ClientSize.Width - S(24f));
-			Size need = TextRenderer.MeasureText(I18n.Tr(text), Theme.BodySemi(8.75f), new Size(w - S(70f), 1000), TextFormatFlags.WordBreak);
+			int actionW = withAction ? TextRenderer.MeasureText(I18n.Tr(actionText), Theme.BodyBold(8.5f)).Width + S(42f) : 0;
+			Size need = TextRenderer.MeasureText(I18n.Tr(text), Theme.BodySemi(8.75f), new Size(w - S(70f) - actionW, 1000), TextFormatFlags.WordBreak);
 			t.ClientSize = new Size(w, Math.Max(S(48f), need.Height + S(28f)));
+			if (withAction)
+			{
+				t.Life = Math.Max(t.Life, 7f);
+			}
 			// Como mucho tres a la vez: el más antiguo se va.
 			if (toasts.Count >= 3)
 			{
@@ -533,7 +608,7 @@ namespace StreamDelay
 
 		public int CurrentPage
 		{
-			get { return TabPages[Math.Max(0, tabs.Selected)]; }
+			get { return PageOfTab(tabs.Selected); }
 		}
 
 		private void UiInit()
@@ -541,9 +616,9 @@ namespace StreamDelay
 			// La ventana se puede ensanchar (no hacer más alta): a la derecha sale el panel.
 			FormBorderStyle = FormBorderStyle.Sizable;
 			MaximizeBox = false;
-			Size min = SizeFromClientSize(new Size(S(460f), S(654f)));
+			Size min = SizeFromClientSize(new Size(S(460f), S(WinH)));
 			MinimumSize = min;
-			MaximumSize = new Size(SizeFromClientSize(new Size(S(1180f), S(654f))).Width, min.Height);
+			MaximumSize = new Size(SizeFromClientSize(new Size(S(1180f), S(WinH))).Width, min.Height);
 			side = new SidePanel(this);
 			Controls.Add(side);
 			side.Visible = false;
@@ -571,7 +646,7 @@ namespace StreamDelay
 			Resize += delegate { LayoutWide(); };
 			if (winWidth > 460)
 			{
-				ClientSize = new Size(S(Math.Min(1180, winWidth)), S(654f));
+				ClientSize = new Size(S(Math.Min(1180, winWidth)), S(WinH));
 			}
 			LayoutWide();
 			// El tiempo de directo, los avisos y el panel se refrescan con el temporizador de siempre.
@@ -720,22 +795,99 @@ namespace StreamDelay
 		private VButton[] setPickBtns = new VButton[0];
 		private int setPick;
 
-		private void BuildSettingsPicker(int y0)
+		// Subpestañas (fila de arriba): Directo = Emisión · Título y categoría; Ajustes = Destinos · OBS ·
+		// Opciones · Registro. Las demás páginas llevan ahí una línea que explica para qué sirven.
+		private VButton[] livePickBtns = new VButton[0];
+
+		private void PlaceOn(Control c, float x, float y, float w, float h, int pageA, int pageB)
 		{
-			string[] names = new string[3] { "Destinos", "OBS", "Opciones" };
-			string[] icons = new string[3] { "live", "layers", "gear" };
-			setPickBtns = new VButton[3];
-			for (int i = 0; i < 3; i++)
+			Place(this, c, x, y, w, h, pageA);
+			pages[pageB].Add(c);
+		}
+
+		private void BuildSubPickers()
+		{
+			string[] liveNames = new string[2] { "Emisión", "Título y categoría" };
+			livePickBtns = new VButton[2];
+			for (int i = 0; i < 2; i++)
+			{
+				int target = (i == 0) ? PageLive : PageTitle;
+				livePickBtns[i] = new VButton { Kind = ButtonKind.Pill, Text = liveNames[i], Selected = i == 0, FontSize = 8.5f };
+				PlaceOn(livePickBtns[i], 20f + (float)i * 213f, SubRowTop, 207f, 28f, PageLive, PageTitle);
+				livePickBtns[i].Click += delegate
+				{
+					GoPage(target);
+				};
+			}
+			string[] names = new string[4] { "Destinos", "OBS", "Opciones", "Registro" };
+			setPickBtns = new VButton[4];
+			for (int i = 0; i < 4; i++)
 			{
 				int idx = i;
-				setPickBtns[i] = new VButton { Kind = ButtonKind.Pill, Text = names[i], Selected = i == setPick, FontSize = 8f };
-				Place(this, setPickBtns[i], 20f + (float)i * 142f, (float)y0, 136f, 28f, PageSettings);
+				setPickBtns[i] = new VButton { Kind = ButtonKind.Pill, Text = names[i], Selected = i == 0, FontSize = 8.5f };
+				PlaceOn(setPickBtns[i], 20f + (float)i * 106.5f, SubRowTop, 100.5f, 28f, PageSettings, PageLog);
 				setPickBtns[i].Click += delegate
 				{
+					if (idx == 3)
+					{
+						GoPage(PageLog);
+						return;
+					}
 					setPick = idx;
+					if (curPage != PageSettings)
+					{
+						GoPage(PageSettings);
+					}
 					ApplySettingsPick();
 				};
 			}
+			PageNote(PageChat, "Twitch, Kick, YouTube y TikTok en un solo chat: escribe y modera desde aquí.", null);
+			PageNote(PageMando, "Controla el delay desde el móvil, una tablet o el Stream Deck.", null);
+			PageNote(PageClips, "Cada clip guarda los últimos 60 s que ha visto tu público.", "Ctrl+Alt+C");
+		}
+
+		// Línea de la fila de arriba: qué es la página y, a la derecha, su atajo de teclado.
+		private void PageNote(int page, string text, string hotkey)
+		{
+			Box(this, 20f, SubRowTop, 420f, 28f, delegate(Graphics g, Rectangle r)
+			{
+				float right = 0f;
+				if (hotkey != null)
+				{
+					Font kf = Theme.Mono(8f);
+					float kw = Theme.Measure(g, hotkey, kf).Width + S(14f);
+					RectangleF key = new RectangleF(r.Width - kw - 1f, S(4f), kw, r.Height - S(8f));
+					using (GraphicsPath p = Theme.Round(key, S(6f)))
+					using (SolidBrush b = new SolidBrush(Theme.Input))
+					using (Pen pen = new Pen(Theme.Border))
+					{
+						g.FillPath(b, p);
+						g.DrawPath(pen, p);
+					}
+					Theme.DrawText(g, hotkey, kf, Theme.Muted, key, StringAlignment.Center, StringAlignment.Center);
+					right = kw + S(8f);
+				}
+				Theme.DrawText(g, text, Theme.Body(8.5f), Theme.Muted, new RectangleF(0f, 0f, r.Width - right, r.Height), StringAlignment.Near, StringAlignment.Center);
+			}, page);
+		}
+
+		// Marca la subpestaña elegida (lo llama ShowPage).
+		private void SyncSubPickers(int p)
+		{
+			if (p == PageLive || p == PageTitle)
+			{
+				liveSub = p;
+			}
+			else if (p == PageSettings || p == PageLog)
+			{
+				setSub = p;
+			}
+			for (int i = 0; i < livePickBtns.Length; i++)
+			{
+				livePickBtns[i].Selected = (i == 0) ? (liveSub == PageLive) : (liveSub == PageTitle);
+				livePickBtns[i].Invalidate();
+			}
+			ApplySettingsPick();
 		}
 
 		private void ApplySettingsPick()
@@ -749,7 +901,7 @@ namespace StreamDelay
 			}
 			for (int i = 0; i < setPickBtns.Length; i++)
 			{
-				setPickBtns[i].Selected = i == setPick;
+				setPickBtns[i].Selected = (i == 3) ? (setSub == PageLog) : (setSub == PageSettings && i == setPick);
 				setPickBtns[i].Invalidate();
 			}
 		}

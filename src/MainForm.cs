@@ -8,7 +8,7 @@
 //   Extras.cs       pestaña Overlays, delays guardados y avisos automáticos en el chat
 //   ChatCmd.cs      comandos del chat (!delay…) y moderación
 //   Remote.cs       pestaña Mando (móvil, Stream Deck, panel de OBS)
-//   TitleTab.cs     pestaña Título (título y categoría, conectar plataformas)
+//   TitleTab.cs     Directo → Título y categoría (título y categoría, conectar plataformas)
 //   SettingsTab.cs  pestaña Ajustes (destinos, OBS y opciones)
 //   Updater.cs      actualización automática
 //   LicenseUi.cs    plan (prueba, Básico, Completo), ventana Licencia y pestañas de pago
@@ -278,7 +278,13 @@ namespace StreamDelay
 		private PaintBox destStrip;
 
 		// Página que muestra cada pestaña: Directo, Chat, Overlays, Mando, Título, Ajustes, Registro.
-		private static readonly int[] TabPages = new int[8] { PageLive, PageChat, PageOverlays, PageMando, PageClips, PageTitle, PageSettings, PageLog };
+		private static readonly int[] TabPages = new int[6] { PageLive, PageChat, PageOverlays, PageMando, PageClips, PageSettings };
+
+		// Alto de la ventana (diseño a 96 ppp). Debajo de las pestañas hay una fila (126–154) con las
+		// subpestañas de Directo y Ajustes, o una línea que explica la página; el contenido va desde 162.
+		private const float WinH = 690f;
+
+		private const int SubRowTop = 126;
 
 		// ---------- Pestaña Chat ----------
 
@@ -408,7 +414,7 @@ namespace StreamDelay
 			base.FormBorderStyle = FormBorderStyle.FixedSingle;
 			base.MaximizeBox = false;
 			base.AutoScaleMode = AutoScaleMode.None;
-			base.ClientSize = new Size(S(460f), S(654f));
+			base.ClientSize = new Size(S(460f), S(WinH));
 			base.StartPosition = FormStartPosition.CenterScreen;
 			DoubleBuffered = true;
 			try
@@ -430,18 +436,19 @@ namespace StreamDelay
 			{
 			}
 			int formWidth = 460;
-			int pageTop = 126;
+			int pageTop = 162;
 			header = Box(this, 0f, 0f, formWidth, 70f, PaintHeader);
 			tabs = new Tabs
 			{
-				Items = new string[8] { "Directo", "Chat", "Overlays", "Mando", "Clips", "Título", "Ajustes", "Registro" },
-				IconNames = new string[8] { "live", "chat", "layers", "remote", "film", "text", "gear", "list" }
+				Items = new string[6] { "Directo", "Chat", "Overlays", "Mando", "Clips", "Ajustes" },
+				IconNames = new string[6] { "live", "chat", "layers", "remote", "film", "gear" }
 			};
 			Place(this, tabs, 20f, 72f, 420f, 46f);
 			tabs.SelectedChanged += delegate
 			{
-				ShowPage(TabPages[tabs.Selected]);
+				ShowPage(PageOfTab(tabs.Selected));
 			};
+			BuildSubPickers();
 			BuildLive(pageTop);
 			BuildSettings(pageTop);
 			BuildLog(pageTop);
@@ -462,7 +469,20 @@ namespace StreamDelay
 				Text = I18n.English ? "Español" : "English",
 				FontSize = 8f
 			};
-			Place(header, langBtn, 206f, 14f, 90f, 22f);
+			Place(header, langBtn, 196f, 14f, 76f, 22f);
+			// "?": lista de atajos de teclado (y desde ahí, el asistente de inicio).
+			VButton helpBtn = new VButton
+			{
+				Kind = ButtonKind.Link,
+				Text = "?",
+				FontSize = 10f
+			};
+			Place(header, helpBtn, 276f, 14f, 26f, 22f);
+			tip.SetToolTip(helpBtn, I18n.Tr("Atajos de teclado y asistente de inicio") + " · ?");
+			helpBtn.Click += delegate
+			{
+				ToggleKeysSheet();
+			};
 			langBtn.Click += delegate
 			{
 				I18n.English = !I18n.English;
@@ -475,13 +495,20 @@ namespace StreamDelay
 			// Plan (prueba, Básico o Completo): botón debajo del idioma y aviso de las pestañas de pago.
 			BuildLicense(pageTop);
 			// Overlays y Mando se construyen después de cargar la configuración porque la necesitan.
-			BuildOverlays(pageTop);
+			// Overlays tiene su propio selector arriba: empieza en la fila de las subpestañas.
+			BuildOverlays(SubRowTop);
 			BuildMando(pageTop);
 			BuildClips(pageTop);
 			RefreshPresetButtons();
 			fldObs.Box.Text = ObsServer;
 			UiInit();
+			BuildShortcuts();
+			BuildWizard();
 			ShowPage(PageLive);
+			if (!wizardDone)
+			{
+				OpenWizard();
+			}
 			timer = new System.Windows.Forms.Timer
 			{
 				Interval = 500
@@ -495,6 +522,7 @@ namespace StreamDelay
 				LicenseTick();
 				SummaryTick();
 				UiSlowTick();
+				WizRefresh();
 			};
 			timer.Start();
 			RefreshStatus();
@@ -504,14 +532,58 @@ namespace StreamDelay
 
 		// ---------- Pestañas y páginas ----------
 
+		// Título va dentro de Directo y Registro dentro de Ajustes (subpestañas).
+		private int liveSub = PageLive;
+
+		private int setSub = PageSettings;
+
 		private int PageTab(int page)
 		{
+			if (page == PageTitle)
+			{
+				page = PageLive;
+			}
+			else if (page == PageLog)
+			{
+				page = PageSettings;
+			}
 			return Array.IndexOf(TabPages, page);
+		}
+
+		// Página que se enseña al elegir una pestaña (la última subpestaña usada).
+		private int PageOfTab(int tab)
+		{
+			int p = TabPages[Math.Max(0, tab)];
+			if (p == PageLive)
+			{
+				return liveSub;
+			}
+			if (p == PageSettings)
+			{
+				return setSub;
+			}
+			return p;
 		}
 
 		private void GoPage(int page)
 		{
-			tabs.Selected = PageTab(page);
+			if (page == PageLive || page == PageTitle)
+			{
+				liveSub = page;
+			}
+			else if (page == PageSettings || page == PageLog)
+			{
+				setSub = page;
+			}
+			int tab = PageTab(page);
+			if (tabs.Selected == tab)
+			{
+				ShowPage(page);
+			}
+			else
+			{
+				tabs.Selected = tab;
+			}
 		}
 
 		// Página que se ve ahora (para la transición).
@@ -528,6 +600,10 @@ namespace StreamDelay
 				{
 					lockBox.Invalidate();
 				}
+			}
+			if (p != PageLocked)
+			{
+				SyncSubPickers(p);
 			}
 			System.Drawing.Bitmap trOld = TransitionBegin(curPage, p);
 			SuspendLayout();
@@ -716,7 +792,7 @@ namespace StreamDelay
 			}
 			catch
 			{
-				I18n.Show(this, "No encuentro GUIA.html junto a VortexsLive.exe.", "Guía");
+				Toast("No encuentro GUIA.html junto a VortexsLive.exe.", "error");
 			}
 		}
 
@@ -826,7 +902,7 @@ namespace StreamDelay
 			{
 				g.DrawString("Live", font, brush2, textX + streamWidth, S(10f), StringFormat.GenericTypographic);
 			}
-			Theme.DrawText(g, "DELAY · MULTISTREAM · V" + Version, Theme.Mono(7f), Theme.Muted, new RectangleF(textX + 1f, S(39f), S(200f), S(16f)), StringAlignment.Near, StringAlignment.Center);
+			Theme.DrawText(g, "DELAY · MULTISTREAM", Theme.Mono(7f), Theme.Muted, new RectangleF(textX + 1f, S(39f), S(122f), S(16f)), StringAlignment.Near, StringAlignment.Center);
 			bool filledDot = true;
 			string state;
 			Color color;
@@ -1108,6 +1184,7 @@ namespace StreamDelay
 			}
 			SaveConfig();
 			SummaryOnClose();
+			FlushAllClipDeletes();
 			engine.Stop();
 			StopVertical();
 			base.OnFormClosing(e);
@@ -1132,6 +1209,9 @@ namespace StreamDelay
 			// Antes se llamaba StreamDelay: si aún no hay VortexsLive.ini, se leen los ajustes de StreamDelay.ini
 			// (se guardan ya en el nuevo; el viejo se deja como está).
 			string readPath = File.Exists(configPath) ? configPath : Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "StreamDelay.ini");
+			// Sin configuración = primera vez en este PC: sale el asistente. Quien ya lo usaba no lo ve.
+			firstRun = !File.Exists(readPath);
+			wizardDone = !firstRun;
 			if (File.Exists(readPath))
 			{
 				foreach (string line in File.ReadAllLines(readPath))

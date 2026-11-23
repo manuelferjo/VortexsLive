@@ -23,9 +23,7 @@ namespace StreamDelay
 
 		private void BuildSettings(int y0)
 		{
-			// Arriba, las secciones; debajo, el recuadro de la elegida.
-			BuildSettingsPicker(y0);
-			y0 += 38;
+			// Arriba (fila de subpestañas, BuildSubPickers), las secciones; debajo, el recuadro de la elegida.
 			BuildDestinations(y0);
 
 			// Recuadro OBS: servidor para copiar en OBS, puerto y modo de 2 PCs.
@@ -321,8 +319,9 @@ namespace StreamDelay
 			List<Destination> enabled = EnabledDestinations();
 			if (enabled.Count == 0)
 			{
+				setPick = 0;
 				GoPage(PageSettings);
-				I18n.Show(this, "Activa al menos un destino en Ajustes → Destinos.", "Sin destinos");
+				Toast("Activa al menos un destino en Ajustes → Destinos.", "warn");
 				return false;
 			}
 			List<string> withoutKey = new List<string>();
@@ -331,14 +330,16 @@ namespace StreamDelay
 				string server = d.Server.Trim();
 				if (server.Length == 0 || (!server.StartsWith("rtmp://", StringComparison.OrdinalIgnoreCase) && !server.StartsWith("rtmps://", StringComparison.OrdinalIgnoreCase)))
 				{
+					setPick = 0;
 					GoPage(PageSettings);
-					I18n.Show(this, d.Name + ": el servidor debe empezar por rtmp:// o rtmps://", "Servidor no válido");
+					Toast(d.Name + ": el servidor debe empezar por rtmp:// o rtmps://", "error");
 					return false;
 				}
 				if (server.Contains("127.0.0.1") || server.ToLowerInvariant().Contains("localhost"))
 				{
+					setPick = 0;
 					GoPage(PageSettings);
-					I18n.Show(this, d.Name + ": en Destinos va el servidor de la plataforma, no la dirección local.\n\nLa dirección local (127.0.0.1) es la que se pone en OBS.", "Servidor no válido");
+					Toast(d.Name + ": en Destinos va el servidor de la plataforma, no la dirección local (127.0.0.1 es la que se pone en OBS).", "error");
 					return false;
 				}
 				if (!d.IsTwitch && d.Key.Trim().Length == 0)
@@ -346,10 +347,14 @@ namespace StreamDelay
 					withoutKey.Add(d.Name);
 				}
 			}
-			if (withoutKey.Count > 0 && I18n.Show(this, string.Join(", ", withoutKey.ToArray()) + ((withoutKey.Count == 1) ? " no tiene" : " no tienen") + " clave guardada, así que no se emitirá ahí (salvo que OBS mande su clave).\n\n¿Iniciar igualmente?", "Falta la clave", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) != DialogResult.Yes)
+			// Sin clave: se inicia igualmente (no se emitirá ahí) y se avisa abajo, con un botón para ponerla.
+			if (withoutKey.Count > 0)
 			{
-				GoPage(PageSettings);
-				return false;
+				Toast(string.Join(", ", withoutKey.ToArray()) + ((withoutKey.Count == 1) ? " no tiene" : " no tienen") + " clave guardada: no se emitirá ahí (salvo que OBS mande su clave).", "warn", "Ponerla", delegate
+				{
+					setPick = 0;
+					GoPage(PageSettings);
+				});
 			}
 			return true;
 		}

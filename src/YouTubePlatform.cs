@@ -287,7 +287,7 @@ namespace StreamDelay
 			}
 			if (ex.Status == 401 || ex.Status == 403)
 			{
-				return new ApiException(ex.Status, "YouTube no deja moderar con esta cuenta (vuelve a conectar YouTube en la pestaña Título)");
+				return new ApiException(ex.Status, "YouTube no deja moderar con esta cuenta (vuelve a conectar YouTube en Directo → Título y categoría)");
 			}
 			return ex;
 		}

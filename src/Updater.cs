@@ -66,12 +66,12 @@ namespace StreamDelay
                     Version mine = ParseVersion(Version);
                     if (info == null)
                     {
-                        if (manual) I18n.Show(this, "No se pudo comprobar si hay versiones nuevas" + (error != null ? ":\n" + error : "."), "Actualizaciones");
+                        if (manual) Toast("No se pudo comprobar si hay versiones nuevas" + (error != null ? ": " + error : "."), "error");
                         return;
                     }
                     if (mine != null && info.Ver <= mine)
                     {
-                        if (manual) I18n.Show(this, "Tienes la última versión (" + Version + ").", "Actualizaciones", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        if (manual) Toast(I18n.Tr("Tienes la última versión (") + Version + ").", "ok");
                         return;
                     }
                     AppendLog("Hay una versión nueva de Vortexs Live: " + info.Tag + ".");
@@ -132,7 +132,7 @@ namespace StreamDelay
             Place(f, skip, 20f, 326f, 120f, 44f);
             Place(f, later, 148f, 326f, 120f, 44f);
             Place(f, ok, 276f, 326f, 164f, 44f);
-            skip.Click += delegate { updateSkip = info.Tag; SaveConfig(); AppendLog("Actualización " + info.Tag + " saltada (puedes instalarla desde Registro → Actualizaciones)."); f.Close(); };
+            skip.Click += delegate { updateSkip = info.Tag; SaveConfig(); AppendLog("Actualización " + info.Tag + " saltada (puedes instalarla desde Ajustes → Registro → Actualizaciones)."); f.Close(); };
             later.Click += delegate { f.Close(); };
             ok.Click += delegate
             {

@@ -1003,6 +1003,7 @@ namespace StreamDelay
 			if (raw.TryGetValue("win_w", out v) && int.TryParse(v, out n) && n >= 460 && n <= 1180) winWidth = n;
 			if (raw.TryGetValue("wide_w", out v) && int.TryParse(v, out n) && n >= 760 && n <= 1180) wideWidth = n;
 			if (raw.TryGetValue("panel_tip", out v)) panelTipShown = v == "1";
+			if (raw.TryGetValue("wizard", out v)) wizardDone = v == "1";
 		}
 
 		private void SaveWidgetsConfig(List<string> lines)
@@ -1035,6 +1036,7 @@ namespace StreamDelay
 			lines.Add("win_w=" + winWidth);
 			lines.Add("wide_w=" + wideWidth);
 			lines.Add("panel_tip=" + (panelTipShown ? "1" : "0"));
+			lines.Add("wizard=" + (wizardDone ? "1" : "0"));
 		}
 	}
 }

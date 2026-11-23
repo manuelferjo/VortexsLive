@@ -224,7 +224,7 @@ namespace StreamDelay
 			{
 				if (!twitch.Connected || twCh.Length == 0)
 				{
-					res["error"] = "los modos del chat son de Twitch: conecta tu cuenta en la pestaña Título";
+					res["error"] = "los modos del chat son de Twitch: conecta tu cuenta en Directo → Título y categoría";
 					return res;
 				}
 				try
@@ -289,7 +289,7 @@ namespace StreamDelay
 				}
 				if (!twitch.Connected || twCh.Length == 0)
 				{
-					res["error"] = "conecta tu cuenta de Twitch en la pestaña Título";
+					res["error"] = "conecta tu cuenta de Twitch en Directo → Título y categoría";
 					return res;
 				}
 				if (uid.Length == 0)
@@ -333,7 +333,7 @@ namespace StreamDelay
 				Platform pp = (p == "twitch") ? twitch : ((p == "kick") ? ((Platform)kick) : ((p == "youtube") ? ((Platform)youtube) : null));
 				if (pp == null || !pp.Connected)
 				{
-					res["error"] = (pp == null) ? "plataforma desconocida" : ("conecta tu cuenta de " + pp.Name + " en la pestaña Título para moderar");
+					res["error"] = (pp == null) ? "plataforma desconocida" : ("conecta tu cuenta de " + pp.Name + " en Directo → Título y categoría para moderar");
 					return res;
 				}
 				int done = 0, total = 0;
@@ -416,7 +416,7 @@ namespace StreamDelay
 			}
 			if (!plat.Connected)
 			{
-				res["error"] = "conecta tu cuenta de " + plat.Name + " en la pestaña Título para moderar";
+				res["error"] = "conecta tu cuenta de " + plat.Name + " en Directo → Título y categoría para moderar";
 				return res;
 			}
 			if ((del && id.Length == 0 && p != "youtube") || (!del && uid.Length == 0))

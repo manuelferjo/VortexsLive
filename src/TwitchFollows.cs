@@ -23,7 +23,7 @@ namespace StreamDelay
                 if (!api.IsOwnChannel(channel)) return;   // solo el dueño del canal ve los canjes
                 if (!api.HasScope("channel:read:redemptions"))
                 {
-                    hub.Log("Canjes de puntos de Twitch: vuelve a conectar Twitch una vez (pestaña Título) para verlos en el chat.");
+                    hub.Log("Canjes de puntos de Twitch: vuelve a conectar Twitch una vez (Directo → Título y categoría) para verlos en el chat.");
                     return;
                 }
                 api.SubscribeRedemptions(sid, channel);
@@ -95,7 +95,7 @@ namespace StreamDelay
             }
             else if (type == "revocation" && J.S(o, "payload", "subscription", "type") == "channel.channel_points_custom_reward_redemption.add")
             {
-                hub.Log("Canjes de puntos de Twitch: Twitch retiró el permiso. Vuelve a conectar Twitch en la pestaña Título.");
+                hub.Log("Canjes de puntos de Twitch: Twitch retiró el permiso. Vuelve a conectar Twitch en Directo → Título y categoría.");
             }
             else if (type == "revocation")
             {

@@ -341,7 +341,7 @@ namespace StreamDelay
 			}
 			if (tabs != null)
 			{
-				ShowPage(TabPages[tabs.Selected]);
+				ShowPage(PageOfTab(tabs.Selected));
 			}
 		}
 
