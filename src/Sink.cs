@@ -113,6 +113,50 @@ namespace StreamDelay
 			}
 		}
 
+		// ---------- Estadísticas para la ficha de destinos ----------
+
+		// Bytes enviados a la plataforma (lo suma el hilo "enviar-…").
+		private long sentBytes;
+
+		// Veces que se ha caído la conexión desde que se inició el servicio.
+		public volatile int Reconnects;
+
+		// Velocidad de subida a este destino (kbps, media de unos segundos) y desde cuándo está en directo.
+		public volatile int RateKbps;
+
+		private long rateLastBytes;
+
+		private long rateLastAt = -1L;
+
+		private double rateAvg;
+
+		public long LiveForMs
+		{
+			get
+			{
+				return (State == SinkState.Live) ? Math.Max(0L, e.Now - startedAt) : 0L;
+			}
+		}
+
+		// La llama la ventana cada medio segundo para calcular la velocidad.
+		public void SampleRate()
+		{
+			long now = e.Now;
+			long bytes = Interlocked.Read(ref sentBytes);
+			if (rateLastAt >= 0L && now > rateLastAt)
+			{
+				double kbps = (double)(bytes - rateLastBytes) * 8.0 / (double)(now - rateLastAt);
+				rateAvg = (rateAvg <= 0.0) ? kbps : (rateAvg * 0.75 + kbps * 0.25);
+			}
+			rateLastBytes = bytes;
+			rateLastAt = now;
+			RateKbps = (State == SinkState.Live) ? (int)Math.Round(rateAvg) : 0;
+			if (State != SinkState.Live)
+			{
+				rateAvg = 0.0;
+			}
+		}
+
 		public long QueueBytes
 		{
 			get
@@ -545,6 +589,7 @@ namespace StreamDelay
 				try
 				{
 					c.Write(item.Type, item.Ts, item.Data);
+					Interlocked.Add(ref sentBytes, item.Data.Length);
 				}
 				catch (Exception ex)
 				{
@@ -567,6 +612,7 @@ namespace StreamDelay
 				conn = null;
 				items.Clear();
 				qBytes = 0L;
+				Reconnects++;
 				// Si aguantó más de 15 s, se vuelve a empezar la cuenta de fallos.
 				bool quickFail = e.Now - startedAt < 15000;
 				fails = ((!quickFail) ? 1 : (fails + 1));

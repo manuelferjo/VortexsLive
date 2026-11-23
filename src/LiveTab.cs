@@ -95,7 +95,8 @@ namespace StreamDelay
 				ApplyDelay(slider.Value);
 			};
 
-			// Franja de destinos (se dibuja en SettingsTab.cs). Pulsarla lleva a Ajustes.
+			// Franja de destinos (se dibuja en SettingsTab.cs). Pulsarla lleva a Ajustes, o en directo abre
+			// la ficha de destinos (velocidad, retraso y reconexiones de cada uno).
 			int stripTop = y0 + 268;
 			destStrip = Box(this, 20f, stripTop, 420f, 76f, PaintDestStrip, PageLive);
 			destStrip.Cursor = Cursors.Hand;
@@ -104,6 +105,10 @@ namespace StreamDelay
 				if (!engine.Running)
 				{
 					GoPage(PageSettings);
+				}
+				else
+				{
+					DestStatsDialog();
 				}
 			};
 
@@ -517,7 +522,7 @@ namespace StreamDelay
 			}
 		}
 
-		// Cambia el delay (0–600 s). En directo, al subirlo se repite o congela lo último y al bajarlo se salta.
+		// Cambia el delay (0–180 s). En directo, al subirlo se repite o congela lo último y al bajarlo se salta.
 		private void ApplyDelay(int seconds)
 		{
 			seconds = Math.Max(0, Math.Min(MaxDelay, seconds));

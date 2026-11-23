@@ -1,4 +1,4 @@
-# Compila Vortexs Live en GitHub con cada cambio y pasa las pruebas del chat.
+# Compila Vortexs Live en GitHub con cada cambio y pasa las pruebas del chat y del motor.
 # Al publicar una versión (Release con etiqueta v3.1, v4.0…), adjunta el ZIP de descarga a la Release.
 name: Compilar
 
@@ -22,6 +22,12 @@ permissions:
 jobs:
   compilar:
     runs-on: windows-latest
+    env:
+      # Firma del programa (SSL.com eSigner). Si estos secretos no existen, se salta la firma.
+      ES_USERNAME: ${{ secrets.ES_USERNAME }}
+      ES_PASSWORD: ${{ secrets.ES_PASSWORD }}
+      ES_CREDENTIAL_ID: ${{ secrets.ES_CREDENTIAL_ID }}
+      ES_TOTP_SECRET: ${{ secrets.ES_TOTP_SECRET }}
     steps:
       - name: Descargar el código
         uses: actions/checkout@v7
@@ -51,6 +57,20 @@ jobs:
           }
           "Pruebas del chat: $($salida.Count) líneas idénticas al resultado esperado."
 
+      - name: Prueba del motor (vídeo de verdad con ffmpeg)
+        shell: pwsh
+        run: |
+          if (-not (Get-Command ffmpeg -ErrorAction SilentlyContinue)) {
+            choco install ffmpeg -y --no-progress | Out-Null
+            $env:PATH = "C:\ProgramData\chocolatey\bin;$env:PATH"
+          }
+          $ff = (Get-Command ffmpeg).Source
+          "ffmpeg: $ff"
+          & "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319\csc.exe" /nologo /out:verifyengine.exe pruebas\VerifyEngine.cs
+          if ($LASTEXITCODE -ne 0) { throw "No se pudo compilar la prueba del motor" }
+          .\verifyengine.exe VortexsLive.exe $ff prueba-motor
+          if ($LASTEXITCODE -ne 0) { throw "La prueba del motor ha fallado (mira las líneas FALLO)" }
+
       - name: Comprobar que la versión coincide con la etiqueta
         if: github.event_name == 'release' || inputs.etiqueta != ''
         shell: pwsh
@@ -60,6 +80,31 @@ jobs:
           $v = (Select-String -Path src\MainForm.cs -Pattern 'const string Version = "([^"]+)"').Matches[0].Groups[1].Value
           if ("v$v" -ne $env:ETIQUETA) { throw "La etiqueta es $env:ETIQUETA pero src\MainForm.cs dice Version = $v. Cámbialo para que coincidan." }
           "Versión $v = etiqueta $env:ETIQUETA"
+
+      # Firma digital: Windows (SmartScreen) muestra "Vortexs" como editor en vez de "desconocido".
+      # Solo al publicar una versión (cada firma cuenta en el plan de eSigner) y si hay secretos.
+      - name: Firmar VortexsLive.exe
+        if: (github.event_name == 'release' || inputs.etiqueta != '') && env.ES_USERNAME != ''
+        uses: sslcom/esigner-codesign@develop
+        with:
+          command: sign
+          username: ${{ env.ES_USERNAME }}
+          password: ${{ env.ES_PASSWORD }}
+          credential_id: ${{ env.ES_CREDENTIAL_ID }}
+          totp_secret: ${{ env.ES_TOTP_SECRET }}
+          file_path: ${{ github.workspace }}/VortexsLive.exe
+          output_path: ${{ github.workspace }}/firmado
+          environment_name: PROD
+
+      - name: Usar el programa firmado
+        if: (github.event_name == 'release' || inputs.etiqueta != '') && env.ES_USERNAME != ''
+        shell: pwsh
+        run: |
+          if (-not (Test-Path firmado\VortexsLive.exe)) { throw "eSigner no ha devuelto el programa firmado" }
+          Copy-Item firmado\VortexsLive.exe VortexsLive.exe -Force
+          $firma = Get-AuthenticodeSignature VortexsLive.exe
+          "Firma: $($firma.Status) · $($firma.SignerCertificate.Subject)"
+          if ($firma.Status -ne 'Valid') { throw "La firma no es válida: $($firma.StatusMessage)" }
 
       - name: Crear el ZIP de descarga
         shell: pwsh
