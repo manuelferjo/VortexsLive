@@ -82,8 +82,6 @@ jobs:
           $p = Start-Process capturas-app\VortexsLive.exe -ArgumentList "--capturas=$PWD\capturas" -PassThru
           if (-not $p.WaitForExit(120000)) { $p.Kill(); throw "Las capturas no terminaron en 2 minutos" }
           Get-ChildItem capturas | ForEach-Object { "$($_.Name): $([math]::Round($_.Length / 1KB)) KB" }
-          # TEMPORAL (revisión): las capturas en el registro, en base64.
-          Get-ChildItem capturas\*.png | ForEach-Object { "CAPTURA " + $_.Name + " " + [Convert]::ToBase64String([IO.File]::ReadAllBytes($_.FullName)) }
 
       - name: Guardar las capturas
         continue-on-error: true
