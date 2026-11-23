@@ -51,6 +51,16 @@ namespace StreamDelay
 			shots.Add(new KeyValuePair<string, Action>("08-mando", delegate { GoPage(PageMando); }));
 			shots.Add(new KeyValuePair<string, Action>("09-clips", delegate { GoPage(PageClips); }));
 			shots.Add(new KeyValuePair<string, Action>("09b-overlays-alertas", delegate { ovPick = 3; ApplyOverlayPick(); GoPage(PageOverlays); }));
+			shots.Add(new KeyValuePair<string, Action>("09c-personalizar-alertas", delegate { AlertCustomDialog(); }));
+			shots.Add(new KeyValuePair<string, Action>("09d-overlays-vertical", delegate
+			{
+				foreach (Form o in OwnedForms)
+				{
+					o.Close();
+				}
+				ovVertical = true;
+				ovHint.Invalidate();
+			}));
 			for (int i = 0; i < 3; i++)
 			{
 				int pick = i;
@@ -103,7 +113,16 @@ namespace StreamDelay
 		// La ventana tal como se ve en pantalla (y si no se puede, dibujada en un bitmap).
 		private void Snap(string path)
 		{
-			Rectangle r = RectangleToScreen(ClientRectangle);
+			// Si hay una ventana abierta encima (por ejemplo Personalizar alertas), la foto es de esa.
+			Form target = this;
+			foreach (Form o in OwnedForms)
+			{
+				if (o.Visible && !(o is ToastForm))
+				{
+					target = o;
+				}
+			}
+			Rectangle r = target.RectangleToScreen(target.ClientRectangle);
 			// Los avisos salen debajo de la ventana: se incluye un poco más por abajo si hay alguno.
 			using (Bitmap b = new Bitmap(r.Width, r.Height))
 			{
@@ -121,7 +140,7 @@ namespace StreamDelay
 				}
 				if (!ok)
 				{
-					DrawToBitmap(b, new Rectangle(0, 0, r.Width, r.Height));
+					target.DrawToBitmap(b, new Rectangle(0, 0, r.Width, r.Height));
 				}
 				b.Save(path, ImageFormat.Png);
 			}

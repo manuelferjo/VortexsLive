@@ -352,6 +352,12 @@ namespace StreamDelay
 			test.Click += delegate { SendTestAlert(); };
 			ok.Click += delegate { f.Close(); };
 			f.FormClosing += delegate { PlaySoundPreview(null, 0); SaveConfig(); };
+			// En las capturas de GitHub se abre sin bloquear, para poder hacerle la foto.
+			if (Program.CaptureDir != null)
+			{
+				f.Show(this);
+				return;
+			}
 			f.ShowDialog(this);
 		}
 	}
