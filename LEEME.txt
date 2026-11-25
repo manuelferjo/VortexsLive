@@ -1,7 +1,18 @@
-VORTEXS LIVE 4.24 - delay dinámico y multistream para OBS (by Vortexs)
+VORTEXS LIVE 4.25 - delay dinámico y multistream para OBS (by Vortexs)
 =====================================================================
 
 Abre GUIA.html (doble clic) para ver la guía completa.
+
+Novedades de la 4.25
+- Expulsiones y bans en el chat: los mensajes de esa persona ya no
+  desaparecen; se quedan borrosos (pasa el ratón para leerlos) con
+  "⏱ 10:00" o "⛔ baneado" y un botón "↩ Quitar" para levantarlo.
+  En el chat en pantalla de OBS se siguen quitando.
+- Los enlaces del chat se abren en tu navegador predeterminado, también
+  desde el panel de OBS (antes se abrían en una ventanita de OBS).
+- Chat compartido de Twitch: arriba del chat sale "Chat compartido con"
+  y los canales que están escribiendo, además de la etiqueta de cada
+  mensaje.
 
 Novedades de la 4.24
 - Registro del delay para Vortexs Clips: Vortexs Live apunta el delay
