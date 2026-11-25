@@ -23,6 +23,13 @@ namespace StreamDelay
         const string UpdateRepo = "manuelferjo/VortexsLive";
         string updateSkip = "";   // versión que el usuario decidió saltarse
         volatile bool updateBusy;
+        // Actualizar solo: se descarga e instala en segundo plano y se usa al volver a abrir (Ajustes → Opciones).
+        bool autoUpdate = true;
+        Toggle tgAutoUpdate;
+        // Versión con la que se abrió la última vez: si cambia sin --actualizado, se actualizó sola.
+        string lastVersion = "";
+        // Ya instalada en el disco, esperando a que se vuelva a abrir.
+        string updateReady = "";
 
         class UpdateInfo
         {
@@ -44,6 +51,16 @@ namespace StreamDelay
         {
             if (Program.CaptureDir != null) return;
             if (Program.UpdatedTo.Length > 0) AppendLog("Vortexs Live actualizado a la versión " + Program.UpdatedTo + ". Tu configuración se ha conservado.");
+            else if (lastVersion.Length > 0 && lastVersion != Version)
+            {
+                // Se instaló sola mientras estaba abierta la versión anterior: se avisa una vez.
+                AppendLog("Vortexs Live actualizado a la versión " + Version + " (antes " + lastVersion + "). Tu configuración se ha conservado.");
+                string page = "https://github.com/" + UpdateRepo + "/releases/tag/v" + Version;
+                System.Windows.Forms.Timer hello = new System.Windows.Forms.Timer { Interval = 2500 };
+                hello.Tick += delegate { hello.Stop(); hello.Dispose(); Toast(I18n.Tr("Vortexs Live se ha actualizado a la ") + Version + ".", "ok", "Novedades", delegate { Http.OpenBrowser(page); }); };
+                hello.Start();
+            }
+            if (lastVersion != Version) { lastVersion = Version; SaveConfig(); }
             ThreadPool.QueueUserWorkItem(delegate
             {
                 string old = Application.ExecutablePath + ".old";
@@ -77,6 +94,9 @@ namespace StreamDelay
                     }
                     AppendLog("Hay una versión nueva de Vortexs Live: " + info.Tag + ".");
                     if (!manual && info.Tag == updateSkip) return;
+                    if (!manual && updateReady == info.Tag) return;
+                    // Actualizar solo: sin preguntar, en segundo plano. Al pulsar "Actualizaciones", la ventana de siempre.
+                    if (!manual && autoUpdate) { AutoUpdate(info); return; }
                     UpdateDialog(info);
                 });
             }
@@ -183,6 +203,63 @@ namespace StreamDelay
             });
         }
 
+        // Descarga e instala la versión nueva en la carpeta del programa sin cerrarlo: el .exe abierto pasa
+        // a .old y el nuevo ocupa su sitio, así que la próxima vez que se abra ya es la nueva. En directo
+        // espera a que termine (mira cada minuto).
+        void AutoUpdate(UpdateInfo info)
+        {
+            if (updateBusy || updateReady == info.Tag) return;
+            if (engine.OutputActive)
+            {
+                System.Windows.Forms.Timer wait = new System.Windows.Forms.Timer { Interval = 60000 };
+                wait.Tick += delegate
+                {
+                    if (engine.OutputActive) return;
+                    wait.Stop(); wait.Dispose();
+                    AutoUpdate(info);
+                };
+                wait.Start();
+                return;
+            }
+            updateBusy = true;
+            AppendLog("Descargando Vortexs Live " + info.Tag + " en segundo plano…");
+            ThreadPool.QueueUserWorkItem(delegate
+            {
+                string exe = Application.ExecutablePath;
+                string err = null;
+                try { InstallUpdate(info, exe); }
+                catch (Exception ex) { err = ex.Message; }
+                try
+                {
+                    BeginInvoke((Action)delegate
+                    {
+                        updateBusy = false;
+                        if (err != null)
+                        {
+                            // Si no se puede sola (carpeta sin permiso…), se pregunta como siempre.
+                            AppendLog("No se pudo actualizar solo: " + err);
+                            UpdateDialog(info);
+                            return;
+                        }
+                        updateReady = info.Tag;
+                        AppendLog("Vortexs Live " + info.Tag + " instalado: se usará la próxima vez que abras el programa.");
+                        Toast(I18n.Tr("Vortexs Live ") + info.Tag + I18n.Tr(" está lista: se usará la próxima vez que lo abras."), "ok", "Reiniciar ahora", delegate
+                        {
+                            if (engine.OutputActive)
+                            {
+                                Toast("Estás en directo: se usará al volver a abrir Vortexs Live.", "warn");
+                                return;
+                            }
+                            Process.Start(new ProcessStartInfo(exe, "--esperar=" + Process.GetCurrentProcess().Id + " --actualizado=" + info.Tag.TrimStart('v', 'V'))
+                            { UseShellExecute = false, WorkingDirectory = Path.GetDirectoryName(exe) });
+                            Close();
+                        });
+                    });
+                }
+                catch { }
+            });
+        }
+
         static void InstallUpdate(UpdateInfo info, string exe)
         {
             string dir = Path.GetDirectoryName(exe);
@@ -253,11 +330,16 @@ namespace StreamDelay
         {
             string v;
             if (raw.TryGetValue("update_skip", out v)) updateSkip = v.Trim();
+            if (raw.TryGetValue("update_auto", out v)) autoUpdate = v != "0";
+            if (raw.TryGetValue("last_version", out v)) lastVersion = v.Trim();
+            if (tgAutoUpdate != null) tgAutoUpdate.Checked = autoUpdate;
         }
 
         void SaveUpdateConfig(List<string> lines)
         {
             lines.Add("update_skip=" + updateSkip);
+            lines.Add("update_auto=" + (autoUpdate ? "1" : "0"));
+            lines.Add("last_version=" + lastVersion);
         }
     }
 }

@@ -93,7 +93,7 @@ namespace StreamDelay
 
 			// Recuadro de opciones.
 			Card optionsCard = new Card();
-			Place(this, optionsCard, 20f, y0, 420f, 104f, PageSettings);
+			Place(this, optionsCard, 20f, y0, 420f, 134f, PageSettings);
 			setCards = new Card[3] { destCard, obsCard, optionsCard };
 			tgReplay = new Toggle
 			{
@@ -128,6 +128,21 @@ namespace StreamDelay
 				Text = "Modo clásico con ffmpeg (solo una calidad)"
 			};
 			Place(optionsCard, tgFfmpeg, 18f, 70f, 384f, 28f);
+			// Actualizaciones: se descargan e instalan solas (nunca en directo) y se usan al volver a abrir.
+			tgAutoUpdate = new Toggle
+			{
+				Text = "Instalar las actualizaciones solo (se usan al volver a abrir)",
+				Checked = autoUpdate
+			};
+			Place(optionsCard, tgAutoUpdate, 18f, 100f, 384f, 28f);
+			tgAutoUpdate.CheckedChanged += delegate
+			{
+				autoUpdate = tgAutoUpdate.Checked;
+				if (!loading)
+				{
+					SaveConfig();
+				}
+			};
 			tgFfmpeg.CheckedChanged += delegate
 			{
 				if (!loading)

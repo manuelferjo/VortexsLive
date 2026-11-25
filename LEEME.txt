@@ -4,6 +4,15 @@ VORTEXS LIVE 4.25 - delay dinámico y multistream para OBS (by Vortexs)
 Abre GUIA.html (doble clic) para ver la guía completa.
 
 Novedades de la 4.25
+- Instalador: VortexsLive-Instalar.exe pone Vortexs Live en tu usuario
+  (sin pedir permisos de administrador), con acceso directo en el menú
+  Inicio, en el escritorio si quieres y la opción de abrirse con
+  Windows. Se desinstala desde Configuración de Windows → Aplicaciones
+  (tus ajustes y clips se quedan). El ZIP sigue disponible.
+- Las actualizaciones se instalan solas: se descargan en segundo plano
+  (nunca en directo) y se usan la próxima vez que abras el programa, o
+  al momento con "Reiniciar ahora". Se puede quitar en Ajustes →
+  Opciones.
 - Expulsiones y bans en el chat: los mensajes de esa persona ya no
   desaparecen; se quedan borrosos (pasa el ratón para leerlos) con
   "⏱ 10:00" o "⛔ baneado" y un botón "↩ Quitar" para levantarlo.

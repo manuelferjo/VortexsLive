@@ -137,6 +137,28 @@ jobs:
           name: VortexsLive
           path: dist/*.zip
 
+      # Instalador (dist\VortexsLive-Instalar.exe): se compila y se prueba instalando y desinstalando.
+      - name: Crear y probar el instalador
+        shell: pwsh
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { choco install innosetup -y --no-progress | Out-Null }
+          if (-not (Test-Path $iscc)) { throw "No se encuentra Inno Setup" }
+          $v = (Select-String -Path src\MainForm.cs -Pattern 'const string Version = "([^"]+)"').Matches[0].Groups[1].Value
+          & $iscc /Q "/DAppVersion=$v" instalador\VortexsLive.iss
+          if ($LASTEXITCODE -ne 0) { throw "No se pudo crear el instalador" }
+          $setup = "dist\VortexsLive-Instalar.exe"
+          "Instalador: $([math]::Round((Get-Item $setup).Length / 1KB)) KB"
+          $p = Start-Process $setup -ArgumentList "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /TASKS=""""" -PassThru -Wait
+          $dir = "$env:LOCALAPPDATA\Programs\Vortexs Live"
+          if (-not (Test-Path "$dir\VortexsLive.exe")) { throw "El instalador no dejó VortexsLive.exe en $dir" }
+          if (-not (Test-Path "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Vortexs Live.lnk")) { throw "Falta el acceso directo del menú Inicio" }
+          $unins = Get-ChildItem $dir -Filter "unins*.exe" | Select-Object -First 1
+          Start-Process $unins.FullName -ArgumentList "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART" -Wait
+          Start-Sleep 3
+          if (Test-Path "$dir\VortexsLive.exe") { throw "El desinstalador no quitó VortexsLive.exe" }
+          "Instalador probado: instala en $dir, crea el acceso directo y se desinstala bien."
+
       - name: Crear la Release (al subir una etiqueta)
         if: startsWith(github.ref, 'refs/tags/v')
         shell: pwsh
@@ -158,14 +180,14 @@ jobs:
           gh release create $env:ETIQUETA --repo $env:GITHUB_REPOSITORY --title "Vortexs Live $v" --notes-file $notas --verify-tag
           if ($LASTEXITCODE -ne 0) { throw "No se pudo crear la Release $env:ETIQUETA" }
 
-      - name: Adjuntar el ZIP a la Release
+      - name: Adjuntar el ZIP y el instalador a la Release
         if: github.event_name == 'release' || inputs.etiqueta != '' || startsWith(github.ref, 'refs/tags/v')
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
           ETIQUETA: ${{ github.event.release.tag_name || inputs.etiqueta || github.ref_name }}
         run: |
-          foreach ($zip in (Get-Item dist\*.zip)) {
+          foreach ($zip in (Get-Item dist\*.zip, dist\VortexsLive-Instalar.exe)) {
             gh release upload $env:ETIQUETA $zip.FullName --clobber --repo $env:GITHUB_REPOSITORY
             if ($LASTEXITCODE -ne 0) { throw "No se pudo adjuntar $($zip.Name) a la Release" }
             "Adjuntado $($zip.Name) a la Release $env:ETIQUETA"
