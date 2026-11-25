@@ -143,6 +143,20 @@
   /* Moderación: pulsa un mensaje para borrarlo o expulsar a quien lo escribió */
   body:not(.overlay):not(.nomod) .msg[data-mod] { cursor: pointer; }
   .msg.modsel { background: rgba(192,154,253,.08); }
+  /* Expulsado o baneado: su mensaje sigue ahí, borroso (se lee al pasar el ratón) y con ↩ para quitarlo. */
+  .msg.muted .mbody { filter: blur(1.6px); opacity: .55; transition: filter .15s, opacity .15s; }
+  .msg.muted:hover .mbody, .msg.muted.reveal .mbody { filter: none; opacity: .75; }
+  .tbadge { display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; padding: 0 3px 0 7px; height: 1.55em; border-radius: 99px; vertical-align: .05em;
+    background: rgba(255,70,85,.14); box-shadow: inset 0 0 0 1px rgba(255,70,85,.4); color: #ff9aa4; font-size: .78em; font-weight: 700; white-space: nowrap; }
+  .tbadge.t { background: rgba(255,176,32,.13); box-shadow: inset 0 0 0 1px rgba(255,176,32,.4); color: #ffd27a; }
+  .tbadge button { font: inherit; font-size: .95em; border: 0; border-radius: 99px; padding: 1px 7px; cursor: pointer; background: rgba(255,255,255,.1); color: #fff; }
+  .tbadge button:hover { background: rgba(255,255,255,.2); }
+  .tbadge button:disabled { opacity: .5; cursor: default; }
+  body.nomod .tbadge button { display: none; }
+  /* Chat compartido: con qué canales. */
+  #shared { display: none; padding: 5px 10px; font-size: 12px; color: #d4c2ff; background: rgba(145,71,255,.12); border-bottom: 1px solid rgba(145,71,255,.3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #shared.on { display: block; }
+  body.overlay #shared { display: none !important; }
   /* Timeout arrastrando el nombre hacia la derecha: la barrita sale a la izquierda del mensaje. */
   .msg { position: relative; }
   body:not(.overlay):not(.nomod) .msg[data-mod] .name { touch-action: pan-y; user-select: none; cursor: grab; }
@@ -273,6 +287,7 @@
   </div>
   <div id="pollstate"></div>
 </div>
+<div id="shared"></div>
 <div id="list"><div id="empty">Esperando mensajes…<br><small>Activa el chat en Vortexs Live → pestaña Chat.</small></div></div>
 <div id="emo">
   <div id="emo-top"><input id="emo-q" type="text" placeholder="Buscar emote…" autocomplete="off"></div>
@@ -302,6 +317,7 @@
   var EN_TXT = {
     'Chat conjunto · Vortexs Live': 'Combined chat · Vortexs Live',
     'Esperando mensajes…': 'Waiting for messages…',
+    'expulsado': 'timed out', 'baneado': 'banned', 'Quitar': 'Remove', 'Quitar la expulsión o el ban': 'Remove the timeout or ban', 'Chat compartido con': 'Shared chat with',
     'Escrito en el canal de ': 'Written in the channel of ',
     'Activa el chat en Vortexs Live → pestaña Chat.': 'Turn on the chat in Vortexs Live → Chat tab.',
     'Enviar a:': 'Send to:',
@@ -559,6 +575,7 @@
     // TikTok no deja moderar desde otros programas: sus mensajes solo se pueden ocultar.
     el._raw = m;
     if (m.id || m.uid || m.user) { el.dataset.mod = '1'; el._m = { p: m.p, id: m.id || '', uid: m.uid || '', user: m.user || '', text: plain(m.parts), roles: (m.roles || []).slice(), at: Date.now() }; }
+    noteShared(m);
     el.innerHTML = ICONS[m.p] + srcHtml(m) + rolesHtml(m.roles, m.bd) + '<span class="name" style="color:' + nameColor(m.color, m.user) + '">' + esc(m.user) + '</span>: ' + partsHtml(m.parts);
     if (m.uid && m.p !== 'tiktok') el.querySelector('.name').title = T('Pulsa para moderar · arrastra hacia la derecha para un timeout');
     add(el);
@@ -579,8 +596,65 @@
   function onDelete(m) {
     var sel = m.id ? '[data-id="' + m.p + ':' + m.id + '"]' : m.uid ? '[data-uid="' + m.p + ':' + m.uid + '"]' : null;
     if (!sel) return;
+    // Expulsión o ban en la plataforma: en tu chat sus mensajes se quedan borrosos (en pantalla, en OBS, se quitan).
+    if (!m.id && (m.kind === 'timeout' || m.kind === 'ban') && !document.body.classList.contains('overlay')) {
+      Array.prototype.forEach.call(list.querySelectorAll('.msg' + sel), function (e) { muteMsg(e, m); });
+      return;
+    }
     Array.prototype.forEach.call(list.querySelectorAll(sel), function (e) { e.remove(); });
   }
+  function muteMsg(el, m) {
+    var body = el.querySelector('.mbody');
+    if (!body) {
+      body = document.createElement('span'); body.className = 'mbody';
+      Array.prototype.slice.call(el.childNodes).forEach(function (n) {
+        if (n.nodeType === 1 && (n.classList.contains('modbar') || n.classList.contains('tswipe'))) return;
+        body.appendChild(n);
+      });
+      el.insertBefore(body, el.firstChild);
+    }
+    var old = el.querySelector('.tbadge'); if (old) old.remove();
+    var secs = +m.amount || 0, timed = m.kind === 'timeout';
+    var b = document.createElement('span'); b.className = 'tbadge' + (timed ? ' t' : '');
+    b.innerHTML = '<span>' + (timed ? '⏱ ' + esc(secs ? clock(secs) : T('expulsado')) : '⛔ ' + esc(T('baneado'))) + '</span>' +
+      (m.uid && m.p !== 'tiktok' ? '<button type="button" title="' + esc(T('Quitar la expulsión o el ban')) + '">↩ ' + esc(T('Quitar')) + '</button>' : '');
+    el.classList.add('muted');
+    el.insertBefore(b, body.nextSibling);
+    var btn = b.querySelector('button');
+    if (btn) btn.onclick = function (e) {
+      e.stopPropagation(); btn.disabled = true; btn.textContent = T('Un momento…');
+      var who = el._m || {};
+      fetch('/api/mod', { method: 'POST', headers: { 'X-SD-Secret': SECRET, 'Content-Type': 'application/json' }, body: JSON.stringify({ p: m.p, a: 'unban', uid: m.uid, user: who.user || '' }) })
+        .then(function (r) { return r.json(); })
+        .then(function (r) {
+          if (r && r.ok) unmuteUser(m.p, m.uid);
+          else { btn.disabled = false; btn.textContent = '✗ ' + ((r && r.error) || 'error'); }
+        })
+        .catch(function () { btn.disabled = false; btn.textContent = '✗'; });
+    };
+    // Tocar el mensaje (no el nombre) lo deja leer sin pasar el ratón.
+    body.onclick = function (e) { if (!e.target.closest('.name')) el.classList.toggle('reveal'); };
+  }
+  function unmuteUser(p, uid) {
+    Array.prototype.forEach.call(list.querySelectorAll('.msg.muted[data-uid="' + p + ':' + uid + '"]'), function (e) {
+      e.classList.remove('muted', 'reveal');
+      var b = e.querySelector('.tbadge'); if (b) b.remove();
+    });
+  }
+
+  // Chat compartido de Twitch: arriba, con qué canales (los que han escrito en los últimos 15 min).
+  var sharedSeen = {}, sharedEl = document.getElementById('shared');
+  function noteShared(m) {
+    if (!m.src) return;
+    sharedSeen[m.src] = Date.now();
+    renderShared();
+  }
+  function renderShared() {
+    var now = Date.now(), names = Object.keys(sharedSeen).filter(function (k) { return now - sharedSeen[k] < 15 * 60 * 1000; });
+    sharedEl.classList.toggle('on', names.length > 0);
+    sharedEl.textContent = names.length ? '🔗 ' + T('Chat compartido con') + ' ' + names.join(', ') : '';
+  }
+  setInterval(renderShared, 60000);
 
   var states = {}, viewers = {};
   // Ver u ocultar espectadores: cada persona lo elige pulsando (se recuerda en su navegador o panel de OBS).
@@ -1070,6 +1144,18 @@
   list.addEventListener('pointercancel', function () { swipeEnd(false); });
   list.addEventListener('lostpointercapture', function (e) { if (swipe && e.pointerId === swipe.id) swipeEnd(false); });
 
+  // Enlaces: se abren en tu navegador predeterminado (desde el panel de OBS se abrirían en una ventanita de OBS).
+  // Lo abre Vortexs Live; si no contesta, el navegador de siempre.
+  list.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a.lnk');
+    if (!a) return;
+    e.preventDefault(); e.stopPropagation();
+    var url = a.href;
+    if (SECRET.indexOf('__') === 0) { window.open(url, '_blank', 'noopener'); return; }
+    fetch('/api/abrir', { method: 'POST', headers: { 'X-SD-Secret': SECRET, 'Content-Type': 'application/json' }, body: JSON.stringify({ url: url }) })
+      .then(function (r) { if (!r.ok) throw 0; a.classList.add('opened'); })
+      .catch(function () { window.open(url, '_blank', 'noopener'); });
+  }, true);
   list.addEventListener('click', function (e) {
     if (swallowClick) { swallowClick = false; return; }   // acababa de arrastrar el nombre
     if (document.body.classList.contains('overlay') || document.body.classList.contains('nomod')) return;

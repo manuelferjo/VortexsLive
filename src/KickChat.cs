@@ -145,7 +145,11 @@ namespace StreamDelay
                 case "pusher:error": hub.SetState("kick", "error: " + J.S(data, "message")); break;
                 case @"App\Events\ChatMessageEvent": Message(data); break;
                 case @"App\Events\MessageDeletedEvent": hub.Emit(new ChatItem { t = "del", p = "kick", id = J.S(data, "message", "id") }); break;
-                case @"App\Events\UserBannedEvent": hub.Emit(new ChatItem { t = "del", p = "kick", uid = J.S(data, "user", "id") }); break;
+                case @"App\Events\UserBannedEvent":
+                    // Con fecha de fin es una expulsión temporal; sin ella, ban.
+                    string until = J.S(data, "expires_at");
+                    hub.Emit(new ChatItem { t = "del", p = "kick", uid = J.S(data, "user", "id"), kind = until.Length > 0 ? "timeout" : "ban" });
+                    break;
                 case @"App\Events\SubscriptionEvent":
                     {
                         string u = J.S(data, "username"); long months = J.N(data, 1, "months");

@@ -77,7 +77,7 @@
  > @login=x;target-msg-id=abc-123 :tmi.twitch.tv CLEARMSG #cana
   item {amount=null bd=null color=null data=null id="abc-123" kind=null p="twitch" parts=null roles=null src=null srci=null t="del" text=null uid=null user=null}
  > @target-user-id=999 :tmi.twitch.tv CLEARCHAT #canal :baneado
-  item {amount=null bd=null color=null data=null id=null kind=null p="twitch" parts=null roles=null src=null srci=null t="del" text=null uid="999" user=null}
+  item {amount=null bd=null color=null data=null id=null kind="ban" p="twitch" parts=null roles=null src=null srci=null t="del" text=null uid="999" user=null}
  > :tmi.twitch.tv CLEARCHAT #canal
  > @msg-id=msg_channel_suspended :tmi.twitch.tv NOTICE #canal :
   log: Chat de Twitch: error: canal suspendido o inexistente.
@@ -92,7 +92,7 @@
  > {"event":"App\\Events\\MessageDeletedEvent","data":{"message
   item {amount=null bd=null color=null data=null id="m1" kind=null p="kick" parts=null roles=null src=null srci=null t="del" text=null uid=null user=null}
  > {"event":"App\\Events\\UserBannedEvent","data":{"user":{"id"
-  item {amount=null bd=null color=null data=null id=null kind=null p="kick" parts=null roles=null src=null srci=null t="del" text=null uid="7" user=null}
+  item {amount=null bd=null color=null data=null id=null kind="ban" p="kick" parts=null roles=null src=null srci=null t="del" text=null uid="7" user=null}
  > {"event":"App\\Events\\SubscriptionEvent","data":{"username"
   item {amount=null bd=null color=null data=null id=null kind="sub" p="kick" parts=null roles=null src=null srci=null t="ev" text="sub1 se ha suscrito" uid=null user="sub1"}
  > {"event":"App\\Events\\SubscriptionEvent","data":{"username"

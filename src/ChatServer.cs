@@ -68,6 +68,9 @@ namespace StreamDelay
 		// Imagen o GIF elegido para un tipo de alerta (/imagen/follow…): ruta del archivo o null.
 		public Func<string, string> OnImage = (string kind) => null;
 
+		// Abrir un enlace del chat en el navegador predeterminado (desde el panel de OBS o el chat).
+		public Action<string> OnOpenLink = delegate { };
+
 		// Mando a distancia (móvil, Stream Deck, panel de OBS): acción + parámetros -> JSON de estado.
 		// Exige la clave del mando (?k=...) en cada petición.
 		public Func<string, Dictionary<string, string>, string> OnRemote = (string a, Dictionary<string, string> q) => "{}";
@@ -621,6 +624,19 @@ namespace StreamDelay
 				}
 				else
 				{
+					if (p == "/api/abrir" && req.Method == "POST")
+					{
+						// Solo http(s): nada de file:, javascript: ni programas.
+						string link = J.S(Web.Parse(req.Body), "url").Trim();
+						Uri uri;
+						bool okLink = link.Length < 2000 && Uri.TryCreate(link, UriKind.Absolute, out uri) && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
+						if (okLink)
+						{
+							OnOpenLink(link);
+						}
+						Respond(s, okLink ? "200 OK" : "400 Bad Request", "application/json; charset=utf-8", okLink ? "{\"ok\":true}" : "{\"ok\":false}");
+						return;
+					}
 					if (p == "/api/mod" && req.Method == "POST")
 					{
 						Dictionary<string, object> md = Web.Parse(req.Body) as Dictionary<string, object>;
