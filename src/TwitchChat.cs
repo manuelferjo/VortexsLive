@@ -183,7 +183,9 @@ namespace StreamDelay
                 case "CLEARMSG": hub.Emit(new ChatItem { t = "del", p = "twitch", id = Tag(m, "target-msg-id") }); break;
                 case "CLEARCHAT":
                     string target = Tag(m, "target-user-id");
-                    if (target.Length > 0) hub.Emit(new ChatItem { t = "del", p = "twitch", uid = target });
+                    // ban-duration = expulsión temporal (segundos); sin él, ban. El chat los deja borrosos.
+                    string dur = Tag(m, "ban-duration");
+                    if (target.Length > 0) hub.Emit(new ChatItem { t = "del", p = "twitch", uid = target, kind = dur.Length > 0 ? "timeout" : "ban", amount = dur.Length > 0 ? dur : null });
                     break;
             }
         }

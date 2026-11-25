@@ -246,6 +246,7 @@ namespace StreamDelay
 					chatServer.OnWidgets = WidgetsJson;
 					chatServer.OnSound = AlertSoundFile;
 					chatServer.OnImage = AlertImageFile;
+					chatServer.OnOpenLink = OpenLinkFromChat;
 					chatServer.OnDelayState = DelayStateJson;
 					chatServer.OnViewersState = ViewersStateJson;
 					WireServer();
@@ -279,6 +280,7 @@ namespace StreamDelay
 					chatServer.OnWidgets = WidgetsJson;
 					chatServer.OnSound = AlertSoundFile;
 					chatServer.OnImage = AlertImageFile;
+					chatServer.OnOpenLink = OpenLinkFromChat;
 					chatServer.OnDelayState = DelayStateJson;
 					chatServer.OnViewersState = ViewersStateJson;
 					WireServer();
@@ -888,6 +890,19 @@ namespace StreamDelay
 				SaveChatStyleConfig(lines);
 				SaveRemoteConfig(lines);
 				SaveUpdateConfig(lines);
+			}
+		}
+
+		// Un enlace pulsado en el chat (panel de OBS o navegador) se abre en el navegador predeterminado.
+		private void OpenLinkFromChat(string url)
+		{
+			try
+			{
+				System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(url) { UseShellExecute = true });
+			}
+			catch (Exception ex)
+			{
+				LogLater("No se pudo abrir el enlace (" + ex.Message + ").");
 			}
 		}
 	}
