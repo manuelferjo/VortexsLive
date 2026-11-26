@@ -57,20 +57,32 @@ namespace StreamDelay
 				sb.Append(w);
 			}
 			t = sb.ToString();
-			string[] seps = new string[11] { " | ", "|", " // ", " - ", " — ", " – ", " • ", " · ", "║", " ~ ", " ❘ " };
-			int cut = -1;
-			foreach (string sep in seps)
+			// Trozos entre separadores ( | - // • · ║ ~ ): el primero que tenga texto de verdad
+			// ("🇪🇸 |🔴SOLOQ CHALLENGE…|🏆…" → "SOLOQ CHALLENGE…").
+			string marked = t;
+			foreach (string sep in new string[11] { "|", "║", "❘", "//", " - ", " — ", " – ", " • ", " · ", " ~ ", "｜" })
 			{
-				int i = t.IndexOf(sep, StringComparison.Ordinal);
-				if (i >= 8 && (cut < 0 || i < cut))
+				marked = marked.Replace(sep, "\u0001");
+			}
+			string best = null;
+			foreach (string part in marked.Split('\u0001'))
+			{
+				string clean = CleanEdges(part);
+				int letters = 0;
+				foreach (char ch in clean)
 				{
-					cut = i;
+					if (char.IsLetter(ch))
+					{
+						letters++;
+					}
+				}
+				if (letters >= 4)
+				{
+					best = clean;
+					break;
 				}
 			}
-			if (cut > 0)
-			{
-				t = t.Substring(0, cut);
-			}
+			t = best ?? CleanEdges(t);
 			t = t.Trim(' ', '-', '|', '/', '•', '·', ',', ';', ':');
 			if (t.Length > max)
 			{
@@ -87,6 +99,23 @@ namespace StreamDelay
 				t = t.Substring(0, len).TrimEnd(' ', ',', ';', ':', '.', '-', '|') + "…";
 			}
 			return t;
+		}
+
+		// Quita emojis, símbolos y espacios de los bordes (deja ¡ ¿ al principio y ! ? . ) al final).
+		private static string CleanEdges(string s)
+		{
+			s = (s ?? "").Trim();
+			int i = 0;
+			while (i < s.Length && !char.IsLetterOrDigit(s[i]) && s[i] != '¡' && s[i] != '¿' && s[i] != '"' && s[i] != '(')
+			{
+				i++;
+			}
+			int j = s.Length;
+			while (j > i && !char.IsLetterOrDigit(s[j - 1]) && s[j - 1] != '!' && s[j - 1] != '?' && s[j - 1] != '.' && s[j - 1] != ')' && s[j - 1] != '"')
+			{
+				j--;
+			}
+			return s.Substring(i, j - i).Trim();
 		}
 
 		// Plantilla con {titulo}, {titulo_completo}, {enlace}, {categoria} y \n para saltar de línea.
@@ -564,6 +593,10 @@ namespace StreamDelay
 				Thread.Sleep(800);
 				if (dryRun)
 				{
+					// X apaga el post que no se está editando: se vuelve al primero (el del título).
+					b.Click(Box0);
+					b.Call("Input.dispatchKeyEvent", XpBrowser.P("type", "keyDown", "key", "End", "code", "End", "windowsVirtualKeyCode", 35, "nativeVirtualKeyCode", 35), 10000);
+					b.Call("Input.dispatchKeyEvent", XpBrowser.P("type", "keyUp", "key", "End", "code", "End", "windowsVirtualKeyCode", 35, "nativeVirtualKeyCode", 35), 10000);
 					// Prueba: captura de la ventana de escribir y se cierra sin publicar (no queda borrador).
 					status("Prueba: haciendo la captura sin publicar…");
 					Thread.Sleep(1000);
@@ -629,6 +662,19 @@ namespace StreamDelay
 				res.Png = b.ShotElement("(function(){var L=document.getElementById('layers');if(L)L.style.display='none';var a=document.querySelector('article[data-testid=\"tweet\"]');if(!a)return null;var r=a.getBoundingClientRect();window.scrollBy(0,r.top-70);r=a.getBoundingClientRect();return [r.left,r.top,r.width,Math.min(r.height,window.innerHeight-r.top)];})()");
 			}
 			return res;
+		}
+
+		// Título del directo leído de la página pública de Twitch (sin conectar la cuenta).
+		public static string TwitchTitle(string channel)
+		{
+			using (XpBrowser b = new XpBrowser())
+			{
+				b.Start();
+				b.Go("https://www.twitch.tv/" + Uri.EscapeDataString(channel));
+				string js = "(function(){var m=document.querySelector('meta[property=\"og:description\"]')||document.querySelector('meta[name=\"description\"]');return m?(m.getAttribute('content')||''):'';})()";
+				b.WaitFor(js + ".length>0", 15000);
+				return ((b.Eval(js) as string) ?? "").Trim();
+			}
 		}
 
 		private static string FirstLine(string s)
@@ -1387,6 +1433,17 @@ namespace StreamDelay
 						{
 							cat = c.Name;
 						}
+					}
+					catch
+					{
+					}
+				}
+				if (title.Length == 0)
+				{
+					xpStatus = "Leyendo el título en tu página de Twitch…";
+					try
+					{
+						title = XpPoster.TwitchTitle(channel);
 					}
 					catch
 					{
