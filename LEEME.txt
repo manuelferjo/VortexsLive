@@ -1,7 +1,19 @@
-VORTEXS LIVE 4.25 - delay dinámico y multistream para OBS (by Vortexs)
+VORTEXS LIVE 4.26 - delay dinámico y multistream para OBS (by Vortexs)
 =====================================================================
 
 Abre GUIA.html (doble clic) para ver la guía completa.
+
+Novedades de la 4.26
+- Anunciar el directo (Ajustes → Anuncio), plan Completo: al empezar en Twitch
+  publica en X un post con el principio de tu título y, en el mismo
+  hilo (el "+"), tu enlace de Twitch. Después hace una captura del post
+  y prepara dos historias: la de TikTok con "Twitch: tu canal" encima y
+  la de Instagram con sitio para el widget de enlace. Te las manda al
+  móvil por Telegram (con el enlace listo para copiar) y las guarda en
+  Imágenes\Vortexs Live\Anuncios. No usa la API de pago de X: inicias
+  sesión una vez en un Chrome propio de Vortexs Live. Con "Prueba sin
+  publicar" lo ves todo sin estar en directo y sin publicar nada. Ver GUIA.html,
+  apartado 12.
 
 Novedades de la 4.25
 - Instalador: VortexsLive-Instalar.exe pone Vortexs Live en tu usuario
@@ -11,8 +23,10 @@ Novedades de la 4.25
   (tus ajustes y clips se quedan). El ZIP sigue disponible.
 - Las actualizaciones se instalan solas: se descargan en segundo plano
   (nunca en directo) y se usan la próxima vez que abras el programa, o
-  al momento con "Reiniciar ahora". Se puede quitar en Ajustes →
-  Opciones.
+  al momento con "Reiniciar ahora". Se puede quitar en Ajustes →
+
+  Opciones.
+
 - Más seguro: si una versión nueva falla al abrir, Vortexs Live vuelve
   solo a la anterior y no la vuelve a instalar. Y cada versión se
   comprueba en GitHub abriéndola antes de publicarse.

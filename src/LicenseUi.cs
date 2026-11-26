@@ -772,6 +772,12 @@ namespace StreamDelay
 			return plan == Plan.Full;
 		}
 
+		// Anunciar el directo (Ajustes → Anuncio): plan Completo (también en la prueba).
+		private bool AnnounceAllowed()
+		{
+			return plan == Plan.Full;
+		}
+
 		// Para Iniciar hace falta algún plan (prueba, Básico o Completo).
 		private bool CanStream()
 		{
@@ -864,7 +870,7 @@ namespace StreamDelay
 			};
 			Place(f, plans, 20f, 116f, 420f, 220f);
 			PlanRow(plans, 54f, "Básico", License.PriceBasic, "Delay dinámico, multistream (Twitch, Kick, YouTube, TikTok y otros a la vez), avisos del delay en el chat y título y categoría.", License.BuyBasicUrl, plan == Plan.Basic && planInfo.Source != "prueba");
-			PlanRow(plans, 134f, "Completo", License.PriceFull, "Todo: además, clips de los últimos 60 s, chat conjunto con moderación, overlays y Mando (móvil y Stream Deck).", License.BuyFullUrl, plan == Plan.Full && planInfo.Source != "prueba");
+			PlanRow(plans, 134f, "Completo", License.PriceFull, "Todo: además, clips de los últimos 60 s, chat conjunto con moderación, overlays, Mando (móvil y Stream Deck) y anunciar el directo en X con historias.", License.BuyFullUrl, plan == Plan.Full && planInfo.Source != "prueba");
 
 			Card act = new Card
 			{

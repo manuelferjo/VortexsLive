@@ -801,7 +801,7 @@ namespace StreamDelay
 		private int setPick;
 
 		// Subpestañas (fila de arriba): Directo = Emisión · Título y categoría; Ajustes = Destinos · OBS ·
-		// Opciones · Registro. Las demás páginas llevan ahí una línea que explica para qué sirven.
+		// Opciones · Anuncio · Registro. Las demás páginas llevan ahí una línea que explica para qué sirven.
 		private VButton[] livePickBtns = new VButton[0];
 
 		private void PlaceOn(Control c, float x, float y, float w, float h, int pageA, int pageB)
@@ -824,16 +824,16 @@ namespace StreamDelay
 					GoPage(target);
 				};
 			}
-			string[] names = new string[4] { "Destinos", "OBS", "Opciones", "Registro" };
-			setPickBtns = new VButton[4];
-			for (int i = 0; i < 4; i++)
+			string[] names = new string[5] { "Destinos", "OBS", "Opciones", "Anuncio", "Registro" };
+			setPickBtns = new VButton[5];
+			for (int i = 0; i < 5; i++)
 			{
 				int idx = i;
 				setPickBtns[i] = new VButton { Kind = ButtonKind.Pill, Text = names[i], Selected = i == 0, FontSize = 8.5f };
-				PlaceOn(setPickBtns[i], 20f + (float)i * 106.5f, SubRowTop, 100.5f, 28f, PageSettings, PageLog);
+				PlaceOn(setPickBtns[i], 20f + (float)i * 85f, SubRowTop, 80f, 28f, PageSettings, PageLog);
 				setPickBtns[i].Click += delegate
 				{
-					if (idx == 3)
+					if (idx == 4)
 					{
 						GoPage(PageLog);
 						return;
@@ -906,7 +906,7 @@ namespace StreamDelay
 			}
 			for (int i = 0; i < setPickBtns.Length; i++)
 			{
-				setPickBtns[i].Selected = (i == 3) ? (setSub == PageLog) : (setSub == PageSettings && i == setPick);
+				setPickBtns[i].Selected = (i == 4) ? (setSub == PageLog) : (setSub == PageSettings && i == setPick);
 				setPickBtns[i].Invalidate();
 			}
 		}
