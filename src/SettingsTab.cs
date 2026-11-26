@@ -94,7 +94,7 @@ namespace StreamDelay
 			// Recuadro de opciones.
 			Card optionsCard = new Card();
 			Place(this, optionsCard, 20f, y0, 420f, 134f, PageSettings);
-			setCards = new Card[3] { destCard, obsCard, optionsCard };
+			setCards = new Card[4] { destCard, obsCard, optionsCard, BuildAnnounce(y0) };
 			tgReplay = new Toggle
 			{
 				Text = "Al subir el delay, repetir lo último (si no, se congela)"

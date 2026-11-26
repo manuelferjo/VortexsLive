@@ -479,6 +479,33 @@
     </ul>
   </section>
 
+  <section id="anuncio">
+    <h2><span class="n">12</span>Anunciar el directo en X, TikTok e Instagram <span class="tag">NUEVO EN 4.26</span></h2>
+    <p>Al empezar a emitir en Twitch, Vortexs Live publica solo en X un post con el principio de tu título y, en el mismo hilo (el botón <b>+</b> de X), tu enlace de Twitch. Luego hace una captura de ese post y prepara dos historias: la de <b>TikTok</b> con <b>“Twitch: tu canal”</b> encima de la captura y la de <b>Instagram</b> con sitio abajo para el widget de enlace. Es <b>gratis</b>: no usa la API de pago de X, sino un Chrome propio, oculto, en el que inicias sesión una vez (si no tienes Chrome, usa Edge).</p>
+    <h3 style="margin:16px 0 8px">Prepararlo (una sola vez)</h3>
+    <ol>
+      <li><b>Ajustes → Anuncio</b> → pulsa <b>Iniciar sesión en X</b>. Se abre una ventana de Chrome solo para Vortexs Live: entra con tu cuenta de X y <b>cierra la ventana</b>. Tu Chrome de siempre (con tus pestañas y cuentas) no se toca.</li>
+      <li>Revisa los textos. En el <b>post</b>, <code>{titulo}</code> es el principio del título (sin los <code>!comandos</code> ni lo que va después de <code>|</code>, <code>-</code>, <code>//</code>…). En la <b>respuesta del hilo</b>, <code>{enlace}</code> es tu enlace de Twitch. También puedes usar <code>{titulo_completo}</code>, <code>{categoria}</code> y <code>\n</code> para saltar de línea.</li>
+      <li><b>Canal de Twitch</b>: si lo dejas vacío, usa el del chat o el de la cuenta conectada. <b>Texto historia TikTok</b>: vacío pone “Twitch: tu canal”.</li>
+      <li><b>Para recibirlo en el móvil (gratis, con Telegram):</b> en Telegram abre <b>@BotFather</b>, escribe <code>/newbot</code>, ponle un nombre y copia el <b>token</b> que te da. Pégalo en Ajustes → Anuncio, abre tu bot en Telegram y escríbele “hola”, y pulsa <b>Detectar chat</b>. Te llegará un mensaje de prueba.</li>
+      <li>Activa <b>Al empezar en Twitch: publicar en X y preparar historias</b>. <b>Prueba sin publicar</b> lo hace todo sin estar en directo (lee el título, lo escribe en X, hace la captura y te manda las historias) pero <b>no pulsa Postear</b>: no se publica nada. <b>Publicar ya</b> lo hace de verdad.</li>
+    </ol>
+    <h3 style="margin:16px 0 8px">En cada directo</h3>
+    <ol>
+      <li>Unos 20 segundos después de que Twitch esté en directo, sale el post en X con la respuesta del enlace.</li>
+      <li>Te llegan a Telegram las dos historias y el enlace de Twitch (tócalo y se copia).</li>
+      <li><b>TikTok:</b> guarda la imagen y súbela a tu historia.</li>
+      <li><b>Instagram:</b> sube la imagen a tu historia, toca <b>stickers → Enlace</b>, pega el enlace y colócalo debajo de la captura.</li>
+    </ol>
+    <ul>
+      <li>Las historias tienen que subirse a mano: ni Instagram deja poner el widget de enlace desde otro programa ni TikTok deja subir historias. Vortexs Live te lo deja todo listo para que sean unos segundos.</li>
+      <li>Todo se guarda también en <b>Imágenes\Vortexs Live\Anuncios</b> (una carpeta por directo, con la captura y las dos historias). Botón <b>Abrir carpeta de anuncios</b>.</li>
+      <li>Si el directo se corta y vuelve en menos de 20 minutos, no se anuncia otra vez.</li>
+      <li>Si algo falla (por ejemplo, X te pide volver a iniciar sesión), lo verás en Ajustes → Anuncio, en el Registro y en Telegram. Vuelve a pulsar <b>Iniciar sesión en X</b>.</li>
+      <li>Necesita Google Chrome o, si no lo tienes, Microsoft Edge (viene con Windows). Si cambia la web de X puede dejar de funcionar hasta la siguiente actualización.</li>
+    </ul>
+  </section>
+
   <section>
     <h2>Si algo falla</h2>
     <table>
