@@ -407,6 +407,7 @@ namespace StreamDelay
 
 		public MainForm()
 		{
+			Crash.Version = Version;
 			Text = "Vortexs Live " + Version;
 			Font = Theme.Body(9f);
 			BackColor = Theme.Bg;
@@ -514,6 +515,28 @@ namespace StreamDelay
 				Shown += delegate
 				{
 					StartCaptures();
+				};
+			}
+			if (Program.FailOnPurpose)
+			{
+				Shown += delegate
+				{
+					throw new InvalidOperationException("Fallo de prueba (--fallo-de-prueba)");
+				};
+			}
+			if (Program.SelfTest)
+			{
+				// Autoprueba: si a los 5 s de abrir no ha habido ningún error, todo bien.
+				Shown += delegate
+				{
+					System.Windows.Forms.Timer ok = new System.Windows.Forms.Timer { Interval = 5000 };
+					ok.Tick += delegate
+					{
+						ok.Stop();
+						Console.WriteLine("Vortexs Live " + Version + " abre bien.");
+						Environment.Exit(0);
+					};
+					ok.Start();
 				};
 			}
 			timer = new System.Windows.Forms.Timer

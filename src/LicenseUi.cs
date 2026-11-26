@@ -362,7 +362,7 @@ namespace StreamDelay
 		// se acaba sola) y cada 6 horas se vuelve a comprobar la suscripción de Polar.
 		private void LicenseTick()
 		{
-			if (Program.CaptureDir != null)
+			if (Program.Headless)
 			{
 				return;
 			}

@@ -44,6 +44,36 @@ jobs:
           if (-not (Test-Path VortexsLive.exe)) { throw "No se ha creado VortexsLive.exe (mira el paso anterior)" }
           "VortexsLive.exe: $([math]::Round((Get-Item VortexsLive.exe).Length / 1KB)) KB"
 
+      # Obligatoria: con las actualizaciones automáticas, una versión que no abre llegaría a todos.
+      - name: Comprobar que el programa abre
+        shell: pwsh
+        run: |
+          $p = Start-Process .\VortexsLive.exe -ArgumentList "--autoprueba" -PassThru -RedirectStandardError autoprueba-error.txt -RedirectStandardOutput autoprueba.txt
+          if (-not $p.WaitForExit(60000)) { $p.Kill(); throw "VortexsLive.exe no terminó la autoprueba en 60 s" }
+          Get-Content autoprueba.txt, autoprueba-error.txt -ErrorAction SilentlyContinue
+          if ($p.ExitCode -ne 0) { throw "VortexsLive.exe falla al abrir (código $($p.ExitCode)): esta versión no se puede publicar" }
+
+      # Si una versión recién actualizada falla al abrir, vuelve sola a la anterior (.old).
+      - name: Probar la vuelta a la versión anterior
+        shell: pwsh
+        run: |
+          $d = "prueba-vuelta"; New-Item -ItemType Directory -Force $d | Out-Null
+          Copy-Item VortexsLive.exe "$d\VortexsLive.exe"
+          Copy-Item VortexsLive.exe "$d\VortexsLive.exe.old"
+          "anterior" | Set-Content "$d\marca-anterior.txt"
+          (Get-Item "$d\VortexsLive.exe.old").LastWriteTime = (Get-Date).AddDays(-1)
+          $p = Start-Process "$d\VortexsLive.exe" -ArgumentList "--fallo-de-prueba" -PassThru
+          if (-not $p.WaitForExit(60000)) { $p.Kill(); throw "La versión que falla no se cerró" }
+          Start-Sleep 4
+          Get-Process VortexsLive -ErrorAction SilentlyContinue | Stop-Process -Force
+          if ($p.ExitCode -ne 2) { throw "Al fallar al abrir debería volver a la anterior (código 2), pero salió con $($p.ExitCode)" }
+          if (-not (Test-Path "$d\VortexsLive.exe.fallida")) { throw "No se apartó la versión que falla (.fallida)" }
+          if (Test-Path "$d\VortexsLive.exe.old") { throw "La versión anterior no volvió a su sitio" }
+          if (-not (Test-Path "$d\VortexsLive.exe")) { throw "Falta VortexsLive.exe tras volver atrás" }
+          $inf = Get-ChildItem "$env:APPDATA\VortexsLive\errores\error-*.txt" | Sort-Object LastWriteTime | Select-Object -Last 1
+          if (-not $inf -or -not (Select-String -Path $inf.FullName -Pattern "Fallo de prueba" -Quiet)) { throw "No se guardó el informe del error" }
+          "Vuelta atrás probada: la versión que falla queda como .fallida, vuelve la anterior y hay informe ($($inf.Name))."
+
       - name: Pruebas del chat
         shell: pwsh
         run: |
