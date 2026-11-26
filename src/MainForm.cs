@@ -10,6 +10,7 @@
 //   Remote.cs       pestaña Mando (móvil, Stream Deck, panel de OBS)
 //   TitleTab.cs     Directo → Título y categoría (título y categoría, conectar plataformas)
 //   SettingsTab.cs  pestaña Ajustes (destinos, OBS y opciones)
+//   Novedades.cs    ventana de novedades al abrir una versión nueva
 //   XAnnounce.cs    Ajustes → Anuncio (post en X al empezar, captura e historias para TikTok e Instagram)
 //   Updater.cs      actualización automática
 //   LicenseUi.cs    plan (prueba, Básico, Completo), ventana Licencia y pestañas de pago
@@ -129,7 +130,7 @@ namespace StreamDelay
 
 		// ---------- Constantes ----------
 
-		private const string Version = "4.29";
+		private const string Version = "4.30";
 
 		private const string TikTokName = "TikTok";
 
@@ -555,6 +556,7 @@ namespace StreamDelay
 				UiSlowTick();
 				WizRefresh();
 				XpTick();
+				NewsTick();
 			};
 			timer.Start();
 			RefreshStatus();
@@ -1326,6 +1328,7 @@ namespace StreamDelay
 			LoadTitleConfig(raw);
 			LoadChatConfig(raw);
 			LoadXpConfig(raw);
+			LoadNewsConfig(raw);
 			loading = false;
 		}
 
@@ -1353,6 +1356,7 @@ namespace StreamDelay
 				SaveChatConfig(lines);
 				SaveLicenseConfig(lines);
 				SaveXpConfig(lines);
+				SaveNewsConfig(lines);
 				File.WriteAllLines(configPath, lines.ToArray());
 			}
 			catch

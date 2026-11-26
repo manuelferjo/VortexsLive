@@ -600,7 +600,8 @@ namespace StreamDelay
 					// Prueba: captura de la ventana de escribir y se cierra sin publicar (no queda borrador).
 					status("Prueba: haciendo la captura sin publicar…");
 					Thread.Sleep(1000);
-					res.Png = b.ShotElement("(function(){var m=document.querySelector('[aria-modal=\"true\"]');var R=m||document;var a=R.querySelector('[data-testid=\"tweetTextarea_0\"]');if(!a)return null;var c=R.querySelector('[data-testid=\"tweetTextarea_1\"]');var e=a;while(e.parentElement&&e.parentElement!==m&&(e.getBoundingClientRect().width<560||(c&&!e.contains(c)))){e=e.parentElement;}e.scrollIntoView({block:'center'});var r=e.getBoundingClientRect();return [r.left,r.top,r.width,Math.min(r.height,window.innerHeight-r.top)];})()");
+					// Solo el primer post (el del título): el mayor bloque que lo contiene sin llegar al segundo.
+					res.Png = b.ShotElement("(function(){var m=document.querySelector('[aria-modal=\"true\"]');var R=m||document;var a=R.querySelector('[data-testid=\"tweetTextarea_0\"]');if(!a)return null;var c=R.querySelector('[data-testid=\"tweetTextarea_1\"]');var e=a;if(c){while(e.parentElement&&e.parentElement!==m&&!e.parentElement.contains(c)){e=e.parentElement;}}else{while(e.parentElement&&e.parentElement!==m&&e.getBoundingClientRect().width<560){e=e.parentElement;}}e.scrollIntoView({block:'center'});var r=e.getBoundingClientRect();return [r.left,r.top,r.width,Math.min(r.height,window.innerHeight-r.top)];})()");
 					res.Url = "(prueba: no se ha publicado)";
 					return res;
 				}
@@ -664,16 +665,35 @@ namespace StreamDelay
 			return res;
 		}
 
-		// Título del directo leído de la página pública de Twitch (sin conectar la cuenta).
+		// Título del directo sin conectar la cuenta: primero la API pública que usa la web de Twitch;
+		// si falla, el título que sale en la página del canal.
 		public static string TwitchTitle(string channel)
 		{
+			string login = (channel ?? "").Trim().ToLowerInvariant();
+			try
+			{
+				Dictionary<string, string> h = new Dictionary<string, string>();
+				h.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
+				string q = "{\"query\":\"query{user(login:\\\"" + login.Replace("\"", "").Replace("\\", "") + "\\\"){broadcastSettings{title}}}\"}";
+				Dictionary<string, object> d = Http.Send("POST", "https://gql.twitch.tv/gql", null, h, "application/json", q);
+				string t = J.S(d, "data", "user", "broadcastSettings", "title").Trim();
+				if (t.Length > 0)
+				{
+					return t;
+				}
+			}
+			catch
+			{
+			}
 			using (XpBrowser b = new XpBrowser())
 			{
 				b.Start();
-				b.Go("https://www.twitch.tv/" + Uri.EscapeDataString(channel));
-				string js = "(function(){var m=document.querySelector('meta[property=\"og:description\"]')||document.querySelector('meta[name=\"description\"]');return m?(m.getAttribute('content')||''):'';})()";
+				b.Go("https://www.twitch.tv/" + Uri.EscapeDataString(login));
+				string js = "(function(){var e=document.querySelector('[data-a-target=\"stream-title\"]');return e?(e.getAttribute('title')||e.textContent||''):'';})()";
 				b.WaitFor(js + ".length>0", 15000);
-				return ((b.Eval(js) as string) ?? "").Trim();
+				string t = ((b.Eval(js) as string) ?? "").Trim();
+				// La descripción genérica de Twitch no vale como título.
+				return t.StartsWith("Twitch is", StringComparison.OrdinalIgnoreCase) ? "" : t;
 			}
 		}
 

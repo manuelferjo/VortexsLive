@@ -131,6 +131,7 @@ jobs:
           $v = (Select-String -Path src\MainForm.cs -Pattern 'const string Version = "([^"]+)"').Matches[0].Groups[1].Value
           if ("v$v" -ne $env:ETIQUETA) { throw "La etiqueta es $env:ETIQUETA pero src\MainForm.cs dice Version = $v. Cámbialo para que coincidan." }
           "Versión $v = etiqueta $env:ETIQUETA"
+          if (-not (Select-String -Path src\Novedades.cs -SimpleMatch -Pattern "{ `"$v`"," -Quiet)) { throw "Falta la entrada de la $v en src\Novedades.cs (ReleaseNews): es lo que ve el usuario al actualizar." }
 
       # Firma digital: Windows (SmartScreen) muestra "Vortexs" como editor en vez de "desconocido".
       # Solo al publicar una versión (cada firma cuenta en el plan de eSigner) y si hay secretos.
