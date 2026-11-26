@@ -411,6 +411,44 @@ namespace StreamDelay
 			return false;
 		}
 
+		// Captura lo que se ve y recorta el elemento. rectJs devuelve [x, y, ancho, alto] en
+		// coordenadas de la ventana (getBoundingClientRect), después de colocar la página.
+		public byte[] ShotElement(string rectJs)
+		{
+			if (J.L(Eval(rectJs)).Count < 4)
+			{
+				throw new Exception("no se encontró el post para la captura");
+			}
+			Thread.Sleep(700);
+			List<object> v = J.L(Eval(rectJs));
+			if (v.Count < 4)
+			{
+				throw new Exception("no se encontró el post para la captura");
+			}
+			double vw = Convert.ToDouble(Eval("window.innerWidth"));
+			byte[] full = Convert.FromBase64String(J.S(Call("Page.captureScreenshot", P("format", "png"), 60000), "data"));
+			using (MemoryStream ms = new MemoryStream(full))
+			using (Bitmap src = new Bitmap(ms))
+			{
+				double k = (vw > 0) ? (src.Width / vw) : 2.0;
+				int x = (int)Math.Floor(Convert.ToDouble(v[0]) * k);
+				int y = (int)Math.Floor(Convert.ToDouble(v[1]) * k);
+				int w = (int)Math.Ceiling(Convert.ToDouble(v[2]) * k);
+				int h = (int)Math.Ceiling(Convert.ToDouble(v[3]) * k);
+				Rectangle r = Rectangle.Intersect(new Rectangle(x, y, w, h), new Rectangle(0, 0, src.Width, src.Height));
+				if (r.Width < 50 || r.Height < 50)
+				{
+					throw new Exception("la captura del post ha salido vacía");
+				}
+				using (Bitmap crop = src.Clone(r, src.PixelFormat))
+				using (MemoryStream o = new MemoryStream())
+				{
+					crop.Save(o, ImageFormat.Png);
+					return o.ToArray();
+				}
+			}
+		}
+
 		// Captura de la zona (en píxeles de la página) como PNG.
 		public byte[] Shot(double x, double y, double w, double h)
 		{
@@ -529,13 +567,7 @@ namespace StreamDelay
 					// Prueba: captura de la ventana de escribir y se cierra sin publicar (no queda borrador).
 					status("Prueba: haciendo la captura sin publicar…");
 					Thread.Sleep(1000);
-					object box = b.Eval("(function(){var a=document.querySelector('[role=\"dialog\"] [data-testid=\"tweetTextarea_0\"]');var d=a?a.closest('[role=\"dialog\"]'):null;if(!d)return null;var r=null;var all=d.querySelectorAll('div');for(var i=0;i<all.length;i++){var x=all[i].getBoundingClientRect();if(x.width>=400&&x.width<900&&x.height>100&&all[i].contains(a)){r=x;break;}}if(!r)r=d.getBoundingClientRect();return [r.left+window.scrollX,r.top+window.scrollY,r.width,r.height];})()");
-					List<object> bv = J.L(box);
-					if (bv.Count < 4)
-					{
-						throw new Exception("no se encontró la ventana de escribir para la captura");
-					}
-					res.Png = b.Shot(Convert.ToDouble(bv[0]), Convert.ToDouble(bv[1]), Convert.ToDouble(bv[2]), Convert.ToDouble(bv[3]));
+					res.Png = b.ShotElement("(function(){var m=document.querySelector('[aria-modal=\"true\"]');var R=m||document;var a=R.querySelector('[data-testid=\"tweetTextarea_0\"]');if(!a)return null;var c=R.querySelector('[data-testid=\"tweetTextarea_1\"]');var e=a;while(e.parentElement&&e.parentElement!==m&&(e.getBoundingClientRect().width<560||(c&&!e.contains(c)))){e=e.parentElement;}e.scrollIntoView({block:'center'});var r=e.getBoundingClientRect();return [r.left,r.top,r.width,Math.min(r.height,window.innerHeight-r.top)];})()");
 					res.Url = "(prueba: no se ha publicado)";
 					return res;
 				}
@@ -594,14 +626,7 @@ namespace StreamDelay
 					throw new Exception("no se pudo abrir el post para la captura");
 				}
 				Thread.Sleep(2000);
-				object rect = b.Eval("(function(){var L=document.getElementById('layers');if(L)L.style.display='none';var a=document.querySelector('article[data-testid=\"tweet\"]');if(!a)return null;a.scrollIntoView({block:'center'});var r=a.getBoundingClientRect();return [r.left+window.scrollX,r.top+window.scrollY,r.width,r.height];})()");
-				List<object> v = J.L(rect);
-				if (v.Count < 4)
-				{
-					throw new Exception("no se encontró el post en la página");
-				}
-				Thread.Sleep(600);
-				res.Png = b.Shot(Convert.ToDouble(v[0]), Convert.ToDouble(v[1]), Convert.ToDouble(v[2]), Convert.ToDouble(v[3]));
+				res.Png = b.ShotElement("(function(){var L=document.getElementById('layers');if(L)L.style.display='none';var a=document.querySelector('article[data-testid=\"tweet\"]');if(!a)return null;var r=a.getBoundingClientRect();window.scrollBy(0,r.top-70);r=a.getBoundingClientRect();return [r.left,r.top,r.width,Math.min(r.height,window.innerHeight-r.top)];})()");
 			}
 			return res;
 		}
