@@ -382,6 +382,23 @@ namespace StreamDelay
 			}
 		}
 
+		// Clic con el ratón en el centro del elemento (expresión JavaScript que lo devuelve).
+		public void Click(string el)
+		{
+			List<object> p = J.L(Eval("(function(){var e=" + el + ";if(!e)return null;e.scrollIntoView({block:'center'});var r=e.getBoundingClientRect();return [r.left+r.width/2,r.top+r.height/2];})()"));
+			if (p.Count < 2)
+			{
+				throw new Exception("no se encontró en X lo que había que pulsar");
+			}
+			Thread.Sleep(200);
+			double x = Convert.ToDouble(p[0]);
+			double y = Convert.ToDouble(p[1]);
+			Call("Input.dispatchMouseEvent", P("type", "mouseMoved", "x", x, "y", y), 10000);
+			Call("Input.dispatchMouseEvent", P("type", "mousePressed", "x", x, "y", y, "button", "left", "clickCount", 1), 10000);
+			Call("Input.dispatchMouseEvent", P("type", "mouseReleased", "x", x, "y", y, "button", "left", "clickCount", 1), 10000);
+			Thread.Sleep(300);
+		}
+
 		public bool HasCookie(string url, string name)
 		{
 			foreach (object c in J.L(Call("Network.getCookies", P("urls", new string[1] { url }), 10000), "cookies"))
@@ -454,9 +471,17 @@ namespace StreamDelay
 			public byte[] Png;
 		}
 
-		private const string Box0 = "document.querySelector('[data-testid=\"tweetTextarea_0\"]')";
+		// Todo dentro de la ventana de escribir (modal): detrás queda la caja de escribir del inicio,
+		// que tiene los mismos data-testid.
+		private const string Root = "(document.querySelector('[aria-modal=\"true\"] [data-testid=\"tweetTextarea_0\"]')?document.querySelector('[aria-modal=\"true\"]'):document)";
 
-		private const string Box1 = "document.querySelector('[data-testid=\"tweetTextarea_1\"]')";
+		private const string Box0 = Root + ".querySelector('[data-testid=\"tweetTextarea_0\"]')";
+
+		private const string Box1 = Root + ".querySelector('[data-testid=\"tweetTextarea_1\"]')";
+
+		private const string AddBtn = Root + ".querySelector('[data-testid=\"addButton\"]')";
+
+		private const string PostBtn = Root + ".querySelector('[data-testid=\"tweetButton\"]')";
 
 		// Publica el post y, si hay reply, lo añade al hilo con el «+». Devuelve el enlace y la captura.
 		// dryRun: lo escribe todo pero no pulsa «Postear»; la captura es la de la ventana de escribir.
@@ -478,23 +503,23 @@ namespace StreamDelay
 				}
 				string handle = (b.Eval("(function(){var a=document.querySelector('[data-testid=\"AppTabBar_Profile_Link\"]');return a?a.getAttribute('href'):'';})()") as string) ?? "";
 				status("Escribiendo el post…");
-				b.Eval("(function(){var e=" + Box0 + ";e.focus();e.click();return true;})()");
+				b.Click(Box0);
 				Thread.Sleep(400);
 				b.Type(main);
 				if (!string.IsNullOrEmpty(reply))
 				{
 					// El «+» añade otro post al hilo.
-					if (!b.WaitFor("document.querySelector('[data-testid=\"addButton\"]') && !document.querySelector('[data-testid=\"addButton\"]').disabled", 10000))
+					if (!b.WaitFor(AddBtn + " && !" + AddBtn + ".disabled && " + AddBtn + ".getAttribute('aria-disabled') !== 'true'", 10000))
 					{
 						throw new Exception("no aparece el botón + para añadir al hilo");
 					}
-					b.Eval("document.querySelector('[data-testid=\"addButton\"]').click();true");
+					b.Click(AddBtn);
 					if (!b.WaitFor(Box1, 10000))
 					{
 						throw new Exception("no se abrió el segundo post del hilo");
 					}
 					Thread.Sleep(500);
-					b.Eval("(function(){var e=" + Box1 + ";e.focus();e.click();return true;})()");
+					b.Click(Box1);
 					Thread.Sleep(400);
 					b.Type(reply);
 				}
@@ -514,13 +539,13 @@ namespace StreamDelay
 					res.Url = "(prueba: no se ha publicado)";
 					return res;
 				}
-				string btn = "document.querySelector('[data-testid=\"tweetButton\"]')";
+				string btn = PostBtn;
 				if (!b.WaitFor(btn + " && " + btn + ".getAttribute('aria-disabled') !== 'true' && !" + btn + ".disabled", 10000))
 				{
 					throw new Exception("X no deja publicar (¿texto demasiado largo?)");
 				}
 				status("Publicando…");
-				b.Eval(btn + ".click();true");
+				b.Click(btn);
 				// Tras publicar, X enseña un aviso con «Ver» que lleva al post.
 				string toast = "document.querySelector('[data-testid=\"toast\"] a[href*=\"/status/\"]')";
 				if (b.WaitFor(toast, 25000))
@@ -745,7 +770,15 @@ namespace StreamDelay
 		public static string DetectChat(string token, out string who)
 		{
 			who = "";
-			Dictionary<string, object> d = Http.Send("GET", Api(token, "getUpdates"), null, null, null, null);
+			Dictionary<string, object> d;
+			try
+			{
+				d = Http.Send("GET", Api(token, "getUpdates"), null, null, null, null);
+			}
+			catch (ApiException ex)
+			{
+				throw Explain(ex.Status, ex.Message);
+			}
 			List<Dictionary<string, object>> list = Http.Arr(d, "result");
 			for (int i = list.Count - 1; i >= 0; i--)
 			{
@@ -765,7 +798,37 @@ namespace StreamDelay
 
 		public static void Message(string token, string chat, string html)
 		{
-			Http.Send("POST", Api(token, "sendMessage"), null, null, "application/x-www-form-urlencoded", Http.Form("chat_id", chat, "text", html, "parse_mode", "HTML", "disable_web_page_preview", "true"));
+			try
+			{
+				Http.Send("POST", Api(token, "sendMessage"), null, null, "application/x-www-form-urlencoded", Http.Form("chat_id", chat, "text", html, "parse_mode", "HTML", "disable_web_page_preview", "true"));
+			}
+			catch (ApiException ex)
+			{
+				throw Explain(ex.Status, ex.Message);
+			}
+		}
+
+		// El error de Telegram con lo que hay que hacer.
+		public static Exception Explain(int status, string msg)
+		{
+			string m = (msg ?? "").ToLowerInvariant();
+			if (status == 401 || m.Contains("unauthorized"))
+			{
+				return new Exception("Telegram: el token no vale (¿lo cambiaste con /revoke?). Pega el token nuevo y pulsa Detectar chat");
+			}
+			if (status == 403 || m.Contains("forbidden") || m.Contains("blocked"))
+			{
+				return new Exception("Telegram: el bot no puede escribirte. Abre tu bot en Telegram, pulsa Iniciar (o Desbloquear), escríbele «hola» y pulsa Detectar chat");
+			}
+			if (m.Contains("chat not found"))
+			{
+				return new Exception("Telegram: no encuentra tu chat. Escríbele «hola» a tu bot y pulsa Detectar chat");
+			}
+			if (status == 0)
+			{
+				return new Exception("Telegram: sin conexión con api.telegram.org (¿lo bloquea la red o el antivirus?)");
+			}
+			return new Exception("Telegram (" + status + "): " + msg);
 		}
 
 		public static string Esc(string s)
@@ -812,6 +875,11 @@ namespace StreamDelay
 			}
 			catch (WebException ex)
 			{
+				HttpWebResponse hr = ex.Response as HttpWebResponse;
+				if (hr != null && (hr.StatusCode == HttpStatusCode.Unauthorized || hr.StatusCode == HttpStatusCode.Forbidden))
+				{
+					throw Explain((int)hr.StatusCode, "");
+				}
 				string text = "";
 				try
 				{
@@ -899,8 +967,20 @@ namespace StreamDelay
 			{
 				c = twitch.Account;
 			}
-			c = c.Replace("https://", "").Replace("http://", "").Replace("www.", "").Replace("twitch.tv/", "").Trim('/', '@', ' ');
-			return c;
+			c = c.Trim().TrimEnd('/');
+			int slash = c.LastIndexOf('/');
+			if (slash >= 0)
+			{
+				c = c.Substring(slash + 1);
+			}
+			foreach (string pre in new string[4] { "www.", "twitch.tv", "twitch.", "@" })
+			{
+				if (c.StartsWith(pre, StringComparison.OrdinalIgnoreCase))
+				{
+					c = c.Substring(pre.Length);
+				}
+			}
+			return c.Trim('/', '@', '.', ' ');
 		}
 
 		private string XpTikTokText()
