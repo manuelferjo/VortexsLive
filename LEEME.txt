@@ -4,7 +4,7 @@ VORTEXS LIVE 4.26 - delay dinámico y multistream para OBS (by Vortexs)
 Abre GUIA.html (doble clic) para ver la guía completa.
 
 Novedades de la 4.26
-- Anunciar el directo (Ajustes → Anuncio), gratis: al empezar en Twitch
+- Anunciar el directo (Ajustes → Anuncio), plan Completo: al empezar en Twitch
   publica en X un post con el principio de tu título y, en el mismo
   hilo (el "+"), tu enlace de Twitch. Después hace una captura del post
   y prepara dos historias: la de TikTok con "Twitch: tu canal" encima y

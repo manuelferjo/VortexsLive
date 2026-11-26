@@ -987,7 +987,10 @@ namespace StreamDelay
 			dry.Click += delegate
 			{
 				// Lo escribe en X pero no lo publica: sirve sin estar en directo.
-				XpStart(true);
+				if (XpCheckPlan())
+				{
+					XpStart(true);
+				}
 			};
 			VButton test = new VButton
 			{
@@ -998,7 +1001,7 @@ namespace StreamDelay
 			Place(card, test, 282f, 254f, 118f, 34f);
 			test.Click += delegate
 			{
-				if (xpBusy)
+				if (xpBusy || !XpCheckPlan())
 				{
 					return;
 				}
@@ -1042,6 +1045,10 @@ namespace StreamDelay
 			xpStatusBox = Box(card, 20f, 404f, 380f, 44f, delegate(Graphics g, Rectangle r)
 			{
 				string s = xpStatus;
+				if (s.Length == 0 && !AnnounceAllowed())
+				{
+					s = "Anunciar el directo es del plan Completo (" + License.PriceFull + "). Puedes dejarlo preparado y se activa al suscribirte.";
+				}
 				if (s.Length == 0)
 				{
 					s = (xpTgChat.Length > 0) ? "Telegram conectado. Listo para el próximo directo." : "Sin Telegram: las historias se guardan solo en la carpeta.";
@@ -1081,6 +1088,18 @@ namespace StreamDelay
 				g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
 				g.DrawString(I18n.Tr(s), Theme.Body(8f), b, r, fmt);
 			}
+		}
+
+		// Avisa si no tiene el plan Completo y abre la ventana de planes.
+		private bool XpCheckPlan()
+		{
+			if (AnnounceAllowed())
+			{
+				return true;
+			}
+			I18n.Show(this, "Anunciar el directo en X y preparar las historias es del plan Completo (" + License.PriceFull + ").\n\nPuedes dejar la sesión de X y Telegram preparados: en cuanto tengas el plan Completo, funciona solo.", "Plan Completo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+			LicenseDialog();
+			return AnnounceAllowed();
 		}
 
 		private void XpSetStatus(string s)
@@ -1170,7 +1189,7 @@ namespace StreamDelay
 				{
 					xpWasLive = true;
 					bool fresh = xpLastLive == DateTime.MinValue || (now - xpLastLive).TotalMinutes >= XpGapMinutes;
-					if (fresh && xpOn && !xpBusy)
+					if (fresh && xpOn && !xpBusy && AnnounceAllowed())
 					{
 						// Un poco después, para que Twitch ya enseñe el directo al abrir el enlace.
 						xpDueAt = now.AddSeconds(20);
