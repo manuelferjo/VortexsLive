@@ -7,6 +7,10 @@ Novedades de la 4.30
 - Novedades al actualizar: la primera vez que abres una versión nueva
   sale una ventana corta con lo que ha cambiado (nunca en pleno
   directo). Si te saltaste varias, salen todas.
+- Anuncio: lee bien el título de tu directo aunque no tengas Twitch
+  conectado (antes podía salir la descripción genérica de Twitch).
+- Prueba sin publicar: la captura es solo del primer post (el del
+  título), sin el del enlace.
 
 Novedades de la 4.29
 - Anuncio: si Twitch no está conectado en Título y categoría, lee el

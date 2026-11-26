@@ -13,7 +13,7 @@ namespace StreamDelay
 		// Versión → cambios (de la más nueva a la más vieja).
 		private static readonly string[][] ReleaseNews = new string[5][]
 		{
-			new string[2] { "4.30", "• Al abrir una versión nueva te contamos aquí, en pocas líneas, qué ha cambiado." },
+			new string[2] { "4.30", "• Al abrir una versión nueva te contamos aquí, en pocas líneas, qué ha cambiado.\n• Anuncio: lee bien el título de tu directo aunque no tengas Twitch conectado.\n• Prueba sin publicar: la captura es solo del primer post (el del título)." },
 			new string[2] { "4.29", "• Anuncio: si Twitch no está conectado, lee el título de tu página de Twitch y se queda con la parte buena (sin emojis ni !comandos).\n• Prueba sin publicar: el post del título sale resaltado en la captura." },
 			new string[2] { "4.28", "• Anuncio: la captura es solo de tu post, sin cortes ni barra lateral." },
 			new string[2] { "4.27", "• Anuncio: arreglado el hilo de X (el +).\n• Los errores de Telegram dicen qué hacer." },
