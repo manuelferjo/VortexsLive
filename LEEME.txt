@@ -1,7 +1,14 @@
-VORTEXS LIVE 4.26 - delay dinámico y multistream para OBS (by Vortexs)
+VORTEXS LIVE 4.27 - delay dinámico y multistream para OBS (by Vortexs)
 =====================================================================
 
 Abre GUIA.html (doble clic) para ver la guía completa.
+
+Novedades de la 4.27
+- Anuncio: arreglado el hilo de X (el "+"): ahora escribe siempre en la
+  ventana de escribir y pulsa los botones como con el ratón.
+- Los errores de Telegram dicen qué pasa y qué hacer (token cambiado,
+  bot sin iniciar, chat no encontrado, sin conexión).
+- El canal de Twitch se limpia solo aunque pegues el enlace entero.
 
 Novedades de la 4.26
 - Anunciar el directo (Ajustes → Anuncio), plan Completo: al empezar en Twitch
