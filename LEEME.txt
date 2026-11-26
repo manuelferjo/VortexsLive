@@ -1,7 +1,12 @@
-VORTEXS LIVE 4.27 - delay dinámico y multistream para OBS (by Vortexs)
+VORTEXS LIVE 4.28 - delay dinámico y multistream para OBS (by Vortexs)
 =====================================================================
 
 Abre GUIA.html (doble clic) para ver la guía completa.
+
+Novedades de la 4.28
+- Anuncio: la captura es solo del post (sin barra lateral ni
+  tendencias) y ya no se corta. En la prueba sin publicar, solo la caja
+  con el post y su hilo.
 
 Novedades de la 4.27
 - Anuncio: arreglado el hilo de X (el "+"): ahora escribe siempre en la
