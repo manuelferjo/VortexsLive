@@ -63,7 +63,7 @@ La web está en `web/` y se publica sola en GitHub Pages al subir cambios (`.git
 
 ## Publicar una versión
 
-1. Cambia `Version` en `src/MainForm.cs` (por ejemplo a `4.1`) y añade las novedades al `LEEME.txt`.
+1. Cambia `Version` en `src/MainForm.cs` (por ejemplo a `4.1`), añade las novedades al `LEEME.txt` y, en `src/Novedades.cs`, una entrada corta para el usuario arriba de `ReleaseNews` (es lo que verá en la ventana de novedades al abrir la versión nueva).
 2. Sube los cambios a GitHub.
 3. En **Releases → Draft a new release**, crea la etiqueta `v4.1` (la misma versión con una `v` delante) y pulsa **Publish release**.
 
