@@ -16,6 +16,22 @@ namespace StreamDelay
 		// --capturas=carpeta: guarda capturas de la interfaz y se cierra (ver Capture.cs).
 		internal static string CaptureDir;
 
+		// --autoprueba: abre el programa, comprueba que arranca sin errores y se cierra (0 = bien). Lo
+		// usa GitHub antes de crear el ZIP y el instalador: una versión que no abre no se publica.
+		internal static bool SelfTest;
+
+		// --revertido=4.25: esa versión falló al abrir y se ha vuelto a esta (ver Crash.cs).
+		internal static string RevertedFrom = "";
+
+		// --fallo-de-prueba: falla nada más abrir (GitHub comprueba así la vuelta a la versión anterior).
+		internal static bool FailOnPurpose;
+
+		// Sin red, licencia ni actualizaciones (capturas y autoprueba de GitHub).
+		internal static bool Headless
+		{
+			get { return CaptureDir != null || SelfTest; }
+		}
+
 		[STAThread]
 		private static void Main(string[] args)
 		{
@@ -42,6 +58,18 @@ namespace StreamDelay
 				{
 					UpdatedTo = a.Substring(14);
 				}
+				else if (a == "--fallo-de-prueba")
+				{
+					FailOnPurpose = true;
+				}
+				else if (a == "--autoprueba")
+				{
+					SelfTest = true;
+				}
+				else if (a.StartsWith("--revertido="))
+				{
+					RevertedFrom = a.Substring(12);
+				}
 			}
 			try
 			{
@@ -53,6 +81,7 @@ namespace StreamDelay
 			catch
 			{
 			}
+			Crash.Install();
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 			Theme.Init();

@@ -11,8 +11,14 @@ Novedades de la 4.25
   (tus ajustes y clips se quedan). El ZIP sigue disponible.
 - Las actualizaciones se instalan solas: se descargan en segundo plano
   (nunca en directo) y se usan la próxima vez que abras el programa, o
-  al momento con "Reiniciar ahora". Se puede quitar en Ajustes →
-  Opciones.
+  al momento con "Reiniciar ahora". Se puede quitar en Ajustes →
+  Opciones.
+- Más seguro: si una versión nueva falla al abrir, Vortexs Live vuelve
+  solo a la anterior y no la vuelve a instalar. Y cada versión se
+  comprueba en GitHub abriéndola antes de publicarse.
+- Errores: en vez de la ventana de Windows sale un aviso propio (el
+  programa y el directo siguen) y se guarda un informe en
+  %APPDATA%\VortexsLive\errores, con "Copiar informe" para mandarlo.
 - Expulsiones y bans en el chat: los mensajes de esa persona ya no
   desaparecen; se quedan borrosos (pasa el ratón para leerlos) con
   "⏱ 10:00" o "⛔ baneado" y un botón "↩ Quitar" para levantarlo.

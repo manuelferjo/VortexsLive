@@ -49,8 +49,41 @@ namespace StreamDelay
         // Al abrir: borrar el .exe viejo de una actualización anterior y mirar si hay versión nueva.
         void StartUpdateCheck()
         {
-            if (Program.CaptureDir != null) return;
-            if (Program.UpdatedTo.Length > 0) AppendLog("Vortexs Live actualizado a la versión " + Program.UpdatedTo + ". Tu configuración se ha conservado.");
+            if (Program.Headless) return;
+            // Una versión nueva falló al abrir y se ha vuelto a esta: no se vuelve a instalar sola.
+            if (Program.RevertedFrom.Length > 0)
+            {
+                string bad = "v" + Program.RevertedFrom.TrimStart('v', 'V');
+                updateSkip = bad;
+                lastVersion = Version;
+                SaveConfig();
+                AppendLog("La versión " + bad + " falló al abrir y se ha vuelto a la " + Version + ". No se instalará sola. Informe en " + Crash.Dir);
+                System.Windows.Forms.Timer back = new System.Windows.Forms.Timer { Interval = 2500 };
+                back.Tick += delegate
+                {
+                    back.Stop(); back.Dispose();
+                    Toast(I18n.Tr("La versión ") + bad + I18n.Tr(" falló al abrir: has vuelto a la ") + Version + ".", "warn", "Ver informe", delegate { OpenCrashFolder(); });
+                };
+                back.Start();
+            }
+            else
+            {
+                // Se cerró por un error la última vez: se avisa una vez.
+                string lastCrash = Crash.TakeLast();
+                if (lastCrash != null)
+                {
+                    AppendLog("La última vez Vortexs Live se cerró por un error. Informe: " + lastCrash);
+                    System.Windows.Forms.Timer warn = new System.Windows.Forms.Timer { Interval = 3000 };
+                    warn.Tick += delegate
+                    {
+                        warn.Stop(); warn.Dispose();
+                        Toast("La última vez Vortexs Live se cerró por un error. Se ha guardado un informe.", "warn", "Ver informe", delegate { OpenCrashFolder(); });
+                    };
+                    warn.Start();
+                }
+            }
+            if (Program.RevertedFrom.Length > 0) { /* ya se ha avisado arriba */ }
+            else if (Program.UpdatedTo.Length > 0) AppendLog("Vortexs Live actualizado a la versión " + Program.UpdatedTo + ". Tu configuración se ha conservado.");
             else if (lastVersion.Length > 0 && lastVersion != Version)
             {
                 // Se instaló sola mientras estaba abierta la versión anterior: se avisa una vez.
@@ -63,10 +96,13 @@ namespace StreamDelay
             if (lastVersion != Version) { lastVersion = Version; SaveConfig(); }
             ThreadPool.QueueUserWorkItem(delegate
             {
-                string old = Application.ExecutablePath + ".old";
-                for (int i = 0; i < 10 && File.Exists(old); i++) { try { File.Delete(old); } catch { Thread.Sleep(1000); } }
                 Thread.Sleep(4000); // que arranque todo antes
                 CheckForUpdate(false);
+                // La versión anterior (.old) se guarda hasta que esta lleve un rato abierta sin fallar: si
+                // falla al arrancar, Crash.cs vuelve a ella.
+                Thread.Sleep((Crash.StartupSeconds + 5) * 1000);
+                foreach (string leftover in new string[] { Application.ExecutablePath + ".old", Application.ExecutablePath + ".fallida" })
+                    for (int i = 0; i < 10 && File.Exists(leftover); i++) { try { File.Delete(leftover); } catch { Thread.Sleep(1000); } }
             });
         }
 
@@ -322,6 +358,11 @@ namespace StreamDelay
             using (var src = resp.GetResponseStream())
             using (var dst = File.Create(path))
                 src.CopyTo(dst);
+        }
+
+        void OpenCrashFolder()
+        {
+            try { Process.Start("explorer.exe", "\"" + Crash.Dir + "\""); } catch { }
         }
 
         // ---------- Configuración ----------
