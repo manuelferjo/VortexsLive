@@ -13,6 +13,8 @@ Novedades de la 4.31 (resumen del directo)
   y pico: sale arriba del resumen con "Descargar" y "Copiar", se guarda
   en Imágenes\Vortexs Live\Resúmenes y, si tienes Telegram conectado
   (Ajustes → Anuncio), te llega al móvil para guardarla en la galería.
+  La imagen lleva tu foto de perfil de Twitch y sus colores (fondo,
+  cifras y bordes); sin foto, los de Vortexs Live.
 
 Novedades de la 4.30
 - Novedades al actualizar: la primera vez que abres una versión nueva

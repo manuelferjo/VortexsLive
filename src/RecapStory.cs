@@ -300,7 +300,7 @@ namespace StreamDelay
 					bool v = i % 3 == 0;
 					using (GraphicsPath p = Theme.Round(new RectangleF(cx, cy, gw, gh), 44f))
 					{
-						using (SolidBrush fill = new SolidBrush(Color.FromArgb(225, 21, 21, 28)))
+						using (SolidBrush fill = new SolidBrush(Color.FromArgb(225, Math.Min(255, pal.Bg.R + 12), Math.Min(255, pal.Bg.G + 12), Math.Min(255, pal.Bg.B + 15))))
 						{
 							g.FillPath(fill, p);
 						}
