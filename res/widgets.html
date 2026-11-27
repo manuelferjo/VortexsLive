@@ -368,7 +368,8 @@
     window.addEventListener('resize', function () { tickKey = ''; renderTicker(); });
   }
   if (MODE === 'encuesta') { pollEl = el('<div id="poll" class="frame left"></div>'); document.body.appendChild(pollEl); setInterval(function () { if (pollState && pollState.open && pollState.ends) renderPoll(); }, 500); }
-  pickCfg();
+  if (window.SDState) SDState('widgets', function (c) { if (c) { cfg = c; onCfg(); } }, pickCfg);
+  else pickCfg();
   connect();
 
   // =================== Vista previa (navegador normal, no OBS): ejemplos ===================

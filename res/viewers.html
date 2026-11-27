@@ -102,6 +102,7 @@
       .then(function () { setTimeout(tick, 2000); });
   }
   if (q.get('demo')) render({ show: { twitch: true, kick: true, youtube: true, tiktok: true, total: true }, v: { twitch: 154, kick: 87, youtube: 23, tiktok: 312 } });
+  else if (window.SDState) SDState('viewers', render, tick);
   else tick();
 </script>
 </body>

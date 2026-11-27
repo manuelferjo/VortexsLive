@@ -33,6 +33,14 @@ namespace StreamDelay
 
 		private readonly List<Stream> clients = new List<Stream>();
 
+		// /estado: los overlays se quedan conectados y reciben el delay, los espectadores, sus ajustes y el
+		// estilo en cuanto cambian (antes preguntaba cada overlay cada 0,5–2 s con una conexión nueva).
+		private readonly List<Stream> stateClients = new List<Stream>();
+
+		private readonly Dictionary<string, string> stateLast = new Dictionary<string, string>();
+
+		private Thread stateThread;
+
 		private readonly object lk = new object();
 
 		private readonly LinkedList<string> recent = new LinkedList<string>();
@@ -225,6 +233,14 @@ namespace StreamDelay
 		public void Stop()
 		{
 			running = false;
+			lock (stateClients)
+			{
+				foreach (Stream sc in stateClients)
+				{
+					try { sc.Close(); } catch { }
+				}
+				stateClients.Clear();
+			}
 			try
 			{
 				if (listener != null)
@@ -292,6 +308,85 @@ namespace StreamDelay
 				}
 			}
 			Broadcast("data: " + text + "\n\n");
+		}
+
+		private static string SafeJson(Func<string> f)
+		{
+			try
+			{
+				string v = f();
+				return string.IsNullOrEmpty(v) ? "{}" : v.Replace("\r", "").Replace("\n", "");
+			}
+			catch
+			{
+				return "{}";
+			}
+		}
+
+		private List<KeyValuePair<string, string>> StateSnapshot()
+		{
+			return new List<KeyValuePair<string, string>>
+			{
+				new KeyValuePair<string, string>("delay", SafeJson(OnDelayState)),
+				new KeyValuePair<string, string>("viewers", SafeJson(OnViewersState)),
+				new KeyValuePair<string, string>("widgets", SafeJson(OnWidgets)),
+				new KeyValuePair<string, string>("style", SafeJson(OnStyleState))
+			};
+		}
+
+		// Cada 0,25 s mira si algo ha cambiado y solo entonces lo manda (una vez para todos los overlays).
+		// Cada 15 s, un comentario vacío para notar los overlays que se han cerrado.
+		private void StateLoop()
+		{
+			int beat = 0;
+			while (running)
+			{
+				lock (stateClients)
+				{
+					if (stateClients.Count == 0)
+					{
+						stateLast.Clear();
+						stateThread = null;
+						return;
+					}
+				}
+				StringBuilder msg = new StringBuilder();
+				foreach (KeyValuePair<string, string> kv in StateSnapshot())
+				{
+					string old;
+					if (!stateLast.TryGetValue(kv.Key, out old) || old != kv.Value)
+					{
+						stateLast[kv.Key] = kv.Value;
+						msg.Append("event: ").Append(kv.Key).Append("\ndata: ").Append(kv.Value).Append("\n\n");
+					}
+				}
+				if (++beat >= 60)
+				{
+					beat = 0;
+					msg.Append(": latido\n\n");
+				}
+				if (msg.Length > 0)
+				{
+					byte[] bytes = Encoding.UTF8.GetBytes(msg.ToString());
+					lock (stateClients)
+					{
+						for (int i = stateClients.Count - 1; i >= 0; i--)
+						{
+							try
+							{
+								stateClients[i].Write(bytes, 0, bytes.Length);
+								stateClients[i].Flush();
+							}
+							catch
+							{
+								try { stateClients[i].Close(); } catch { }
+								stateClients.RemoveAt(i);
+							}
+						}
+					}
+				}
+				Thread.Sleep(250);
+			}
 		}
 
 		private void Broadcast(string s)
@@ -471,6 +566,29 @@ namespace StreamDelay
 						stream.Write(bytes, 0, bytes.Length);
 						stream.Flush();
 						clients.Add(stream);
+					}
+					stream.ReadTimeout = -1;
+					return;
+				}
+				case "/estado":
+				{
+					Write(stream, "HTTP/1.1 200 OK\r\nContent-Type: text/event-stream; charset=utf-8\r\nCache-Control: no-cache\r\nConnection: keep-alive\r\n\r\nretry: 2000\n\n");
+					StringBuilder first = new StringBuilder();
+					foreach (KeyValuePair<string, string> kv in StateSnapshot())
+					{
+						first.Append("event: ").Append(kv.Key).Append("\ndata: ").Append(kv.Value).Append("\n\n");
+					}
+					byte[] fb = Encoding.UTF8.GetBytes(first.ToString());
+					lock (stateClients)
+					{
+						stream.Write(fb, 0, fb.Length);
+						stream.Flush();
+						stateClients.Add(stream);
+						if (stateThread == null || !stateThread.IsAlive)
+						{
+							stateThread = new Thread(StateLoop) { IsBackground = true, Name = "overlays-estado" };
+							stateThread.Start();
+						}
 					}
 					stream.ReadTimeout = -1;
 					return;

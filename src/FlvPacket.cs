@@ -11,6 +11,16 @@ namespace StreamDelay
 
 		public byte[] Data;
 
+		// Si está guardado en el archivo del delay largo (Spool.cs): dónde y cuánto ocupa; -1 = en memoria.
+		public long SpoolPos = -1;
+
+		public int SpoolLen;
+
+		public int Size
+		{
+			get { return (Data != null) ? Data.Length : SpoolLen; }
+		}
+
 		// Cuándo llegó (reloj del motor): sale cuando han pasado los segundos de delay.
 		public long Arrival;
 

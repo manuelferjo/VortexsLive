@@ -56,6 +56,15 @@ namespace StreamDelay
 
 		private long queuedBytes;
 
+		// Delay largo: de la cola, como mucho esto en memoria; lo demás va a un archivo temporal (Spool.cs).
+		// Con 64 MB caben unos 80 s a 6000 kbps; un delay de 5 minutos ya no gasta 220 MB (o más, con
+		// varias calidades) de memoria.
+		public long MemoryBudget = 64L * 1024 * 1024;
+
+		private long memBytes;
+
+		private readonly Spool spool = new Spool();
+
 		// Cola de paquetes esperando su hora de salida (protegida por sync).
 		private readonly LinkedList<FlvPacket> q = new LinkedList<FlvPacket>();
 
@@ -301,6 +310,15 @@ namespace StreamDelay
 			}
 		}
 
+		// Lo que de la cola está en el archivo temporal (no en memoria).
+		public long SpooledBytes
+		{
+			get
+			{
+				return spool.Bytes;
+			}
+		}
+
 		public int CurrentDelayMs
 		{
 			get
@@ -457,6 +475,10 @@ namespace StreamDelay
 			{
 				return;
 			}
+			spool.Log = delegate(string m)
+			{
+				Log(m);
+			};
 			server = new RtmpServer
 			{
 				Log = delegate(string m)
@@ -512,6 +534,8 @@ namespace StreamDelay
 			{
 				q.Clear();
 				queuedBytes = 0L;
+				memBytes = 0L;
+				spool.Reset();
 			}
 			inputActive = false;
 			current = null;
@@ -743,6 +767,12 @@ namespace StreamDelay
 				bool wasEmpty = q.Count == 0;
 				q.AddLast(pk);
 				queuedBytes += data.Length;
+				memBytes += data.Length;
+				// Por encima del límite, lo nuevo (lo que más tardará en salir) va al disco.
+				if (memBytes > MemoryBudget && !pk.Seq && spool.TrySpill(pk))
+				{
+					memBytes -= pk.SpoolLen;
+				}
 				if (wasEmpty)
 				{
 					Monitor.PulseAll(sync);
@@ -961,6 +991,8 @@ namespace StreamDelay
 						cutRequested = false;
 						q.Clear();
 						queuedBytes = 0L;
+						memBytes = 0L;
+						spool.Reset();
 						// Desconectar puede tardar: se suelta el candado mientras tanto.
 						Monitor.Exit(sync);
 						try
@@ -1044,7 +1076,15 @@ namespace StreamDelay
 							{
 								FlvPacket dropped = q.First.Value;
 								q.RemoveFirst();
-								queuedBytes -= dropped.Data.Length;
+								queuedBytes -= dropped.Size;
+								if (dropped.SpoolPos >= 0)
+								{
+									spool.Release(dropped);
+								}
+								else
+								{
+									memBytes -= dropped.Size;
+								}
 								if (dropped.Seq)
 								{
 									skippedHeaders.Add(dropped);
@@ -1060,7 +1100,17 @@ namespace StreamDelay
 					}
 					next = q.First.Value;
 					q.RemoveFirst();
-					queuedBytes -= next.Data.Length;
+					queuedBytes -= next.Size;
+					if (next.SpoolPos < 0)
+					{
+						memBytes -= next.Size;
+					}
+				}
+				// Si estaba en el disco, vuelve a la memoria justo antes de salir (fuera del candado: la
+				// entrada de OBS no espera a la lectura).
+				if (next.SpoolPos >= 0)
+				{
+					spool.Load(next);
 				}
 				if (skippedHeaders != null)
 				{
@@ -1138,7 +1188,7 @@ namespace StreamDelay
 				sink.Offer(p, outTs, sentSeq, now);
 			}
 			// Lo emitido también se guarda un rato para poder sacar clips.
-			Clips.Add(p, outTs);
+			Clips.Add(p, outTs, MainTrack);
 		}
 
 		// ---------- Repetición ----------

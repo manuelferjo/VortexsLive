@@ -154,6 +154,7 @@
   if (q.get('demo') === 'on') render({ on: true, s: +(q.get('s') || 30) });
   else if (q.get('demo') === 'off') render({ on: false, s: 0 });
   else if (q.get('demo') === 'tr') render({ on: true, s: 30, tr: { k: 'on', p: +(q.get('p') || 0.4), from: 0, to: 30 } });
+  else if (window.SDState) SDState('delay', render, tick);   // al instante; si no, preguntando cada 0,5 s
   else tick();
 </script>
 </body>
