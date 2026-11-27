@@ -538,6 +538,8 @@ namespace StreamDelay
 			b.Append("</div>");
 
 			// Espectadores por plataforma
+			// La imagen para historias, arriba: es lo que más se usa.
+			b.Append(StoryCardHtml(png, telegram));
 			b.Append(GamesAndChartHtml(s));
 			b.Append("<h2>👀 ").Append(T("Espectadores por plataforma (pico y media)")).Append("</h2><div class=\"box\">");
 			int maxPeak = 1;
@@ -601,7 +603,6 @@ namespace StreamDelay
 				b.Append("</div>");
 			}
 
-			b.Append(StoryCardHtml(png, telegram));
 			b.Append("<div class=\"foot\">").Append(T("Hecho por Vortexs Live")).Append(" ").Append(H(Version)).Append(" · ").Append(T("Se guarda en")).Append(" ").Append(H(SummaryDir)).Append("</div>");
 			b.Append("</div></body></html>");
 			return b.ToString();
