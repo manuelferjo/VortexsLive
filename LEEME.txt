@@ -16,6 +16,17 @@ Novedades de la 4.31 (resumen del directo)
   La imagen lleva tu foto de perfil de Twitch y sus colores (fondo,
   cifras y bordes); sin foto, los de Vortexs Live.
 
+Más ligero
+- Delay largo en el disco: si el delay pasa de unos segundos, lo que
+  espera se guarda en un archivo temporal en vez de en la memoria (a
+  5 minutos y 6000 kbps, unos 220 MB menos de RAM). El archivo se borra
+  solo al cerrar.
+- Clips: el búfer de clips guarda solo la calidad principal (con
+  Transmisión mejorada antes guardaba todas).
+- Overlays al momento: el delay, los espectadores y los widgets de
+  OBS cambian en cuanto cambian en el programa, sin estar preguntando
+  cada segundo.
+
 Novedades de la 4.30
 - Novedades al actualizar: la primera vez que abres una versión nueva
   sale una ventana corta con lo que ha cambiado (nunca en pleno

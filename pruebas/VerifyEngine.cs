@@ -186,6 +186,8 @@ static class VerifyEngine
         Set(engine, "Log", (Action<string>)(m => Say("motor: " + m)));
         Set(engine, "InputPort", PortIn);
         Set(engine, "TargetMs", 5000);
+        // Límite de memoria muy bajo para que el delay use también el archivo del disco (Spool.cs).
+        Set(engine, "MemoryBudget", 300L * 1024);
         object dest = Activator.CreateInstance(T("Destination"), F, null, new object[] { "otro", "Prueba", false }, null);
         Set(dest, "Server", "rtmp://127.0.0.1:" + PortOut + "/live");
         Set(dest, "Key", "prueba");
@@ -228,6 +230,8 @@ static class VerifyEngine
             Check((bool)Get(engine, "OutputActive"), "sigue en directo tras subir el delay");
             bool up = WaitFor(() => Delay() >= 8500 && Delay() <= 11500, 8000);
             Check(up, "delay real " + Delay() + " ms con 10 s");
+            long spooled = (long)Get(engine, "SpooledBytes");
+            Check(spooled > 0, "parte del delay está en el disco (" + spooled / 1024 + " KB) y no en memoria");
 
             // Bajarlo: se salta lo que sobra.
             Set(engine, "TargetMs", 2000);

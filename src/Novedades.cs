@@ -12,8 +12,9 @@ namespace StreamDelay
 	internal partial class MainForm
 	{
 		// Versión → cambios (de la más nueva a la más vieja).
-		private static readonly string[][] ReleaseNews = new string[5][]
+		private static readonly string[][] ReleaseNews = new string[6][]
 		{
+			new string[2] { "4.31", "• Resumen del directo: media de espectadores, juegos del día, gráfica e imagen para historias con los colores de tu canal (te llega por Telegram).\n• Más ligero: el delay largo se guarda en el disco y no en la memoria, y los clips solo guardan la calidad principal.\n• Los overlays de OBS cambian al momento." },
 			new string[2] { "4.30", "• Al abrir una versión nueva te contamos aquí, en pocas líneas, qué ha cambiado.\n• Anuncio: lee bien el título de tu directo aunque no tengas Twitch conectado.\n• Prueba sin publicar: la captura es solo del primer post (el del título)." },
 			new string[2] { "4.29", "• Anuncio: si Twitch no está conectado, lee el título de tu página de Twitch y se queda con la parte buena (sin emojis ni !comandos).\n• Prueba sin publicar: el post del título sale resaltado en la captura." },
 			new string[2] { "4.28", "• Anuncio: la captura es solo de tu post, sin cortes ni barra lateral." },

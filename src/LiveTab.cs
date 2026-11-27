@@ -279,7 +279,8 @@ namespace StreamDelay
 			}
 			else if (engine.OutputActive)
 			{
-				line = "DELAY REAL " + ((double)engine.CurrentDelayMs / 1000.0).ToString("0.0") + " S · BÚFER " + ((double)engine.QueuedBytes / 1048576.0).ToString("0") + " MB";
+				long spooled = engine.SpooledBytes;
+				line = "DELAY REAL " + ((double)engine.CurrentDelayMs / 1000.0).ToString("0.0") + " S · BÚFER " + ((double)engine.QueuedBytes / 1048576.0).ToString("0") + " MB" + (spooled > 0 ? (" (" + ((double)spooled / 1048576.0).ToString("0") + " EN DISCO)") : "");
 				c = Theme.Muted;
 			}
 			else

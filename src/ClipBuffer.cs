@@ -29,11 +29,21 @@ namespace StreamDelay
 
 		private RtmpSession source;
 
-		// Desde el hilo de salida del motor, con cada paquete que se envía a los destinos.
-		public void Add(FlvPacket p, long outTs)
+		private int track = -1;
+
+		// Desde el hilo de salida del motor, con cada paquete que se envía a los destinos. Solo se guarda
+		// la calidad principal (mainTrack) y el audio principal, que es lo que lleva el clip: con la
+		// Transmisión mejorada (varias calidades) así se gasta una fracción de la memoria.
+		public void Add(FlvPacket p, long outTs, int mainTrack)
 		{
 			lock (lk)
 			{
+				if (mainTrack != track)
+				{
+					// Ha cambiado la calidad principal: lo guardado era de otra.
+					track = mainTrack;
+					items.Clear();
+				}
 				if (p.Src != source)
 				{
 					// Otra conexión de OBS: sus cabeceras y su vídeo no encajan con lo anterior.
@@ -52,6 +62,10 @@ namespace StreamDelay
 					{
 						headers[(p.Type << 16) | ((p.SubType & 0xFF) << 8) | p.Track] = p;
 					}
+					return;
+				}
+				if ((p.Type == 9 && p.Track != mainTrack) || (p.Type == 8 && p.Track != 0))
+				{
 					return;
 				}
 				items.AddLast(new Entry

@@ -7,6 +7,36 @@
 //   --font --lfont   fuente (y la de las etiquetas)
 // Clases en <body>: sd-circle (forma círculo), sd-noicon, sd-bubbles (fondo en el chat), sd-noborder.
 // Si la página define window.onStyle(st), se llama después de aplicarlo.
+// SDState(nombre, función, plan B): recibe "delay", "viewers", "widgets" o "style" en cuanto cambian, por
+// una sola conexión que se queda abierta (/estado). Si en 4 s no llega nada (versión antigua, o se
+// ha abierto el archivo suelto), se llama a "plan B" para preguntar como antes.
+(function () {
+  var subs = {}, es = null, got = false, fellBack = false, fallbacks = [];
+  function open() {
+    if (es || !window.EventSource) return;
+    try { es = new EventSource('/estado'); } catch (e) { es = null; return; }
+    ['delay', 'viewers', 'widgets', 'style'].forEach(function (n) {
+      es.addEventListener(n, function (ev) {
+        got = true;
+        var d; try { d = JSON.parse(ev.data); } catch (e) { return; }
+        (subs[n] || []).forEach(function (f) { try { f(d); } catch (e) {} });
+      });
+    });
+  }
+  window.SDState = function (name, cb, fallback) {
+    (subs[name] = subs[name] || []).push(cb);
+    if (fallback) fallbacks.push(fallback);
+    open();
+    setTimeout(function () {
+      if (got || fellBack) return;
+      fellBack = true;
+      if (es) { try { es.close(); } catch (e) {} }
+      fallbacks.forEach(function (f) { f(); });
+    }, 4000);
+    if (!window.EventSource && fallback) fallback();
+  };
+})();
+
 (function () {
   // ?formato=vertical: lienzo de 1080x1920 (TikTok, Shorts, Aitum Vertical). Cada página lo ajusta con body.fv.
   if (/[?&]formato=vertical(&|$)/.test(location.search)) document.body.classList.add('fv');
@@ -60,5 +90,5 @@
       .then(function (st) { if (st && st.a1) apply(st); }).catch(function () {})
       .then(function () { setTimeout(tick, 2000); });
   }
-  tick();
+  window.SDState('style', function (st) { if (st && st.a1) apply(st); }, tick);
 })();
