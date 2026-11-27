@@ -794,10 +794,5 @@ namespace StreamDelay
 			b.Append(".then(function(){m.textContent=").Append(Js(I18n.Tr("Copiada: pégala donde quieras."))).Append(";},function(){m.textContent=").Append(Js(I18n.Tr("Este navegador no deja copiar imágenes: descárgala."))).Append(";});};</script>");
 			return b.ToString();
 		}
-
-		private static string Js(string v)
-		{
-			return new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(v ?? "");
-		}
 	}
 }
