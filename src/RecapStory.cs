@@ -29,6 +29,132 @@ namespace StreamDelay
 			public string Channel = "";
 			// { cifra, etiqueta } × 4
 			public string[][] Stats = new string[4][];
+			// Foto de perfil del canal (redonda, arriba) y colores sacados de ella; null = logo y colores de Vortexs.
+			public Image Avatar;
+			public Palette Colors;
+		}
+
+		// Dos colores de acento (cifras, bordes, brillos) y el fondo.
+		public class Palette
+		{
+			public Color A = Color.FromArgb(192, 154, 253);
+			public Color B = Color.FromArgb(255, 209, 102);
+			public Color Bg = Color.FromArgb(11, 11, 15);
+		}
+
+		// ---------- Colores de la foto de perfil ----------
+
+		private static void ToHsl(Color c, out float h, out float s, out float l)
+		{
+			h = c.GetHue();
+			s = c.GetSaturation();
+			l = c.GetBrightness();
+		}
+
+		private static Color FromHsl(float h, float s, float l)
+		{
+			h = ((h % 360f) + 360f) % 360f;
+			float c = (1f - Math.Abs(2f * l - 1f)) * s;
+			float x = c * (1f - Math.Abs((h / 60f) % 2f - 1f));
+			float m = l - c / 2f;
+			float r = 0f, g = 0f, b = 0f;
+			if (h < 60f) { r = c; g = x; }
+			else if (h < 120f) { r = x; g = c; }
+			else if (h < 180f) { g = c; b = x; }
+			else if (h < 240f) { g = x; b = c; }
+			else if (h < 300f) { r = x; b = c; }
+			else { r = c; b = x; }
+			return Color.FromArgb(Clamp255((r + m) * 255f), Clamp255((g + m) * 255f), Clamp255((b + m) * 255f));
+		}
+
+		private static int Clamp255(float v)
+		{
+			return Math.Max(0, Math.Min(255, (int)Math.Round(v)));
+		}
+
+		// Que se lea bien sobre fondo oscuro: color vivo y claro.
+		private static Color Readable(Color c)
+		{
+			float h, s, l;
+			ToHsl(c, out h, out s, out l);
+			return FromHsl(h, Math.Max(0.55f, Math.Min(0.95f, s)), Math.Max(0.64f, Math.Min(0.78f, l)));
+		}
+
+		// Los dos tonos con más peso de la foto (los grises, blancos y negros no cuentan). Si la foto es
+		// casi en blanco y negro, se quedan los colores de Vortexs.
+		public static Palette FromImage(Image img)
+		{
+			Palette p = new Palette();
+			if (img == null)
+			{
+				return p;
+			}
+			const int N = 64, Bins = 24;
+			double[] weight = new double[Bins], sr = new double[Bins], sg = new double[Bins], sb = new double[Bins];
+			double total = 0.0;
+			using (Bitmap small = new Bitmap(N, N, PixelFormat.Format32bppArgb))
+			{
+				using (Graphics g = Graphics.FromImage(small))
+				{
+					g.InterpolationMode = InterpolationMode.HighQualityBilinear;
+					g.DrawImage(img, new Rectangle(0, 0, N, N));
+				}
+				for (int y = 0; y < N; y++)
+				{
+					for (int x = 0; x < N; x++)
+					{
+						Color c = small.GetPixel(x, y);
+						if (c.A < 200) continue;
+						float max = Math.Max(c.R, Math.Max(c.G, c.B)) / 255f, min = Math.Min(c.R, Math.Min(c.G, c.B)) / 255f;
+						float sat = max <= 0f ? 0f : (max - min) / max;
+						if (max < 0.18f || sat < 0.22f) continue;
+						double w = sat * max;
+						int bin = (int)(c.GetHue() / 360f * Bins) % Bins;
+						weight[bin] += w; sr[bin] += c.R * w; sg[bin] += c.G * w; sb[bin] += c.B * w;
+						total += w;
+					}
+				}
+			}
+			if (total < N * N * 0.03)
+			{
+				return p;
+			}
+			// Se suaviza con los vecinos para que un degradado no se parta en dos.
+			double[] sm = new double[Bins];
+			for (int i = 0; i < Bins; i++) sm[i] = weight[i] + 0.5 * (weight[(i + Bins - 1) % Bins] + weight[(i + 1) % Bins]);
+			int a = 0;
+			for (int i = 1; i < Bins; i++) if (sm[i] > sm[a]) a = i;
+			int bBin = -1;
+			for (int i = 0; i < Bins; i++)
+			{
+				int dist = Math.Min(Math.Abs(i - a), Bins - Math.Abs(i - a));
+				if (dist >= 3 && sm[i] >= sm[a] * 0.15 && (bBin < 0 || sm[i] > sm[bBin])) bBin = i;
+			}
+			Func<int, Color> avg = delegate(int i)
+			{
+				double w = weight[i];
+				if (w <= 0.0) { int j = (weight[(i + 1) % Bins] > weight[(i + Bins - 1) % Bins]) ? (i + 1) % Bins : (i + Bins - 1) % Bins; i = j; w = weight[i]; }
+				return Color.FromArgb(Clamp255((float)(sr[i] / w)), Clamp255((float)(sg[i] / w)), Clamp255((float)(sb[i] / w)));
+			};
+			Color ca = avg(a);
+			Color cb;
+			if (bBin >= 0)
+			{
+				cb = avg(bBin);
+			}
+			else
+			{
+				// Un solo color: el segundo, el mismo tono girado un poco.
+				float h, s, l;
+				ToHsl(ca, out h, out s, out l);
+				cb = FromHsl(h + 38f, s, l);
+			}
+			p.A = Readable(ca);
+			p.B = Readable(cb);
+			float ha, sa, la;
+			ToHsl(ca, out ha, out sa, out la);
+			p.Bg = FromHsl(ha, 0.3f, 0.05f);
+			return p;
 		}
 
 		public static string Folder
@@ -85,6 +211,15 @@ namespace StreamDelay
 
 		public static Bitmap Make(Data d, Image logo)
 		{
+			Palette pal = d.Colors ?? new Palette();
+			Color violet = pal.A;
+			Color yellow = pal.B;
+			return Draw(d, logo, pal, violet, yellow);
+		}
+
+		// violet / yellow: los dos colores de acento (con los de Vortexs, morado y amarillo).
+		private static Bitmap Draw(Data d, Image logo, Palette pal, Color violet, Color yellow)
+		{
 			Bitmap bmp = new Bitmap(W, H, PixelFormat.Format32bppArgb);
 			using (Graphics g = Graphics.FromImage(bmp))
 			{
@@ -92,15 +227,30 @@ namespace StreamDelay
 				g.InterpolationMode = InterpolationMode.HighQualityBicubic;
 				g.PixelOffsetMode = PixelOffsetMode.HighQuality;
 				g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
-				g.Clear(Color.FromArgb(11, 11, 15));
-				Glow(g, 140f, 260f, 900f, Color.FromArgb(86, 192, 154, 253));
-				Glow(g, 980f, 1700f, 900f, Color.FromArgb(56, 255, 209, 102));
-				Glow(g, 1000f, 560f, 520f, Color.FromArgb(30, 192, 154, 253));
+				g.Clear(pal.Bg);
+				Glow(g, 140f, 260f, 900f, Color.FromArgb(86, violet));
+				Glow(g, 980f, 1700f, 900f, Color.FromArgb(60, yellow));
+				Glow(g, 1000f, 560f, 520f, Color.FromArgb(30, violet));
 				FontFamily disp = Display();
 				FontFamily body = Body();
-				Color violet = Color.FromArgb(192, 154, 253);
-				Color yellow = Color.FromArgb(255, 209, 102);
-				if (logo != null)
+				if (d.Avatar != null)
+				{
+					// Foto de perfil redonda con un aro de los dos colores.
+					RectangleF ring = new RectangleF(W / 2f - 86f, 244f, 172f, 172f);
+					using (LinearGradientBrush rb = new LinearGradientBrush(ring, violet, yellow, LinearGradientMode.ForwardDiagonal))
+					{
+						g.FillEllipse(rb, ring);
+					}
+					RectangleF pic = new RectangleF(W / 2f - 78f, 252f, 156f, 156f);
+					using (GraphicsPath cp = new GraphicsPath())
+					{
+						cp.AddEllipse(pic);
+						g.SetClip(cp);
+						g.DrawImage(d.Avatar, pic);
+						g.ResetClip();
+					}
+				}
+				else if (logo != null)
 				{
 					g.DrawImage(logo, new RectangleF(W / 2f - 80f, 250f, 160f, 160f));
 				}
@@ -150,7 +300,7 @@ namespace StreamDelay
 					bool v = i % 3 == 0;
 					using (GraphicsPath p = Theme.Round(new RectangleF(cx, cy, gw, gh), 44f))
 					{
-						using (SolidBrush fill = new SolidBrush(Color.FromArgb(225, 21, 21, 28)))
+						using (SolidBrush fill = new SolidBrush(Color.FromArgb(225, Math.Min(255, pal.Bg.R + 12), Math.Min(255, pal.Bg.G + 12), Math.Min(255, pal.Bg.B + 15))))
 						{
 							g.FillPath(fill, p);
 						}
