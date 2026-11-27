@@ -107,6 +107,7 @@ jobs:
       # programa: se descargan desde la página de esta ejecución (artefacto "capturas").
       - name: Capturas de la interfaz
         continue-on-error: true
+        timeout-minutes: 5
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force capturas-app | Out-Null

@@ -1,7 +1,18 @@
-VORTEXS LIVE 4.30 - delay dinámico y multistream para OBS (by Vortexs)
+VORTEXS LIVE 4.31 - delay dinámico y multistream para OBS (by Vortexs)
 =====================================================================
 
 Abre GUIA.html (doble clic) para ver la guía completa.
+
+Novedades de la 4.31 (resumen del directo)
+- Media de espectadores (total y de cada plataforma), además del pico.
+- Juegos de hoy: cada juego o categoría con su tiempo, media, pico,
+  follows, subs y mensajes, y cuál tuvo la mejor media. Se lee solo de
+  Twitch (o de Kick) con el chat conjunto activado.
+- Gráfica de espectadores minuto a minuto, con el color de cada juego.
+- Imagen para historias (1080x1920) con seguidores nuevos, media, subs
+  y pico: sale arriba del resumen con "Descargar" y "Copiar", se guarda
+  en Imágenes\Vortexs Live\Resúmenes y, si tienes Telegram conectado
+  (Ajustes → Anuncio), te llega al móvil para guardarla en la galería.
 
 Novedades de la 4.30
 - Novedades al actualizar: la primera vez que abres una versión nueva
