@@ -227,11 +227,15 @@ namespace StreamDelay
             });
         }
 
+        // Categoría del directo en Kick; "" si no está en directo.
+        public volatile string Game = "";
+
         public int FetchViewers()
         {
             var ch = Channel();
             var live = J.At(ch, "livestream");
-            if (live == null) return -2;
+            if (live == null) { Game = ""; return -2; }
+            Game = J.S(live, "categories", 0, "name");
             return (int)J.N(live, -1, "viewer_count");
         }
     }

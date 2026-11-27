@@ -367,16 +367,20 @@ namespace StreamDelay
             hub.Emit(it);
         }
 
+        // Juego o categoría del directo (lo trae la misma consulta que los espectadores); "" si no está en directo.
+        public volatile string Game = "";
+
         // Espectadores con la API pública de la web de Twitch (sin iniciar sesión).
         public int FetchViewers()
         {
-            string body = "{\"query\":\"query{user(login:\\\"" + channel + "\\\"){id stream{viewersCount}}}\"}";
+            string body = "{\"query\":\"query{user(login:\\\"" + channel + "\\\"){id stream{viewersCount game{displayName}}}}\"}";
             var h = new Dictionary<string, string> { { "Client-Id", "kimne78kx3ncx6brgo4mv6wki5h1ko" } };
             var o = Web.PostJson("https://gql.twitch.tv/gql", body, h, null);
             string uid = J.S(o, "data", "user", "id");
             if (uid.Length == 0) { hub.SetState("twitch", "error: el canal \"" + channel + "\" no existe"); return -1; }
             if (roomId.Length == 0) { roomId = uid; ChatHub.Background(() => hub.Emotes.LoadTwitch(uid, hub.Log)); }
-            if (J.At(o, "data", "user", "stream") == null) return -2;
+            if (J.At(o, "data", "user", "stream") == null) { Game = ""; return -2; }
+            Game = J.S(o, "data", "user", "stream", "game", "displayName");
             return (int)J.N(o, -1, "data", "user", "stream", "viewersCount");
         }
     }

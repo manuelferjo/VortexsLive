@@ -29,6 +29,18 @@ namespace StreamDelay
 
         // Espectadores: -1 sin dato, -2 sin directo.
         public volatile int TwitchViewers = -1, KickViewers = -1, YouTubeViewers = -1, TikTokViewers = -1;
+
+        // Juego o categoría de ahora (el de Twitch y, si no, el de Kick); "" si no se sabe.
+        public string CurrentGame
+        {
+            get
+            {
+                var t = tw; var k = kc;
+                string g = (t != null) ? t.Game : "";
+                if (string.IsNullOrEmpty(g) && k != null) g = k.Game;
+                return g ?? "";
+            }
+        }
         // Estado de cada conexión, para la interfaz: "" (no configurado), "conectando", "conectado", "sin directo", "error: …"
         public volatile string TwitchState = "", KickState = "", YouTubeState = "", TikTokState = "";
 
