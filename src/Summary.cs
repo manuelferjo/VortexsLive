@@ -81,6 +81,7 @@ namespace StreamDelay
 					if (stats == null)
 					{
 						stats = new LiveStats();
+						PrefetchAvatar();
 					}
 					sumLastLive = now;
 					stats.End = now;
@@ -713,6 +714,95 @@ namespace StreamDelay
 			return d;
 		}
 
+		// ---------- Foto de perfil de Twitch (para la imagen: arriba y sus colores) ----------
+
+		private System.Drawing.Bitmap recapAvatar;
+
+		private string recapAvatarFor = "";
+
+		private string RecapChannel()
+		{
+			ChatHub h = chatHub;
+			return (h != null) ? (h.TwitchChannel ?? "").Trim().TrimStart('@').ToLowerInvariant() : "";
+		}
+
+		// Copia guardada (por si al terminar el directo no hay internet).
+		private static string AvatarCache(string channel)
+		{
+			return Path.Combine(SummaryDir, "perfil-" + channel + ".png");
+		}
+
+		// Al empezar el directo se baja en segundo plano la foto de perfil del canal de Twitch del chat.
+		private void PrefetchAvatar()
+		{
+			string channel = RecapChannel();
+			if (channel.Length == 0 || channel == recapAvatarFor || channel.IndexOfAny(new char[] { '"', '\\', '/', ' ' }) >= 0)
+			{
+				return;
+			}
+			recapAvatarFor = channel;
+			ThreadPool.QueueUserWorkItem(delegate
+			{
+				try
+				{
+					string body = "{\"query\":\"query{user(login:\\\"" + channel + "\\\"){profileImageURL(width:300)}}\"}";
+					var h = new Dictionary<string, string> { { "Client-Id", "kimne78kx3ncx6brgo4mv6wki5h1ko" } };
+					string url = J.S(Web.PostJson("https://gql.twitch.tv/gql", body, h, null), "data", "user", "profileImageURL");
+					if (url.Length == 0) return;
+					System.Net.HttpWebRequest req = (System.Net.HttpWebRequest)System.Net.WebRequest.Create(url);
+					req.UserAgent = "VortexsLive";
+					req.Timeout = 15000;
+					using (System.Net.WebResponse resp = req.GetResponse())
+					using (Stream st = resp.GetResponseStream())
+					using (MemoryStream ms = new MemoryStream())
+					{
+						st.CopyTo(ms);
+						ms.Position = 0;
+						System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(System.Drawing.Image.FromStream(ms));
+						lock (sumLock)
+						{
+							if (recapAvatar != null) recapAvatar.Dispose();
+							recapAvatar = bmp;
+						}
+						try
+						{
+							Directory.CreateDirectory(SummaryDir);
+							bmp.Save(AvatarCache(channel), System.Drawing.Imaging.ImageFormat.Png);
+						}
+						catch
+						{
+						}
+					}
+				}
+				catch (Exception ex)
+				{
+					LogLater("Resumen: no se pudo bajar la foto de perfil de Twitch (" + ex.Message + "). La imagen usará los colores de Vortexs.");
+				}
+			});
+		}
+
+		// La foto ya bajada, o la guardada de otra vez.
+		private System.Drawing.Bitmap RecapAvatar()
+		{
+			string channel = RecapChannel();
+			lock (sumLock)
+			{
+				if (recapAvatar != null && channel == recapAvatarFor) return new System.Drawing.Bitmap(recapAvatar);
+			}
+			try
+			{
+				string f = AvatarCache(channel);
+				if (channel.Length > 0 && File.Exists(f))
+				{
+					using (System.Drawing.Image img = System.Drawing.Image.FromFile(f)) return new System.Drawing.Bitmap(img);
+				}
+			}
+			catch
+			{
+			}
+			return null;
+		}
+
 		// Dibuja y guarda la imagen; devuelve la ruta (o null si no se pudo).
 		private string MakeRecapPng(LiveStats s, string file)
 		{
@@ -723,9 +813,16 @@ namespace StreamDelay
 				Directory.CreateDirectory(Path.GetDirectoryName(file));
 				using (Stream st = typeof(MainForm).Assembly.GetManifestResourceStream("StreamDelay.logo.png"))
 				using (System.Drawing.Image logo = (st != null) ? System.Drawing.Image.FromStream(st) : null)
-				using (System.Drawing.Bitmap bmp = RecapStory.Make(RecapData(s, s.Avg("total"), peak), logo))
+				using (System.Drawing.Bitmap avatar = RecapAvatar())
 				{
-					bmp.Save(file, System.Drawing.Imaging.ImageFormat.Png);
+					RecapStory.Data d = RecapData(s, s.Avg("total"), peak);
+					// Con la foto de perfil del canal: arriba y sus colores en toda la imagen.
+					d.Avatar = avatar;
+					d.Colors = RecapStory.FromImage(avatar);
+					using (System.Drawing.Bitmap bmp = RecapStory.Make(d, logo))
+					{
+						bmp.Save(file, System.Drawing.Imaging.ImageFormat.Png);
+					}
 				}
 				return file;
 			}

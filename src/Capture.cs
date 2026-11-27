@@ -103,6 +103,24 @@ namespace StreamDelay
 				demo.Peak["total"] = 2410; demo.Peak["twitch"] = 1930; demo.Peak["kick"] = 520;
 				demo.Chatters["twitch\u001fLaura"] = 312; demo.Chatters["twitch\u001fRafa"] = 201; demo.Chatters["kick\u001fPepe"] = 99;
 				string demoPng = MakeRecapPng(demo, Path.Combine(dir, "resumen-demo.png"));
+				// La misma imagen con una foto de perfil de ejemplo (roja y naranja) para ver los colores del canal.
+				using (Bitmap fake = new Bitmap(300, 300))
+				{
+					using (Graphics g = Graphics.FromImage(fake))
+					using (System.Drawing.Drawing2D.LinearGradientBrush lg = new System.Drawing.Drawing2D.LinearGradientBrush(new Rectangle(0, 0, 300, 300), Color.FromArgb(220, 30, 60), Color.FromArgb(255, 150, 20), 45f))
+					{
+						g.FillRectangle(lg, 0, 0, 300, 300);
+						g.FillEllipse(Brushes.White, 95, 60, 110, 110);
+						g.FillEllipse(new SolidBrush(Color.FromArgb(30, 20, 40)), 60, 180, 180, 160);
+					}
+					RecapStory.Data dd = RecapData(demo, demo.Avg("total"), 2410);
+					dd.Avatar = fake;
+					dd.Colors = RecapStory.FromImage(fake);
+					using (Bitmap outImg = RecapStory.Make(dd, null))
+					{
+						outImg.Save(Path.Combine(dir, "resumen-colores.png"), ImageFormat.Png);
+					}
+				}
 				File.WriteAllText(Path.Combine(dir, "resumen-demo.html"), SummaryHtml(demo, new string[9] { "", "", "2100", "120", "30", "", "", "", "1100" }, false, demoPng, true), new System.Text.UTF8Encoding(false));
 			}
 			catch (Exception ex)
