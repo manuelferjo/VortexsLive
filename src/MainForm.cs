@@ -11,6 +11,7 @@
 //   TitleTab.cs     Directo → Título y categoría (título y categoría, conectar plataformas)
 //   SettingsTab.cs  pestaña Ajustes (destinos, OBS y opciones)
 //   Novedades.cs    ventana de novedades al abrir una versión nueva
+//   Rendimiento.cs  panel de rendimiento y prioridad alta en directo
 //   XAnnounce.cs    Ajustes → Anuncio (post en X al empezar, captura e historias para TikTok e Instagram)
 //   Updater.cs      actualización automática
 //   LicenseUi.cs    plan (prueba, Básico, Completo), ventana Licencia y pestañas de pago
@@ -557,6 +558,7 @@ namespace StreamDelay
 				WizRefresh();
 				XpTick();
 				NewsTick();
+				PerfTick();
 			};
 			timer.Start();
 			RefreshStatus();
@@ -1019,9 +1021,21 @@ namespace StreamDelay
 			Card card = new Card
 			{
 				Title = "Registro",
-				Subtitle = "Si pides ayuda, copia este texto: no incluye tu clave."
+				Subtitle = "Cópialo si pides ayuda (no lleva tu clave)."
 			};
 			Place(this, card, 20f, y0, 420f, 440f, PageLog);
+			VButton perf = new VButton
+			{
+				Kind = ButtonKind.Ghost,
+				Text = "Rendimiento",
+				FontSize = 8.5f,
+				Icon = "chart"
+			};
+			Place(card, perf, 284f, 14f, 120f, 36f);
+			perf.Click += delegate
+			{
+				PerfDialog();
+			};
 			PaintBox logFrame = Box(card, 16f, 62f, 388f, 362f, delegate(Graphics g, Rectangle r)
 			{
 				using (GraphicsPath path = Theme.Round(new RectangleF((float)r.X + 0.5f, (float)r.Y + 0.5f, (float)r.Width - 1.5f, (float)r.Height - 1.5f), S(12f)))

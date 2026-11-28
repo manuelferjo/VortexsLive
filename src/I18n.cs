@@ -365,6 +365,18 @@ namespace StreamDelay
 			// Registro y general
 			"Registro", "Log",
 			"Si pides ayuda, copia este texto: no incluye tu clave.", "If you ask for help, copy this text: it doesn't include your key.",
+			"Cópialo si pides ayuda (no lleva tu clave).", "Copy it if you ask for help (no key in it).",
+			// Rendimiento.
+			"Rendimiento", "Performance", "rendimiento", "performance",
+			"PROGRAMA", "APP", "DESTINOS", "DESTINATIONS", "Memoria", "Memory", "Limpiezas de memoria", "Memory clean-ups", "Hilos", "Threads",
+			"Prioridad en Windows", "Windows priority", "alta (en directo)", "high (live)", "normal", "normal", "núcleos", "cores", "rápidas", "quick", "completas", "full",
+			"Delay real", "Actual delay", "en memoria", "in memory", "en el disco", "on disk", "Entrada", "Input", "sin señal", "no signal", "calidades", "qualities",
+			"retraso", "lag", "cortes", "drops", "sin emitir", "not live", "Inicia el servicio para verlos", "Start the service to see them",
+			"Tu subida no da para todos los destinos: baja el bitrate en OBS o emite en menos sitios.", "Your upload can't keep up with every destination: lower the bitrate in OBS or stream to fewer places.",
+			"Vortexs Live está usando mucha CPU. Si te pasa siempre, pulsa «Copiar» y mándalo.", "Vortexs Live is using a lot of CPU. If it always happens, press «Copy» and send it.",
+			"La memoria se está limpiando muy a menudo. Si notas tirones, pulsa «Copiar» y mándalo.", "Memory is being cleaned up very often. If you notice stutters, press «Copy» and send it.",
+			"Todo en orden: el programa va sobrado.", "All good: the app has plenty of headroom.", "Todo en orden.", "All good.",
+			"En directo: Vortexs Live va con prioridad alta en Windows para que el envío no se resienta.", "Live: Vortexs Live runs at high priority in Windows so sending isn't affected.",
 			"Copiar", "Copy",
 			"Guía", "Guide",
 			"Clips", "Clips",

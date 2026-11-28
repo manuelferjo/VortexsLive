@@ -360,7 +360,12 @@ namespace StreamDelay
 			{
 				return p.Data;
 			}
-			return VideoInfo.ToSingleTrack(p.Data);
+			if (!p.SingleDone)
+			{
+				p.Single = VideoInfo.ToSingleTrack(p.Data);
+				p.SingleDone = true;
+			}
+			return p.Single;
 		}
 
 		// Mete un paquete en la cola de envío. false = la cola va demasiado atrasada.
