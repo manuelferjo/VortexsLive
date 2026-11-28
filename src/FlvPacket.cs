@@ -42,6 +42,13 @@ namespace StreamDelay
 		// Tipo de paquete de Enhanced RTMP (-1 si no lo es).
 		public int SubType;
 
+		// Versión de una pista (formato normal) para los destinos que no reciben la Transmisión mejorada:
+		// se calcula una vez por paquete y la usan todos (antes la sacaba cada destino). Se suelta al
+		// terminar de repartirlo.
+		public byte[] Single;
+
+		public bool SingleDone;
+
 		// Conexión de OBS de la que viene.
 		public RtmpSession Src;
 	}

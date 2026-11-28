@@ -115,6 +115,7 @@ jobs:
           $p = Start-Process capturas-app\VortexsLive.exe -ArgumentList "--capturas=$PWD\capturas" -PassThru
           if (-not $p.WaitForExit(120000)) { $p.Kill(); throw "Las capturas no terminaron en 2 minutos" }
           Get-ChildItem capturas | ForEach-Object { "$($_.Name): $([math]::Round($_.Length / 1KB)) KB" }
+          foreach ($n in @("13-registro.png","13-rendimiento.png")) { if (Test-Path "capturas\$n") { $b = [Convert]::ToBase64String([IO.File]::ReadAllBytes("capturas\$n")); for ($i = 0; $i -lt $b.Length; $i += 20000) { "TROZO $n " + $b.Substring($i, [Math]::Min(20000, $b.Length - $i)) } } }
 
       - name: Guardar las capturas
         continue-on-error: true

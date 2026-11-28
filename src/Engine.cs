@@ -310,6 +310,17 @@ namespace StreamDelay
 			}
 		}
 
+		// Bytes recibidos de OBS desde que se abrió el programa (el panel de rendimiento saca la velocidad).
+		private long inBytes;
+
+		public long InputBytes
+		{
+			get
+			{
+				return Interlocked.Read(ref inBytes);
+			}
+		}
+
 		// Lo que de la cola está en el archivo temporal (no en memoria).
 		public long SpooledBytes
 		{
@@ -716,6 +727,7 @@ namespace StreamDelay
 				Arrival = clock.ElapsedMilliseconds,
 				Src = s
 			};
+			Interlocked.Add(ref inBytes, data.Length);
 			if (!Classify(pk))
 			{
 				return;
@@ -1187,6 +1199,9 @@ namespace StreamDelay
 			{
 				sink.Offer(p, outTs, sentSeq, now);
 			}
+			// La versión de una pista ya está en la cola de cada destino: no se guarda en el historial.
+			p.Single = null;
+			p.SingleDone = false;
 			// Lo emitido también se guarda un rato para poder sacar clips.
 			Clips.Add(p, outTs, MainTrack);
 		}

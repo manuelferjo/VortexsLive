@@ -73,6 +73,8 @@ namespace StreamDelay
 				}));
 			}
 			shots.Add(new KeyValuePair<string, Action>("13-registro", delegate { GoPage(PageLog); }));
+			shots.Add(new KeyValuePair<string, Action>("13-rendimiento", delegate { PerfDialog(); }));
+			shots.Add(new KeyValuePair<string, Action>("13-rendimiento-cerrado", delegate { if (perfForm != null) perfForm.Close(); }));
 			shots.Add(new KeyValuePair<string, Action>("14-aviso-deshacer", delegate
 			{
 				GoPage(PageLive);
