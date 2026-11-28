@@ -26,6 +26,11 @@ Más ligero
 - Overlays al momento: el delay, los espectadores y los widgets de
   OBS cambian en cuanto cambian en el programa, sin estar preguntando
   cada segundo.
+- En directo, prioridad alta en Windows: un juego exigente no le quita
+  tiempo al envío (al terminar vuelve a la normal).
+- Ajustes → Registro → Rendimiento: CPU, memoria, cuánto delay está en
+  memoria y en el disco, lo que llega de OBS y el retraso de cada
+  destino, con una frase de qué pasa y "Copiar" para mandarlo.
 
 Novedades de la 4.30
 - Novedades al actualizar: la primera vez que abres una versión nueva
