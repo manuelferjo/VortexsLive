@@ -134,7 +134,7 @@ namespace StreamDelay
 				return;
 			}
 			int rows = Math.Max(1, AllSinks().Length);
-			int boxH = 318 + rows * 22;
+			int boxH = 372 + rows * 22;
 			Form f = DarkForm("Rendimiento", 460, boxH + 96);
 			perfForm = f;
 			perfLastAt = DateTime.MinValue;
@@ -254,18 +254,7 @@ namespace StreamDelay
 			l.Add(new string[] { "Memoria", MbText(ws) + "  ·  .NET " + MbText(GC.GetTotalMemory(false)) });
 			l.Add(new string[] { "Limpiezas de memoria", gen0 + " " + I18n.Tr("rápidas") + " · " + gen2 + " " + I18n.Tr("completas") + " (" + (gen2 / mins).ToString("0.0", CultureInfo.CurrentCulture) + "/min)" });
 			l.Add(new string[] { "Hilos", threads.ToString() });
-			bool raised = false;
-			try
-			{
-				using (Process p = Process.GetCurrentProcess())
-				{
-					raised = p.PriorityClass != ProcessPriorityClass.Normal;
-				}
-			}
-			catch
-			{
-			}
-			l.Add(new string[] { "Prioridad en Windows", raised ? I18n.Tr("alta (en directo)") : I18n.Tr("normal") });
+			l.Add(new string[] { "Prioridad en Windows", perfRaised ? I18n.Tr("alta (en directo)") : I18n.Tr("normal") });
 			l.Add(new string[] { null, "DELAY" });
 			long queued = engine.QueuedBytes;
 			long spooled = engine.SpooledBytes;
